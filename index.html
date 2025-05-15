@@ -24,98 +24,95 @@
     }
     body.dark-mode { background-color: #0f172a; }
     body:not(.dark-mode)::before {
-      content: ""; position:fixed; inset:0;
-      background: rgba(0,0,0,0.75); z-index:-1;
+      content:""; position:fixed; inset:0;
+      background:rgba(0,0,0,0.75); z-index:-1;
     }
 
-    /* kontener centrujący */
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
+      max-width:1200px;
+      margin:0 auto;
+      padding:0 16px;
     }
 
-    .logo { text-align: center; margin: 20px 0; }
-    .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
+    .logo { text-align:center; margin:20px 0; }
+    .logo img { max-width:350px; width:80%; height:auto; display:inline-block; }
 
     .header-controls {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: center; align-items: center; margin: 30px 0;
+      display:flex; flex-wrap:wrap; gap:10px;
+      justify-content:center; align-items:center; margin:30px 0;
     }
     .filter-btn, .toggle-btn, .export-btn {
-      padding: 6px 14px; background: var(--btn-bg);
-      color: #fff; border: 2px solid var(--btn-border);
-      border-radius: var(--btn-radius); cursor: pointer;
-      font-weight: bold; transition: background .2s, color .2s;
+      padding:6px 14px; background:var(--btn-bg);
+      color:#fff; border:2px solid var(--btn-border);
+      border-radius:var(--btn-radius); cursor:pointer;
+      font-weight:bold; transition:background .2s,color .2s;
     }
     .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
-      background: rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.1);
     }
-    .filter-btn.active { background: #fff; color: #000; }
+    .filter-btn.active { background:#fff; color:#000; }
 
     .summary-box, .data-section {
-      background: rgba(255,255,255,0.95); color: #000;
-      border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-      transition: background .3s, color .3s;
-      margin: 0 auto 30px; padding: 20px;
+      background:rgba(255,255,255,0.95); color:#000;
+      border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.4);
+      transition:background .3s,color .3s;
+      margin:0 auto 30px; padding:20px;
     }
     body.dark-mode .summary-box,
     body.dark-mode .data-section {
-      background: rgba(30,41,59,0.95); color: #fff;
+      background:rgba(30,41,59,0.95); color:#fff;
     }
 
     .summary-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 16px;
+      display:flex; justify-content:space-between;
+      align-items:center; margin-bottom:16px;
     }
     .summary-header h2 {
-      margin: 0; font-size: 2.25rem;
-      text-transform: uppercase;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin:0; font-size:2.25rem; text-transform:uppercase;
+      text-shadow:2px 2px 4px rgba(0,0,0,0.3);
     }
     .date-summary {
-      padding: 6px 12px; border-radius: 8px;
-      background: rgba(0,0,0,0.1); font-weight: bold;
-      color: inherit;
+      padding:6px 12px; border-radius:8px;
+      background:rgba(0,0,0,0.1); font-weight:bold; color:inherit;
     }
     body.dark-mode .date-summary {
-      background: rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.1);
     }
 
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px; border: 1px solid #ccc; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:10px; border:1px solid #ccc; }
     th {
-      background: #f0f0f0; text-align: center;
-      color: #000!important; font-weight: bold!important;
+      background:#f0f0f0; text-align:center;
+      color:#000!important; font-weight:bold!important;
     }
 
-    /* ikony w nagłówkach */
-    .summary-table th:nth-child(1)::before { content: "👤 "; }
-    .data-table th:nth-child(1)::before    { content: "📺 "; }
-    .data-table th:nth-child(2)::before    { content: "🔧 "; }
-    .data-table th:nth-child(3)::before    { content: "👤 "; }
-    .data-table th:nth-child(4)::before    { content: "💬 "; }
+    /* ikony przy nagłówkach */
+    .summary-table th:nth-child(1)::before { content:"👤 "; }
+    .data-table th:nth-child(1)::before    { content:"📺 "; }
+    .data-table th:nth-child(2)::before    { content:"🔧 "; }
+    .data-table th:nth-child(3)::before    { content:"👤 "; }
+    .data-table th:nth-child(4)::before    { content:"💬 "; }
 
-    /* kolumny OK/NDF/SCRAP TTL jednolite */
+    /* jednakowa szerokość i styl liczb */
     .summary-table th.ok, .summary-table td.ok,
     .summary-table th.ndf, .summary-table td.ndf,
     .summary-table th.scrap-ttl, .summary-table td.scrap-ttl {
-      width: 100px;
+      width:100px;
     }
     .summary-table td.ok,
     .summary-table td.ndf,
     .summary-table td.scrap-ttl {
-      text-align: center; font-weight: bold;
+      text-align:center; font-weight:bold;
     }
-    .summary-table .ok        { background: var(--ok-bg);    color: var(--txt-dark); }
-    .summary-table .ndf       { background: var(--ndf-bg);   color: var(--txt-dark); }
-    .summary-table .scrap-ttl { background: var(--scrap-bg); color: var(--txt-dark); }
+    .summary-table .ok        { background:var(--ok-bg);    color:var(--txt-dark); }
+    .summary-table .ndf       { background:var(--ndf-bg);   color:var(--txt-dark); }
+    .summary-table .scrap-ttl { background:var(--scrap-bg); color:var(--txt-dark); }
 
-    .data-table td { font-size: 14px; }
-    .status-ok  { background: var(--ok-bg);  color: var(--txt-dark); font-weight:bold; text-align:center; }
-    .status-ndf { background: var(--ndf-bg); color: var(--txt-dark); font-weight:bold; text-align:center; }
+    .data-table td { font-size:14px; }
+    .status-ok  { background:var(--ok-bg);  color:var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background:var(--ndf-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
 
-    @media(max-width:768px) {
+    @media(max-width:768px){
       th, td { font-size:12px; padding:6px; }
       .header-controls, .summary-header {
         flex-direction:column; align-items:flex-start; gap:8px;
@@ -158,10 +155,7 @@
     <table class="data-table" id="data-table">
       <thead>
         <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
+          <th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -177,64 +171,65 @@
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
-      return text.trim().split('\n').map(row =>
-        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-           ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
+      return text.trim().split('\n').map(r =>
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+         ?.map(c=>c.replace(/^"|"$/g,'').trim())||[]
       );
     }
+
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y] = s.split('/');
-        return `${y}-${m}-${d}`;
+        const [d,m,y]=s.split('/'); return `${y}-${m}-${d}`;
       }
       return '';
     }
+
     function formatDate(date) {
       return date.toISOString().split('T')[0];
     }
 
     function highlightActive(type) {
-      document.querySelectorAll('.filter-btn').forEach(btn =>
-        btn.classList.toggle('active', btn.dataset.type === type)
+      document.querySelectorAll('.filter-btn').forEach(b=>
+        b.classList.toggle('active', b.dataset.type===type)
       );
     }
 
     async function loadData() {
-      const tgt = formatDate(currentDate);
-      const all = [];
+      const tgt = formatDate(currentDate), all = [];
       for (const url of urls) {
         try {
-          const res  = await fetch(url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(res.status);
           const text = await res.text();
           const rows = parseCSV(text);
-          const hdr  = rows[0].map(h => h.toUpperCase());
+          const hdr = rows[0].map(h=>h.toUpperCase());
 
-          // poprawne wyszukanie indeksów:
-          const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
-          const iStatus= hdr.findIndex(h => h==='STATUS');
-          const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
-          const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
-          const iComm  = hdr.findIndex(h => h==='COMMENT');
-          const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
+          // teraz findIndex z includes
+          const iDate   = hdr.findIndex(h=>['DATE','DATA'].includes(h));
+          const iStatus = hdr.findIndex(h=>'STATUS'===h);
+          const iName   = hdr.findIndex(h=>['NAME','IMIĘ','IMIE'].includes(h));
+          const iSN     = hdr.findIndex(h=>'SERIAL NUMBER'===h);
+          const iComm   = hdr.findIndex(h=>'COMMENT'===h);
+          const iScrap  = hdr.findIndex(h=>['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
 
-          rows.slice(1).forEach(rw => {
-            const d  = normalizeDate(rw[iDate]);
-            const st = (rw[iStatus]||'').toUpperCase();
-            if (d===tgt && (st==='OK' || st==='NDF')) {
+          rows.slice(1).forEach(rw=>{
+            const d = normalizeDate(rw[iDate]);
+            if (d===tgt) {
+              const st = (rw[iStatus]||'').toUpperCase();
+              const scrapVal = iScrap>=0 ? Number(rw[iScrap])||0 : 0;
               all.push({
                 serial:  rw[iSN]   || '–',
                 status:  st,
                 name:    rw[iName]?.trim() || '–',
                 comment: rw[iComm] || '–',
-                scrap:   iScrap>=0 ? Number(rw[iScrap])||0 : 0
+                scrap:   scrapVal
               });
             }
           });
-        } catch (e) {
-          console.warn('⚠️ fetch error', url, e);
+        } catch(e) {
+          console.warn('⚠️ fetch error', e);
         }
       }
       return all;
@@ -244,15 +239,13 @@
       if (!data.length) return;
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // data table
-      const dtb = document.createElement('tbody');
-      latestData.forEach(it => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+      // data-table
+      const dtb=document.createElement('tbody');
+      latestData.forEach(it=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
-          <td>${it.serial}</td>
-          <td>${it.name}</td>
-          <td>${it.comment}</td>`;
+          <td>${it.serial}</td><td>${it.name}</td><td>${it.comment}</td>`;
         dtb.appendChild(tr);
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
@@ -261,14 +254,14 @@
       const okC={}, ndfC={}, scrC={}, names=new Set();
       latestData.forEach(it=>{
         names.add(it.name);
-        okC[it.name]  = (okC[it.name]||0) + (it.status==='OK'?1:0);
-        ndfC[it.name] = (ndfC[it.name]||0)+(it.status==='NDF'?1:0);
-        scrC[it.name] = (scrC[it.name]||0)+it.scrap;
+        if (it.status==='OK')  okC[it.name]=(okC[it.name]||0)+1;
+        if (it.status==='NDF') ndfC[it.name]=(ndfC[it.name]||0)+1;
+        scrC[it.name]=(scrC[it.name]||0)+it.scrap;
       });
-      const stb = document.createElement('tbody');
+      const stb=document.createElement('tbody');
       Array.from(names).sort().forEach(n=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
           <td>${n}</td>
           <td class="ok">${okC[n]||0}</td>
           <td class="ndf">${ndfC[n]||0}</td>
@@ -279,22 +272,22 @@
     }
 
     function setDate(type) {
-      currentDate = new Date();
-      if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
-      document.getElementById('summary-date').textContent = formatDate(currentDate);
+      currentDate=new Date();
+      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      document.getElementById('summary-date').textContent=formatDate(currentDate);
       highlightActive(type);
       loadData().then(render);
     }
 
-    function toggleTheme() {
+    function toggleTheme(){
       document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme',
         document.body.classList.contains('dark-mode')?'dark':'light'
       );
     }
 
-    function exportToExcel() {
-      const ws = XLSX.utils.json_to_sheet(
+    function exportToExcel(){
+      const ws=XLSX.utils.json_to_sheet(
         latestData.map(d=>({
           STATUS: d.status,
           'SERIAL NUMBER': d.serial,
@@ -303,13 +296,12 @@
           'SCRAP TTL': d.scrap
         }))
       );
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
-      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      const wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
+      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    // init
-    if (localStorage.getItem('theme')==='dark')
+    if(localStorage.getItem('theme')==='dark')
       document.body.classList.add('dark-mode');
     setDate('today');
     (function loop(){
