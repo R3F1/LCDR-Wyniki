@@ -139,7 +139,7 @@
 
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g, '').trim()) || []
+        r.match(/(".*?"|[^\",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g, '').trim()) || []
       );
     }
 
@@ -185,11 +185,7 @@
       for (const url of urls) {
         const text = await fetch(url).then(r => r.text());
         const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
-        const iDate = hdr.indexOf('DATE'),
-              iStatus = hdr.indexOf('STATUS'),
-              iName = hdr.indexOf('NAME'),
-              iSN = hdr.indexOf('SERIAL NUMBER'),
-              iComm = hdr.indexOf('COMMENT');
+        const iDate = hdr.indexOf('DATE'), iStatus = hdr.indexOf('STATUS'), iName = hdr.indexOf('NAME'), iSN = hdr.indexOf('SERIAL NUMBER'), iComm = hdr.indexOf('COMMENT');
         rows.slice(1).forEach(r => {
           const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
           if (d === tgt && (st === 'OK' || st === 'NDF')) {
@@ -203,44 +199,16 @@
     function render(data) {
       latestData = data;
       const okC = {}, ndfC = {}, names = new Set();
-      // COUNT
-      data.forEach(it => {
-        if (it.name) {
-          names.add(it.name);
-          if (it.status === 'OK') okC[it.name] = (okC[it.name] || 0) + 1;
-          if (it.status === 'NDF') ndfC[it.name] = (ndfC[it.name] || 0) + 1;
-        }
-      });
-      // RENDER DATA
+      data.forEach(it => { if (it.name) { names.add(it.name); if (it.status === 'OK') okC[it.name] = (okC[it.name] || 0) + 1; if (it.status === 'NDF') ndfC[it.name] = (ndfC[it.name] || 0) + 1; } });
       const dtb = document.querySelector('#data-table tbody'); dtb.innerHTML = '';
-      data.forEach(it => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
-          <td>${it.serial}</td>
-          <td>${it.name}</td>
-          <td>${it.comment}</td>
-        `;
-        dtb.appendChild(tr);
-      });
-      // RENDER SUMMARY SORTED BY OK DESC
+      data.forEach(it => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="status-${it.status.toLowerCase()}">${it.status}</td><td>${it.serial}</td><td>${it.name}</td><td>${it.comment}</td>`; dtb.appendChild(tr); });
       const stb = document.querySelector('#summary-table tbody'); stb.innerHTML = '';
-      Array.from(names)
-        .sort((a, b) => (okC[b] || 0) - (okC[a] || 0))
-        .forEach(name => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${name}</td>
-            <td class="ok">${okC[name] || 0}</td>
-            <td class="ndf">${ndfC[name] || 0}</td>
-          `;
-          stb.appendChild(tr);
-        });
+      Array.from(names).sort((a, b) => (okC[b] || 0) - (okC[a] || 0)).forEach(name => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${name}</td><td class="ok">${okC[name] || 0}</td><td class="ndf">${ndfC[name] || 0}</td>`; stb.appendChild(tr); });
     }
 
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
     setDate('today');
-    setInterval(() => loadData().then(render), 180000);
+    setInterval(() => loadData().then(render), 30000); // odświeżanie co 30 sekund
   </script>
 </body>
 </html>
