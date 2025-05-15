@@ -18,12 +18,11 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: cover;
-      background-color: #000; /* fallback na czarne */
+      background-color: #000;
       color: #fff;
       position: relative;
       transition: background-color .3s, color .3s;
     }
-    /* w ciemnym trybie zostaje ten sam obrazek + nakładamy tylko kolor pod spodem */
     body.dark-mode {
       background-image: url('background.jpg');
       background-repeat: no-repeat;
@@ -32,7 +31,6 @@
       background-color: #0f172a;
       color: #fff;
     }
-    /* tylko w jasnym trybie półprzezroczysta czarna nakładka */
     body:not(.dark-mode)::before {
       content: "";
       position: fixed;
@@ -40,15 +38,11 @@
       background: rgba(0, 0, 0, 0.75);
       z-index: -1;
     }
-
-    /* LOGO */
     .logo {
       text-align: center;
-      margin: 20px auto 0; /* usunięty margines dolny */
+      margin: 20px auto 0;
     }
     .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
-
-    /* CONTROLS */
     .header-controls {
       display: flex; flex-wrap: wrap; gap: 10px;
       justify-content: center; align-items: center; margin-bottom: 30px;
@@ -62,8 +56,6 @@
       padding: 6px 10px; background: #fff; color: #000;
       border-radius: 6px; font-weight: bold;
     }
-
-    /* SECTIONS */
     .summary-box, .data-section {
       max-width: 1200px; margin: 0 auto 30px; padding: 20px;
       background: rgba(255,255,255,0.95); border-radius: 10px;
@@ -74,8 +66,6 @@
     body.dark-mode .data-section {
       background: rgba(30,41,59,0.95); color: #fff;
     }
-
-    /* TABLE STYLES */
     .summary-table, .data-table { width: 100%; border-collapse: collapse; }
     .summary-table th, .summary-table td,
     .data-table th, .data-table td {
@@ -95,12 +85,9 @@
       background: var(--ndf-bg); color: var(--txt-dark);
       font-weight: bold; text-align: center;
     }
-
-    /* HEADER ICONS */
     .data-table th:nth-child(1)::before { content: "📺 "; }
     .data-table th:nth-child(2)::before { content: "🔧 "; }
     .data-table th:nth-child(4)::before { content: "💬 "; }
-
     @media(max-width: 768px) {
       .header-controls { flex-direction: column; }
       .summary-table th, .summary-table td,
@@ -109,10 +96,8 @@
   </style>
 </head>
 <body>
-  <!-- LOGO -->
   <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
 
-  <!-- CONTROLS -->
   <div class="header-controls">
     <div id="today-date" class="date"></div>
     <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
@@ -121,7 +106,6 @@
     <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
   </div>
 
-  <!-- SUMMARY -->
   <div class="summary-box">
     <h2>Podsumowanie</h2>
     <table class="summary-table" id="summary-table">
@@ -132,7 +116,6 @@
     </table>
   </div>
 
-  <!-- DATA -->
   <div class="data-section">
     <table class="data-table" id="data-table">
       <thead>
@@ -197,11 +180,18 @@
       for (const url of urls) {
         const text = await fetch(url).then(r => r.text());
         const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
-        const iDate = hdr.indexOf('DATE'), iStatus = hdr.indexOf('STATUS'), iName = hdr.indexOf('NAME'), iSN = hdr.indexOf('SERIAL NUMBER'), iComm = hdr.indexOf('COMMENT');
+        const iDate = hdr.indexOf('DATE'), iStatus = hdr.indexOf('STATUS'),
+              iName = hdr.indexOf('NAME'), iSN = hdr.indexOf('SERIAL NUMBER'),
+              iComm = hdr.indexOf('COMMENT');
         rows.slice(1).forEach(r => {
           const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
           if (d === tgt && (st === 'OK' || st === 'NDF')) {
-            all.push({ serial: r[iSN] || '–', status: st, name: r[iName]?.trim() || '–', comment: r[iComm] || '–' });
+            all.push({
+              serial: r[iSN] || '–',
+              status: st,
+              name: r[iName]?.trim() || '–',
+              comment: r[iComm] || '–'
+            });
           }
         });
       }
@@ -210,17 +200,48 @@
 
     function render(data) {
       latestData = data;
-      const okC = {}, ndfC = {}, names = new Set();
-      data.forEach(it => { if (it.name) { names.add(it.name); if (it.status === 'OK') okC[it.name] = (okC[it.name] || 0) + 1; if (it.status === 'NDF') ndfC[it.name] = (ndfC[it.name] || 0) + 1; } });
-      const dtb = document.querySelector('#data-table tbody'); dtb.innerHTML = '';
-      data.forEach(it => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="status-${it.status.toLowerCase()}">${it.status}</td><td>${it.serial}</td><td>${it.name}</td><td>${it.comment}</td>`; dtb.appendChild(tr); });
-      const stb = document.querySelector('#summary-table tbody'); stb.innerHTML = '';
-      Array.from(names).sort((a, b) => (okC[b] || 0) - (okC[a] || 0)).forEach(name => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${name}</td><td class="ok">${okC[name] || 0}</td><td class="ndf">${ndfC[name] || 0}</td>`; stb.appendChild(tr); });
+
+      // Sortujemy dane alfabetycznie po nazwie, aby wiersze były stabilne
+      latestData.sort((a, b) => a.name.localeCompare(b.name));
+
+      // Render danych
+      const dtb = document.querySelector('#data-table tbody');
+      dtb.innerHTML = '';
+      latestData.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
+          <td>${it.serial}</td>
+          <td>${it.name}</td>
+          <td>${it.comment}</td>
+        `;
+        dtb.appendChild(tr);
+      });
+
+      // Podsumowanie
+      const names = Array.from(new Set(latestData.map(it => it.name)))
+                         .sort((a, b) => a.localeCompare(b));
+      const stb = document.querySelector('#summary-table tbody');
+      stb.innerHTML = '';
+      names.forEach(name => {
+        const ok   = latestData.filter(x => x.name === name && x.status === 'OK').length;
+        const ndf  = latestData.filter(x => x.name === name && x.status === 'NDF').length;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${name}</td>
+          <td class="ok">${ok}</td>
+          <td class="ndf">${ndf}</td>
+        `;
+        stb.appendChild(tr);
+      });
     }
 
-    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+    // Ustawienie trybu, data początkowa i odświeżanie co 2 sekundy
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
     setDate('today');
-    setInterval(() => loadData().then(render), 10000);
+    setInterval(() => loadData().then(render), 2000);
   </script>
 </body>
 </html>
