@@ -18,32 +18,53 @@
       color: #fff;
       transition: background-color .3s, color .3s;
     }
-    body.dark-mode { background-color: #0f172a; }
+    body.dark-mode {
+      background-color: #0f172a;
+    }
     body:not(.dark-mode)::before {
       content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
     }
-    .header-controls, .summary-box, .data-section { max-width:1200px; margin:0 auto 30px; }
-    .header-controls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; margin:30px 0; }
-    .filter-btn, .toggle-btn, .export-btn {
-      padding:8px 14px; background:#fff; color:#000; border:none; border-radius:5px;
-      cursor:pointer; font-weight:bold;
+    .logo { text-align:center; margin:20px auto 0; }
+    .logo img { max-width:350px; width:80%; height:auto; }
+    .header-controls {
+      display:flex; flex-wrap:wrap; gap:10px;
+      justify-content:center; align-items:center; margin:30px 0;
     }
-    .filter-btn:hover, .toggle-btn:hover, .export-btn:hover { background:#ccc; }
+    .export-btn, .toggle-btn, .filter-btn {
+      padding:8px 14px; background:#fff; color:#000;
+      border:none; border-radius:5px; cursor:pointer; font-weight:bold;
+    }
+    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background:#ccc; }
     .date {
-      padding:6px 10px; background:#fff; color:#000; border-radius:6px; font-weight:bold;
+      padding:6px 10px; background:#fff; color:#000;
+      border-radius:6px; font-weight:bold;
     }
-    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    .summary-box, .data-section {
+      max-width:1200px; margin:0 auto 30px; padding:20px;
+      background:rgba(255,255,255,0.95); border-radius:10px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
+      transition: background .3s, color .3s;
+    }
+    body.dark-mode .summary-box,
+    body.dark-mode .data-section {
+      background:rgba(30,41,59,0.95); color:#fff;
+    }
+    table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #ccc; }
-    th {
-      background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important;
-    }
-    .summary-table td:first-child { text-align:left; font-weight:bold; }
+    th { background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important; }
+    .summary-table td:first-child { font-weight:bold; text-align:left; }
     .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
     .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
     .data-table td { font-size:14px; }
-    .status-ok { background:var(--ok-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
-    .status-ndf { background:var(--ndf-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ok {
+      background:var(--ok-bg); color:var(--txt-dark);
+      font-weight:bold; text-align:center;
+    }
+    .status-ndf {
+      background:var(--ndf-bg); color:var(--txt-dark);
+      font-weight:bold; text-align:center;
+    }
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
     .data-table th:nth-child(4)::before { content:"💬 "; }
@@ -54,6 +75,7 @@
   </style>
 </head>
 <body>
+  <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
   <div class="header-controls">
     <div id="today-date" class="date"></div>
     <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
@@ -97,44 +119,36 @@
     ];
     let latestData = [], currentDate = new Date();
 
-    function formatDate(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const day = String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${day}`;
-    }
-
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-          ?.map(c => c.replace(/^"|"$/g,'').trim()) || []
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g,'').trim())||[]
       );
     }
-
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y] = s.split('/');
+        const [d,m,y]=s.split('/');
         return `${y}-${m}-${d}`;
       }
       return '';
     }
+    function formatDate(d){ return d.toISOString().split('T')[0]; }
 
     function setDate(type) {
       currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate() - 1);
+      if (type === 'yesterday') currentDate.setDate(currentDate.getDate()-1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
-
     function toggleTheme() {
-      const isDark = document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme',
+        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+      );
     }
-
     function exportToExcel() {
-      const data = latestData.map(d => ({
+      const data = latestData.map(d=>({
         STATUS: d.status,
         'SERIAL NUMBER': d.serial,
         NAME: d.name,
@@ -147,27 +161,24 @@
     }
 
     async function loadData() {
-      console.log('▶️ loadData start, date =', formatDate(currentDate));
-      const tgt = formatDate(currentDate);
-      const all = [];
-      for (let url of urls) {
-        const urlWithBust = url + '&cacheBust=' + Date.now();
+      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
+      const tgt = formatDate(currentDate), all = [];
+      for (const url of urls) {
         try {
-          console.log('   • fetching', urlWithBust);
-          const res = await fetch(urlWithBust, { cache: 'no-store' });
+          console.log('   • fetching', url);
+          const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const text = await res.text();
           console.log(`     → pobrano ${text.length} znaków`);
-          const rows = parseCSV(text);
-          const hdr  = rows[0].map(h => h.toUpperCase());
-          const iDate   = hdr.indexOf('DATE');
-          const iStatus = hdr.indexOf('STATUS');
-          const iName   = hdr.indexOf('NAME');
-          const iSN     = hdr.indexOf('SERIAL NUMBER');
-          const iComm   = hdr.indexOf('COMMENT');
+          const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
+          const iDate   = hdr.indexOf('DATE'),
+                iStatus = hdr.indexOf('STATUS'),
+                iName   = hdr.indexOf('NAME'),
+                iSN     = hdr.indexOf('SERIAL NUMBER'),
+                iComm   = hdr.indexOf('COMMENT');
           rows.slice(1).forEach(r => {
-            const d  = normalizeDate(r[iDate]);
-            const st = r[iStatus]?.toUpperCase();
+            const d  = normalizeDate(r[iDate]),
+                  st = r[iStatus]?.toUpperCase();
             if (d === tgt && (st === 'OK' || st === 'NDF')) {
               all.push({
                 serial:  r[iSN]   || '–',
@@ -178,8 +189,9 @@
             }
           });
         } catch (e) {
-          console.error('❌ fetch error:', e);
-          document.getElementById('today-date').textContent = 'Błąd: ' + e.message;
+          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
+          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
+          return [];
         }
       }
       console.log(`✅ loadData zwraca ${all.length} wierszy`);
@@ -187,19 +199,20 @@
     }
 
     function render(data) {
-      latestData = data.sort((a,b) => a.name.localeCompare(b.name));
+      latestData = data;
+      latestData.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // aktualizacja nagłówków OK/NDF
-      const totalOk  = latestData.filter(x => x.status==='OK').length;
-      const totalNdf = latestData.filter(x => x.status==='NDF').length;
+      // update summary headers with total counts
+      const totalOk  = latestData.filter(x=>x.status==='OK').length;
+      const totalNdf = latestData.filter(x=>x.status==='NDF').length;
       document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
       document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
 
-      // podmiana danych
+      // data table
       const newDataTbody = document.createElement('tbody');
-      latestData.forEach(it => {
+      latestData.forEach(it=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
@@ -209,15 +222,15 @@
       const dataTable = document.getElementById('data-table');
       dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
 
-      // podmiana podsumowania
-      const names = Array.from(new Set(latestData.map(x => x.name)))
-                         .sort((a,b) => a.localeCompare(b));
+      // summary table
+      const names = Array.from(new Set(latestData.map(it=>it.name)))
+                         .sort((a,b)=>a.localeCompare(b));
       const newSumTbody = document.createElement('tbody');
-      names.forEach(name => {
-        const ok  = latestData.filter(x => x.name===name && x.status==='OK').length;
-        const ndf = latestData.filter(x => x.name===name && x.status==='NDF').length;
+      names.forEach(name=>{
+        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
+        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td>${name}</td>
           <td class="ok">${ok}</td>
           <td class="ndf">${ndf}</td>`;
@@ -227,16 +240,13 @@
       sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
     }
 
-    // inicjalizacja
-    if (localStorage.getItem('theme') === 'dark') {
+    if (localStorage.getItem('theme')==='dark'){
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-
-    // cykliczne odświeżanie co 2s
-    (function loop() {
-      setTimeout(() => {
-        loadData().then(render).finally(loop);
+    (function scheduleNext(){
+      setTimeout(()=>{
+        loadData().then(render).finally(scheduleNext);
       }, 2000);
     })();
   </script>
