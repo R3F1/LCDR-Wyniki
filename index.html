@@ -47,7 +47,8 @@
       background: rgba(255,255,255,0.1);
     }
     .filter-btn.active {
-      background: #fff; color: #000;
+      background: #fff;
+      color: #000;
     }
 
     /* SUMMARY BOX */
@@ -61,8 +62,10 @@
       background:rgba(30,41,59,0.95); color:#fff;
     }
     .summary-header {
-      display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
     .summary-header h2 {
       margin: 0;
@@ -71,8 +74,10 @@
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     .date-summary {
-      padding: 6px 12px; border-radius: 8px;
-      background: rgba(0,0,0,0.1); font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.1);
+      font-weight: bold;
       color: inherit;
     }
     body.dark-mode .date-summary {
@@ -97,36 +102,28 @@
       background:#f0f0f0; text-align:center;
       color:#000!important; font-weight:bold!important;
     }
-
-    /* Make OK, NDF, SCRAP TTL same width in summary */
-    .summary-table th.ok, 
-    .summary-table td.ok,
-    .summary-table th.ndf, 
-    .summary-table td.ndf,
-    .summary-table th.scrap-ttl, 
-    .summary-table td.scrap-ttl {
+    /* Ensure OK, NDF, SCRAP TTL columns are same width */
+    th.ok, th.ndf, th.scrap-ttl {
       width: 100px;
     }
-
-    /* Center & bold counts */
+    /* Summary table: center & bold counts */
+    .summary-table td {
+      text-align: left;
+    }
     .summary-table td.ok,
     .summary-table td.ndf,
     .summary-table td.scrap-ttl {
       text-align: center;
       font-weight: bold;
     }
-
-    /* Cell background colors */
     .summary-table .ok       { background:var(--ok-bg);    color:var(--txt-dark); }
     .summary-table .ndf      { background:var(--ndf-bg);   color:var(--txt-dark); }
     .summary-table .scrap-ttl{ background:var(--scrap-bg); color:var(--txt-dark); }
-
-    /* Data table styles */
+    /* Data table */
     .data-table td { font-size:14px; }
     .status-ok  { background:var(--ok-bg);    color:var(--txt-dark); font-weight:bold; text-align:center; }
     .status-ndf { background:var(--ndf-bg);   color:var(--txt-dark); font-weight:bold; text-align:center; }
-
-    /* Header emojis */
+    /* Emojis in headers */
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
     .data-table th:nth-child(3)::before { content:"🪪 "; }
@@ -173,10 +170,7 @@
     <table class="data-table" id="data-table">
       <thead>
         <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
+          <th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -217,7 +211,9 @@
     }
 
     async function loadData() {
-      const tgt = formatDate(currentDate), all = [];
+      const tgt = formatDate(currentDate);
+      const all = [];
+
       for (const url of urls) {
         try {
           const res  = await fetch(url);
@@ -233,6 +229,7 @@
           const iScrap = hdr.findIndex(h =>
             h==='SCRAP TTL' || h==='SCRAP_TTL' || h==='SCRAP-TTL'
           );
+
           rows.slice(1).forEach(r => {
             const d  = normalizeDate(r[iDate]);
             const st = (r[iStatus]||'').toUpperCase();
