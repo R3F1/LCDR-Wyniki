@@ -21,32 +21,15 @@
       color: #fff;
       transition: background-color .3s, color .3s;
     }
-    body.dark-mode {
-      background-color: #0f172a;
-    }
+    body.dark-mode { background-color: #0f172a; }
     body:not(.dark-mode)::before {
       content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
     }
+
     /* LOGO */
     .logo { text-align:center; margin:20px auto 0; }
     .logo img { max-width:350px; width:80%; height:auto; }
-
-    /* DATA DISPLAY */
-    .date-display {
-      text-align: center;
-      margin: 12px auto;
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.9);
-      color: #000;
-      font-weight: bold;
-    }
-    body.dark-mode .date-display {
-      background: rgba(30,41,59,0.95);
-      color: #fff;
-    }
 
     /* CONTROLS */
     .header-controls {
@@ -70,20 +53,47 @@
       background: #fff;
       color: #000;
     }
-    /* DARK MODE: przyciski białe zamiast transparentnych */
-    body.dark-mode .filter-btn, body.dark-mode .toggle-btn, body.dark-mode .export-btn {
-      --btn-border: #fff;
-      --btn-bg: transparent;
-    }
 
-    /* SECTIONS */
-    .summary-box, .data-section {
+    /* SUMMARY BOX */
+    .summary-box {
       max-width:1200px; margin:0 auto 30px; padding:20px;
       background:rgba(255,255,255,0.95); border-radius:10px;
       box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
       transition: background .3s, color .3s;
     }
-    body.dark-mode .summary-box,
+    body.dark-mode .summary-box {
+      background:rgba(30,41,59,0.95); color:#fff;
+    }
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .summary-header h2 {
+      margin: 0;
+      font-size: 2.25rem;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .date-summary {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.1);
+      font-weight: bold;
+      color: inherit;
+    }
+    body.dark-mode .date-summary {
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* DATA SECTION */
+    .data-section {
+      max-width:1200px; margin:0 auto 30px; padding:20px;
+      background:rgba(255,255,255,0.95); border-radius:10px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
+      transition: background .3s, color .3s;
+    }
     body.dark-mode .data-section {
       background:rgba(30,41,59,0.95); color:#fff;
     }
@@ -114,6 +124,7 @@
     @media(max-width:768px) {
       th, td { font-size:12px; padding:6px; }
       .header-controls { flex-direction:column; }
+      .summary-header { flex-direction:column; align-items:flex-start; gap:8px; }
     }
   </style>
 </head>
@@ -122,9 +133,6 @@
   <div class="logo">
     <img src="logo.png" alt="LCDR LIVE DATA Logo">
   </div>
-
-  <!-- DATA DISPLAY -->
-  <div class="date-display">Data: <span id="today-date"></span></div>
 
   <!-- CONTROLS -->
   <div class="header-controls">
@@ -136,7 +144,10 @@
 
   <!-- SUMMARY -->
   <div class="summary-box">
-    <h2>Podsumowanie</h2>
+    <div class="summary-header">
+      <h2>PODSUMOWANIE</h2>
+      <div id="summary-date" class="date-summary"></div>
+    </div>
     <table class="summary-table" id="summary-table">
       <thead>
         <tr><th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th></tr>
@@ -216,8 +227,8 @@
     }
 
     function render(data) {
-      if(!data.length) {
-        console.warn('Brak danych, poprzednie pozostają');
+      if(!data.length){
+        console.warn('Brak danych – pozostawiam poprzednie');
         return;
       }
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
@@ -233,7 +244,8 @@
         dtb.appendChild(tr);
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
-      // summary
+
+      // summary table
       const names=[...new Set(latestData.map(x=>x.name))].sort();
       const stb=document.createElement('tbody');
       names.forEach(n=>{
@@ -249,7 +261,8 @@
     function setDate(type) {
       currentDate = new Date();
       if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
-      document.getElementById('today-date').textContent = formatDate(currentDate);
+      const txt = formatDate(currentDate);
+      document.getElementById('summary-date').textContent = txt;
       highlightActive(type);
       loadData().then(render);
     }
@@ -262,12 +275,14 @@
     }
 
     function exportToExcel() {
-      const ws = XLSX.utils.json_to_sheet(latestData.map(d=>({
-        STATUS:d.status,
-        'SERIAL NUMBER':d.serial,
-        NAME:d.name,
-        COMMENT:d.comment
-      })));
+      const ws = XLSX.utils.json_to_sheet(
+        latestData.map(d=>({
+          STATUS:d.status,
+          'SERIAL NUMBER':d.serial,
+          NAME:d.name,
+          COMMENT:d.comment
+        }))
+      );
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
       XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
