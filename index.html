@@ -381,35 +381,31 @@
 
   #chatbot-container {
     position: fixed;
-    top: 10px;
-    right: 60px;
+    top: 20px;
+    right: 40px;
     z-index: 1003;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 6px;
     animation: robotTalk 3s ease-in-out infinite;
-  }
-
-  @keyframes robotTalk {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-3px); }
-  }
-
-  #chatbot-img {
-    width: 192px;
-    height: auto;
   }
 
   #chatbot-bubble {
     background: rgba(0, 0, 0, 0.8);
     color: white;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-radius: 16px;
-    max-width: 260px;
-    font-size: 14px;
+    max-width: 240px;
+    font-size: 13.5px;
     line-height: 1.4em;
     font-family: 'Segoe UI', sans-serif;
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    margin-top: -8px;
+  }
+
+  body.light-mode #chatbot-bubble {
+    background: rgba(255,255,255,0.9);
+    color: #111;
   }
 
   body.light-mode #chatbot-bubble {
