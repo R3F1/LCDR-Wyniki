@@ -37,11 +37,20 @@
       background: #333;
     }
     .summary {
-      margin-top: 10px;
       font-size: 14px;
-      background: #1e1e1e;
-      padding: 10px;
-      border: 1px solid #444;
+      margin-bottom: 10px;
+    }
+    .summary .ok {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .summary .ndf {
+      color: #000;
+      background: #FFEB3B;
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -49,14 +58,14 @@
   <h2>Dane z dzisiejszego dnia</h2>
   <div class="container">
     <div>
+      <div id="summary1" class="summary"></div>
       <h3>Arkusz 1</h3>
       <table id="sheet1"><thead></thead><tbody></tbody></table>
-      <div id="summary1" class="summary"></div>
     </div>
     <div>
+      <div id="summary2" class="summary"></div>
       <h3>Arkusz 2</h3>
       <table id="sheet2"><thead></thead><tbody></tbody></table>
-      <div id="summary2" class="summary"></div>
     </div>
   </div>
 
@@ -95,12 +104,16 @@
             return dateMatch && (status === 'OK' || status === 'NDF');
           });
 
-          const summary = {};
+          const summaryOK = {};
+          const summaryNDF = {};
           filtered.forEach(row => {
             const status = row[statusIndex]?.toUpperCase();
-            const name = row[nameIndex] || "Brak";
+            const name = row[nameIndex]?.trim();
+            if (!name) return;
             if (status === 'OK') {
-              summary[name] = (summary[name] || 0) + 1;
+              summaryOK[name] = (summaryOK[name] || 0) + 1;
+            } else if (status === 'NDF') {
+              summaryNDF[name] = (summaryNDF[name] || 0) + 1;
             }
           });
 
@@ -112,10 +125,21 @@
           ).join('');
 
           const summaryBox = document.getElementById(summaryId);
-          summaryBox.innerHTML = "<strong>Podsumowanie OK:</strong><br>" + 
-            Object.entries(summary)
-              .map(([name, count]) => `• ${name}: ${count}`)
-              .join('<br>');
+          let summaryHTML = '';
+
+          if (Object.keys(summaryOK).length > 0) {
+            summaryHTML += `<div><span class="ok">Podsumowanie OK:</span><br>` +
+              Object.entries(summaryOK).map(([name, count]) => `• ${name}: ${count}`).join('<br>') +
+              '</div><br>';
+          }
+
+          if (Object.keys(summaryNDF).length > 0) {
+            summaryHTML += `<div><span class="ndf">Podsumowanie NDF:</span><br>` +
+              Object.entries(summaryNDF).map(([name, count]) => `• ${name}: ${count}`).join('<br>') +
+              '</div>';
+          }
+
+          summaryBox.innerHTML = summaryHTML;
         })
         .catch(error => {
           document.querySelector(`#${tableId} tbody`).innerHTML = '<tr><td colspan="100%">Błąd wczytywania danych</td></tr>';
