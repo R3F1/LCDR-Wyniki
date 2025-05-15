@@ -16,6 +16,13 @@ setInterval(updateClockInline, 1000);
 updateClockInline();
 
 
+function updateTimestampLabel() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
+}
 
 
 function updateBotPhrase() {
@@ -37,20 +44,14 @@ updateBotPhrase();
 setInterval(updateBotPhrase, 10000);
 
 
-}
-
-
-async function updateTimestampLabel() {
-  try {
-    const res = await fetch('https://worldtimeapi.org/api/ip');
-    const data = await res.json();
-    const time = new Date(data.datetime);
-    const h = String(time.getHours()).padStart(2, '0');
-    const m = String(time.getMinutes()).padStart(2, '0');
-    const s = String(time.getSeconds()).padStart(2, '0');
-    document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
-  } catch (e) {
-    document.getElementById('last-update').textContent = '🔄 Zaktualizowano (czas niedostępny)';
+function updateTimestampLabel() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const label = document.getElementById('last-update');
+  if (label) {
+    label.textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
   }
 }
 
@@ -756,6 +757,13 @@ setInterval(updateClockInline, 1000);
 updateClockInline();
 
 
+function updateTimestampLabel() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
+}
 
 
 function updateBotPhrase() {
@@ -777,20 +785,14 @@ updateBotPhrase();
 setInterval(updateBotPhrase, 10000);
 
 
-}
-
-
-async function updateTimestampLabel() {
-  try {
-    const res = await fetch('https://worldtimeapi.org/api/ip');
-    const data = await res.json();
-    const time = new Date(data.datetime);
-    const h = String(time.getHours()).padStart(2, '0');
-    const m = String(time.getMinutes()).padStart(2, '0');
-    const s = String(time.getSeconds()).padStart(2, '0');
-    document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
-  } catch (e) {
-    document.getElementById('last-update').textContent = '🔄 Zaktualizowano (czas niedostępny)';
+function updateTimestampLabel() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const label = document.getElementById('last-update');
+  if (label) {
+    label.textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
   }
 }
 
