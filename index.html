@@ -364,28 +364,73 @@
     /* Chatbot okienko */
     #chatbot {
       position: fixed;
-      bottom: 16px;
+      top: 16px;
       right: 16px;
       background: rgba(0,0,0,0.75);
       color: white;
       padding: 12px 16px;
-      border-radius: 12px;
+      border-radius: 12px 12px 12px 0;
       font-size: 14px;
-      max-width: 220px;
+      max-width: 240px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       z-index: 1003;
       font-family: 'Segoe UI', sans-serif;
+      line-height: 1.4em;
     }
+
+
+  #chatbot-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1003;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  #chatbot-img {
+    width: 64px;
+    height: auto;
+  }
+
+  #chatbot-bubble {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 16px;
+    max-width: 260px;
+    font-size: 14px;
+    line-height: 1.4em;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  }
+
+  body.light-mode #chatbot-bubble {
+    background: rgba(255,255,255,0.85);
+    color: #111;
+  }
 
 </style>
 </head>
 <body>
 
+<div id="chatbot-container">
+  <img src="A_flat_digital_illustration_features_a_friendly_ro.png" alt="Robot" id="chatbot-img">
+  <div id="chatbot-bubble">
+    <strong>🤖 LCDR Bot mówi:</strong><br>
+    Naprawiono <span id="chat-ok">–</span> OK,<br>
+    Wykryto <span id="chat-ndf">–</span> NDF,<br>
+    I <span id="chat-scrap">–</span> przypadków SCRAP TTL.
+  </div>
+</div>
+
+
 <div id="chatbot">
-  🤖 <strong>LCDR Assistant:</strong><br>
-  Dziś naprawiono <span id="chat-ok">–</span> OK,<br>
-  znaleziono <span id="chat-ndf">–</span> NDF<br>
-  oraz <span id="chat-scrap">–</span> przypadków SCRAP TTL.
+  🤖 <strong>Cześć! Tu LCDR Bot:</strong><br>
+  Dziś udało się naprawić <span id="chat-ok">–</span> OK,<br>
+  wykryto <span id="chat-ndf">–</span> NDF,<br>
+  i <span id="chat-scrap">–</span> przypadków SCRAP TTL.
 </div>
 
 <div id="clock">🕒 --:--:--</div>
