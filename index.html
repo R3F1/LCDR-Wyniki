@@ -40,17 +40,19 @@
       font-size: 14px;
       margin-bottom: 10px;
     }
-    .summary .ok {
+    .summary-title-ok {
       color: #4CAF50;
       font-weight: bold;
+      margin-bottom: 4px;
     }
-    .summary .ndf {
-      color: #000;
+    .summary-title-ndf {
       background: #FFEB3B;
+      color: #000;
       display: inline-block;
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: bold;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -128,18 +130,16 @@
           let summaryHTML = '';
 
           if (Object.keys(summaryOK).length > 0) {
-            summaryHTML += `<div><span class="ok">Podsumowanie OK:</span><br>` +
-              Object.entries(summaryOK).map(([name, count]) => `• ${name}: ${count}`).join('<br>') +
-              '</div><br>';
+            summaryHTML += `<div class="summary-title-ok">Podsumowanie OK:</div>` +
+              Object.entries(summaryOK).map(([name, count]) => `• ${name}: ${count}`).join('<br>') + '<br><br>';
           }
 
           if (Object.keys(summaryNDF).length > 0) {
-            summaryHTML += `<div><span class="ndf">Podsumowanie NDF:</span><br>` +
-              Object.entries(summaryNDF).map(([name, count]) => `• ${name}: ${count}`).join('<br>') +
-              '</div>';
+            summaryHTML += `<div class="summary-title-ndf">Podsumowanie NDF:</div><br>` +
+              Object.entries(summaryNDF).map(([name, count]) => `• ${name}: ${count}`).join('<br>');
           }
 
-          summaryBox.innerHTML = summaryHTML;
+          summaryBox.innerHTML = summaryHTML || "<i>Brak danych do wyświetlenia</i>";
         })
         .catch(error => {
           document.querySelector(`#${tableId} tbody`).innerHTML = '<tr><td colspan="100%">Błąd wczytywania danych</td></tr>';
