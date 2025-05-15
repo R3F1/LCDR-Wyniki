@@ -250,9 +250,19 @@
 
 
     body {
-      background: linear-gradient(-45deg, #1e3a8a, #0f172a, #1e3a8a, #0f172a);
-      background-size: 400% 400%;
-      animation: backgroundMove 15s ease infinite;
+      background:
+        linear-gradient(-45deg, rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.35), rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.35)),
+        url('background.jpg'); /* or background.svg */
+      background-size: 400% 400%, cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      animation: backgroundMove 20s ease infinite;
+    }
+
+    @keyframes backgroundMove {
+      0% { background-position: 0% 50%, center; }
+      50% { background-position: 100% 50%, center; }
+      100% { background-position: 0% 50%, center; }
     }
 
     @keyframes backgroundMove {
