@@ -3,43 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Podgląd Tabeli - OLED Repair</title>
+  <title>LCDR WYNIKI LIVE</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #121212;
-      color: #fff;
-      padding: 20px;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px 40px;
     }
+
     h1 {
-      text-align: center;
       color: #00e676;
+      font-size: 32px;
+      margin-bottom: 20px;
+      font-weight: 600;
     }
+
     #table-container {
-      margin-top: 20px;
       overflow-x: auto;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0, 255, 135, 0.2);
+      padding: 10px;
+      max-width: 100%;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: #1e1e1e;
     }
+
     th, td {
       border: 1px solid #333;
-      padding: 10px;
+      padding: 12px;
       text-align: left;
+      font-size: 14px;
     }
+
     th {
-      background-color: #2e2e2e;
-      color: #00e676;
-    }
-    tr:nth-child(even) {
       background-color: #2c2c2c;
+      color: #00e676;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+
+    tr:hover {
+      background-color: #333;
     }
   </style>
 </head>
 <body>
-  <h1>OLED Repair - Tabela Serwisowa</h1>
+  <h1>LCDR WYNIKI LIVE</h1>
   <div id="table-container">Ładowanie danych...</div>
 
   <script>
@@ -54,6 +75,8 @@
           const table = doc.querySelector('table');
 
           if (table) {
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
             document.getElementById('table-container').innerHTML = '';
             document.getElementById('table-container').appendChild(table);
           } else {
