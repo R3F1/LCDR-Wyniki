@@ -380,6 +380,14 @@
       document.getElementById('count-scrap').textContent = `(${sumSCR})`;
 
 
+      
+      const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
+      const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
+      const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
+      document.getElementById('head-ok').innerHTML = `OK (${sumOK})`;
+      document.getElementById('head-ndf').innerHTML = `NDF (${sumNDF})`;
+      document.getElementById('head-scrap').innerHTML = `SCRAP TTL (${sumSCR})`;
+
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
     }
 
