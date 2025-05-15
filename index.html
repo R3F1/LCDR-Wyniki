@@ -227,9 +227,9 @@
       <thead>
         <tr>
           <th>Imię</th>
-          <th class="ok">OK</th>
-          <th class="ndf">NDF</th>
-          <th class="scrap-ttl">SCRAP TTL</th>
+          <th class="ok">OK <span id="count-ok"></span></th>
+          <th class="ndf">NDF <span id="count-ndf"></span></th>
+          <th class="scrap-ttl">SCRAP TTL <span id="count-scrap"></span></th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -374,6 +374,11 @@
         <td class="ndf"><strong>⚠️ ${sumNDF}</strong></td>
         <td class="scrap-ttl"><strong>🗑️ ${sumSCR}</strong></td>`;
       stb.appendChild(sumRow);
+
+      document.getElementById('count-ok').textContent = `(${sumOK})`;
+      document.getElementById('count-ndf').textContent = `(${sumNDF})`;
+      document.getElementById('count-scrap').textContent = `(${sumSCR})`;
+
 
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
     }
