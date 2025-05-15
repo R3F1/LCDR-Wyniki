@@ -72,27 +72,32 @@
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          const tables = doc.querySelectorAll('table');
 
-          // Znajdź właściwą tabelę
-          const realTable = [...tables].find(t => {
-            const rows = t.querySelectorAll('tr');
-            return rows.length > 1 && t.innerText.includes('LCD');
-          });
+          // Znajdujemy główną zawartość danych z tabelami przestawnymi
+          const pivotDivs = [...doc.querySelectorAll('div')]
+            .filter(div => div.innerText.includes('FI #') && div.querySelector('table'));
 
-          if (realTable) {
-            // Usuń pierwsze kolumny/wiersze jeśli są indeksami
-            [...realTable.querySelectorAll('tr')].forEach(row => {
-              const firstCell = row.querySelector('td, th');
-              if (firstCell && /^\d+$/.test(firstCell.innerText.trim())) {
-                firstCell.remove();
+          if (pivotDivs.length > 0) {
+            const container = document.getElementById('table-container');
+            container.innerHTML = ''; // wyczyść
+
+            // Dodaj każdą sekcję z tabelą
+            pivotDivs.forEach(div => {
+              const table = div.querySelector('table');
+              if (table) {
+                // Usuń numeracje wierszy (jeśli są)
+                [...table.querySelectorAll('tr')].forEach(row => {
+                  const firstCell = row.querySelector('td, th');
+                  if (firstCell && /^\d+$/.test(firstCell.innerText.trim())) {
+                    firstCell.remove();
+                  }
+                });
+                container.appendChild(table);
+                container.appendChild(document.createElement('br'));
               }
             });
-
-            document.getElementById('table-container').innerHTML = '';
-            document.getElementById('table-container').appendChild(realTable);
           } else {
-            document.getElementById('table-container').innerText = 'Nie udało się załadować tabeli.';
+            document.getElementById('table-container').innerText = 'Nie udało się załadować danych.';
           }
         })
         .catch(err => {
