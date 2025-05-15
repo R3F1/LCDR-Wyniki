@@ -271,6 +271,22 @@
       100% { background-position: 0% 50%; }
     }
 
+
+    .logo img {
+      animation: fadeIn 1.5s ease-in-out forwards, pulse 3s ease-in-out infinite;
+      opacity: 0;
+      transform-origin: center;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
 </style>
 </head>
 <body>
