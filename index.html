@@ -61,7 +61,9 @@ async function updateCurrentDateLabels() {
     const dateYesterdayEl = document.getElementById('date-yesterday');
 
     if (dateTodayEl) dateTodayEl.textContent = today;
+    todayDateStr = today;
     if (dateYesterdayEl) dateYesterdayEl.textContent = yesterday;
+    yesterdayDateStr = yesterday;
   } catch (err) {
     console.error("Błąd pobierania daty:", err);
   }
@@ -912,7 +914,9 @@ async function updateCurrentDateLabels() {
     const dateYesterdayEl = document.getElementById('date-yesterday');
 
     if (dateTodayEl) dateTodayEl.textContent = today;
+    todayDateStr = today;
     if (dateYesterdayEl) dateYesterdayEl.textContent = yesterday;
+    yesterdayDateStr = yesterday;
   } catch (err) {
     console.error("Błąd pobierania daty:", err);
   }
