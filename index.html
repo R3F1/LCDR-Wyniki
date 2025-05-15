@@ -155,10 +155,54 @@
       100% { transform: rotate(360deg); }
     }
 
+
+    .filter-btn, .toggle-btn, .export-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
+      background: linear-gradient(135deg, #2563eb, #60a5fa);
+      transform: translateY(-2px);
+    }
+    .filter-btn.active {
+      background: #fff;
+      color: #1e3a8a;
+      font-weight: bold;
+    }
+    .oled-btn {
+      background: linear-gradient(135deg, #7c3aed, #c084fc);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 4px 10px rgba(124, 58, 237, 0.4);
+    }
+    .oled-btn:hover {
+      background: linear-gradient(135deg, #8b5cf6, #d8b4fe);
+      transform: translateY(-2px);
+    }
+
+
+    .loader-text {
+      margin-top: 16px;
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
 </style>
 </head>
 <body>
-  <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div></div>
+  <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
   <div class="container">
     <div class="logo">
       <img src="logo.png" alt="LCDR LIVE DATA Logo">
