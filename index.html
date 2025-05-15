@@ -26,6 +26,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     .logo {
@@ -36,6 +37,13 @@
 
     .logo::before {
       content: '📡 ';
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
     }
 
     .export-btn {
@@ -50,6 +58,19 @@
 
     .export-btn:hover {
       background: #334155;
+    }
+
+    .date {
+      font-size: 14px;
+      color: #334155;
+      background: #e2e8f0;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .date::before {
+      content: "📅 ";
     }
 
     .summary-box {
@@ -146,6 +167,11 @@
         padding: 10px;
       }
 
+      .header-controls {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
       table th, table td {
         font-size: 12px;
         padding: 6px;
@@ -156,7 +182,10 @@
 <body>
   <div class="header">
     <div class="logo">LCDR LIVE DATA</div>
-    <button class="export-btn" onclick="exportToExcel()">Eksportuj do Excel</button>
+    <div class="header-controls">
+      <div id="today-date" class="date"></div>
+      <button class="export-btn" onclick="exportToExcel()">Eksportuj do Excel</button>
+    </div>
   </div>
 
   <div class="summary-box">
@@ -187,7 +216,6 @@
     </table>
   </div>
 
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const urls = [
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
@@ -288,6 +316,9 @@
       XLSX.utils.book_append_sheet(wb, ws, "LCDR Data");
       XLSX.writeFile(wb, `LCDR_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
+
+    // Pokaż datę dzisiejszą
+    document.getElementById("today-date").textContent = new Date().toISOString().split("T")[0];
 
     loadData().then(render);
     setInterval(() => loadData().then(render), 180000);
