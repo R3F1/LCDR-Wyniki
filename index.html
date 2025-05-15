@@ -7,9 +7,12 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --ok-bg: #A7F3D0;
-      --ndf-bg: #FDE68A;
+      --ok-bg:    #A7F3D0;
+      --ndf-bg:   #FDE68A;
       --txt-dark: #000;
+      --btn-border: #fff;
+      --btn-bg: transparent;
+      --btn-radius: 20px;
     }
     html, body { margin:0; padding:0; height:100%; }
     body {
@@ -25,21 +28,55 @@
       content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
     }
+    /* LOGO */
     .logo { text-align:center; margin:20px auto 0; }
     .logo img { max-width:350px; width:80%; height:auto; }
+
+    /* DATA DISPLAY */
+    .date-display {
+      text-align: center;
+      margin: 12px auto;
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.9);
+      color: #000;
+      font-weight: bold;
+    }
+    body.dark-mode .date-display {
+      background: rgba(30,41,59,0.95);
+      color: #fff;
+    }
+
+    /* CONTROLS */
     .header-controls {
       display:flex; flex-wrap:wrap; gap:10px;
       justify-content:center; align-items:center; margin:30px 0;
     }
-    .export-btn, .toggle-btn, .filter-btn {
-      padding:8px 14px; background:#fff; color:#000;
-      border:none; border-radius:5px; cursor:pointer; font-weight:bold;
+    .filter-btn, .toggle-btn, .export-btn {
+      padding:6px 14px;
+      background: var(--btn-bg);
+      color: #fff;
+      border: 2px solid var(--btn-border);
+      border-radius: var(--btn-radius);
+      cursor: pointer;
+      font-weight: bold;
+      transition: background .2s, color .2s;
     }
-    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background:#ccc; }
-    .date {
-      padding:6px 10px; background:#fff; color:#000;
-      border-radius:6px; font-weight:bold;
+    .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
+      background: rgba(255,255,255,0.1);
     }
+    .filter-btn.active {
+      background: #fff;
+      color: #000;
+    }
+    /* DARK MODE: przyciski białe zamiast transparentnych */
+    body.dark-mode .filter-btn, body.dark-mode .toggle-btn, body.dark-mode .export-btn {
+      --btn-border: #fff;
+      --btn-bg: transparent;
+    }
+
+    /* SECTIONS */
     .summary-box, .data-section {
       max-width:1200px; margin:0 auto 30px; padding:20px;
       background:rgba(255,255,255,0.95); border-radius:10px;
@@ -50,9 +87,14 @@
     body.dark-mode .data-section {
       background:rgba(30,41,59,0.95); color:#fff;
     }
+
+    /* TABLE STYLES */
     table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #ccc; }
-    th { background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important; }
+    th {
+      background:#f0f0f0; text-align:center;
+      color:#000!important; font-weight:bold!important;
+    }
     .summary-table td:first-child { font-weight:bold; text-align:left; }
     .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
     .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
@@ -68,6 +110,7 @@
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
     .data-table th:nth-child(4)::before { content:"💬 "; }
+
     @media(max-width:768px) {
       th, td { font-size:12px; padding:6px; }
       .header-controls { flex-direction:column; }
@@ -75,38 +118,38 @@
   </style>
 </head>
 <body>
-  <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
+  <!-- LOGO -->
+  <div class="logo">
+    <img src="logo.png" alt="LCDR LIVE DATA Logo">
+  </div>
+
+  <!-- DATA DISPLAY -->
+  <div class="date-display">Data: <span id="today-date"></span></div>
+
+  <!-- CONTROLS -->
   <div class="header-controls">
-    <div id="today-date" class="date"></div>
-    <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
-    <button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button>
+    <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
+    <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
     <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
     <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
   </div>
 
+  <!-- SUMMARY -->
   <div class="summary-box">
     <h2>Podsumowanie</h2>
     <table class="summary-table" id="summary-table">
       <thead>
-        <tr>
-          <th>Imię</th>
-          <th class="ok">OK</th>
-          <th class="ndf">NDF</th>
-        </tr>
+        <tr><th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
+  <!-- DATA -->
   <div class="data-section">
     <table class="data-table" id="data-table">
       <thead>
-        <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
-        </tr>
+        <tr><th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -114,140 +157,127 @@
 
   <script>
     const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=193025884&single=true&output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g,'').trim())||[]
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+         ?.map(c=>c.replace(/^"|"$/g,'').trim())||[]
       );
     }
     function normalizeDate(s) {
-      if (!s) return '';
-      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y]=s.split('/');
-        return `${y}-${m}-${d}`;
+      if(!s) return '';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+        const [d,m,y]=s.split('/'); return `${y}-${m}-${d}`;
       }
       return '';
     }
     function formatDate(d){ return d.toISOString().split('T')[0]; }
 
-    function setDate(type) {
-      currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate()-1);
-      document.getElementById('today-date').textContent = formatDate(currentDate);
-      loadData().then(render);
-    }
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
-      );
-    }
-    function exportToExcel() {
-      const data = latestData.map(d=>({
-        STATUS: d.status,
-        'SERIAL NUMBER': d.serial,
-        NAME: d.name,
-        COMMENT: d.comment
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
-      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+    function highlightActive(type) {
+      document.querySelectorAll('.filter-btn').forEach(btn=>{
+        btn.classList.toggle('active', btn.dataset.type===type);
+      });
     }
 
     async function loadData() {
-      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
-      const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
-        try {
-          console.log('   • fetching', url);
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const text = await res.text();
-          console.log(`     → pobrano ${text.length} znaków`);
-          const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
+      const tgt = formatDate(currentDate), all=[];
+      for(const url of urls){
+        try{
+          const res  = await fetch(url);
+          if(!res.ok) throw new Error(res.status);
+          const txt  = await res.text();
+          const rows = parseCSV(txt), hdr=rows[0].map(h=>h.toUpperCase());
           const iDate   = hdr.indexOf('DATE'),
                 iStatus = hdr.indexOf('STATUS'),
                 iName   = hdr.indexOf('NAME'),
                 iSN     = hdr.indexOf('SERIAL NUMBER'),
                 iComm   = hdr.indexOf('COMMENT');
-          rows.slice(1).forEach(r => {
-            const d  = normalizeDate(r[iDate]),
-                  st = r[iStatus]?.toUpperCase();
-            if (d === tgt && (st === 'OK' || st === 'NDF')) {
+          rows.slice(1).forEach(r=>{
+            const d=r[iDate], st=(r[iStatus]||'').toUpperCase();
+            if(d===tgt && (st==='OK'||st==='NDF')){
               all.push({
-                serial:  r[iSN]   || '–',
-                status:  st,
-                name:    r[iName]?.trim() || '–',
-                comment: r[iComm] || '–'
+                serial: r[iSN]||'–',
+                status: st,
+                name:   r[iName]?.trim()||'–',
+                comment:r[iComm]||'–'
               });
             }
           });
-        } catch (e) {
-          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
-          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
-          return [];
+        }catch(e){
+          console.warn('⚠️ fetch error',url,e);
         }
       }
-      console.log(`✅ loadData zwraca ${all.length} wierszy`);
       return all;
     }
 
     function render(data) {
-      latestData = data;
-      latestData.sort((a,b)=>a.name.localeCompare(b.name));
-
-      // update summary headers with total counts
-      const totalOk  = latestData.filter(x=>x.status==='OK').length;
-      const totalNdf = latestData.filter(x=>x.status==='NDF').length;
-      document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
-      document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
-
+      if(!data.length) {
+        console.warn('Brak danych, poprzednie pozostają');
+        return;
+      }
+      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
       // data table
-      const newDataTbody = document.createElement('tbody');
+      const dtb=document.createElement('tbody');
       latestData.forEach(it=>{
-        const tr = document.createElement('tr');
+        const tr=document.createElement('tr');
         tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
           <td>${it.comment}</td>`;
-        newDataTbody.appendChild(tr);
+        dtb.appendChild(tr);
       });
-      const dataTable = document.getElementById('data-table');
-      dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
-
-      // summary table
-      const names = Array.from(new Set(latestData.map(it=>it.name)))
-                         .sort((a,b)=>a.localeCompare(b));
-      const newSumTbody = document.createElement('tbody');
-      names.forEach(name=>{
-        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
-        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
-        const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td>${name}</td>
-          <td class="ok">${ok}</td>
-          <td class="ndf">${ndf}</td>`;
-        newSumTbody.appendChild(tr);
+      document.getElementById('data-table').tBodies[0].replaceWith(dtb);
+      // summary
+      const names=[...new Set(latestData.map(x=>x.name))].sort();
+      const stb=document.createElement('tbody');
+      names.forEach(n=>{
+        const ok=latestData.filter(x=>x.name===n&&x.status==='OK').length;
+        const nd=latestData.filter(x=>x.name===n&&x.status==='NDF').length;
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${n}</td><td class="ok">${ok}</td><td class="ndf">${nd}</td>`;
+        stb.appendChild(tr);
       });
-      const sumTable = document.getElementById('summary-table');
-      sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
+      document.getElementById('summary-table').tBodies[0].replaceWith(stb);
     }
 
-    if (localStorage.getItem('theme')==='dark'){
-      document.body.classList.add('dark-mode');
+    function setDate(type) {
+      currentDate = new Date();
+      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      document.getElementById('today-date').textContent = formatDate(currentDate);
+      highlightActive(type);
+      loadData().then(render);
     }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme',
+        document.body.classList.contains('dark-mode')?'dark':'light'
+      );
+    }
+
+    function exportToExcel() {
+      const ws = XLSX.utils.json_to_sheet(latestData.map(d=>({
+        STATUS:d.status,
+        'SERIAL NUMBER':d.serial,
+        NAME:d.name,
+        COMMENT:d.comment
+      })));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
+      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+    }
+
+    // init
+    if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark-mode');
     setDate('today');
-    (function scheduleNext(){
-      setTimeout(()=>{
-        loadData().then(render).finally(scheduleNext);
-      }, 20000);
+    (function loop(){
+      setTimeout(()=>loadData().then(render).finally(loop),30000);
     })();
   </script>
 </body>
