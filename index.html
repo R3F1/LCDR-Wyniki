@@ -7,44 +7,41 @@
   <title>LCDR LIVE DATA</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
-    :root {
-      --ok-bg: #A7F3D0;
-      --ndf-bg: #FDE68A;
-      --txt-dark: #000;
-    }
-
     body {
-  background: url('background.jpg') no-repeat center center fixed;
-  background-size: cover;
-
+      font-family: 'Segoe UI', sans-serif;
+      background: url('background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #ffffff;
       margin: 0;
       padding: 20px;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f1f5f9;
-      color: #1e293b;
-      transition: background 0.3s, color 0.3s;
+      position: relative;
     }
 
-    .header {
-      max-width: 1200px;
-      margin: 0 auto 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: -1;
     }
 
     .logo {
       font-size: 26px;
       font-weight: bold;
-      letter-spacing: 1px;
     }
 
     .header-controls {
       display: flex;
-      flex-wrap: wrap;
       gap: 10px;
-      align-items: center;
+    }
+
+    .summary-box, .data-section {
+      background: rgba(255, 255, 255, 0.95);
+      color: #000;
+      margin: 20px auto;
+      max-width: 1200px;
+      padding: 20px;
+      border-radius: 10px;
     }
 
     .export-btn, .toggle-btn, .filter-btn {
@@ -57,105 +54,22 @@
       font-weight: bold;
     }
 
-    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover {
-      background: #ccc;
-    }
-
-    .date {
-      font-size: 14px;
-      background: #ffffff;
-      color: #000;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-
-    .summary-box, .data-section {
-      max-width: 1200px;
-      margin: 0 auto 30px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .summary-box h2 {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .summary-table, .data-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .summary-table th, .summary-table td,
-    .data-table th, .data-table td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
-    .summary-table th,
-    .data-table th {
-      background: #f0f0f0;
-      text-align: center;
-    }
-
-    .summary-table .ok {
-      background: var(--ok-bg);
-      color: var(--txt-dark);
-    }
-
-    .summary-table .ndf {
-      background: var(--ndf-bg);
-      color: var(--txt-dark);
-    }
-
     .status-ok {
-      background: var(--ok-bg);
-      color: var(--txt-dark);
-      font-weight: bold;
-      text-align: center;
+      background: #A7F3D0;
+      color: #000;
     }
 
     .status-ndf {
-      background: var(--ndf-bg);
-      color: var(--txt-dark);
+      background: #FDE68A;
+      color: #000;
+    }
+
+    .date {
+      padding: 6px 10px;
+      background: #fff;
+      color: #000;
+      border-radius: 6px;
       font-weight: bold;
-      text-align: center;
-    }
-
-    body.dark-mode {
-      background: #0f172a;
-      color: #ffffff;
-    }
-
-    body.dark-mode .summary-box,
-    body.dark-mode .data-section {
-      background: rgba(30, 41, 59, 0.95);
-      color: white;
-    }
-
-    body.dark-mode .export-btn,
-    body.dark-mode .filter-btn,
-    body.dark-mode .toggle-btn {
-      background: #1e293b;
-      color: white;
-    }
-
-    body.dark-mode th {
-      background: #1e293b;
-      color: white;
-    }
-
-    body.dark-mode td {
-      color: white;
-    }
-
-    body.dark-mode .date {
-      background: #1e293b;
-      color: #fff;
     }
   </style>
 </head>
@@ -319,7 +233,6 @@ function render(data) {
   });
 }
 
-// Ustawienia początkowe
 if (localStorage.getItem("theme") === "dark") {
   document.body.classList.add("dark-mode");
 }
