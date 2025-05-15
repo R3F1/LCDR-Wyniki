@@ -293,9 +293,32 @@
       50% { transform: scale(1.05); }
     }
 
+
+    #emoji-loading {
+      animation: spinEmoji 1s linear infinite;
+      display: inline-block;
+      margin-left: 5px;
+    }
+
+    @keyframes spinEmoji {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+
+    .emoji-indicator {
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      font-size: 28px;
+      animation: spinEmoji 1.2s linear infinite;
+      z-index: 1001;
+    }
+
 </style>
 </head>
 <body>
+  <div id="global-emoji-loading" style="display:none;" class="emoji-indicator">⏳</div>
   <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
   <div class="container">
     <div class="logo">
@@ -306,7 +329,7 @@
   
       <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
       <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-      <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE</button>
+      <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
       <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
       <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
     </div>
