@@ -31,15 +31,12 @@
       display:flex; flex-wrap:wrap; gap:10px;
       justify-content:center; align-items:center; margin:30px 0;
     }
-    .export-btn, .toggle-btn, .filter-btn {
+    .export-btn, .toggle-btn, .filter-btn,
+    .header-controls .date {
       padding:8px 14px; background:#fff; color:#000;
       border:none; border-radius:5px; cursor:pointer; font-weight:bold;
     }
     .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background:#ccc; }
-    .date {
-      padding:6px 10px; background:#fff; color:#000;
-      border-radius:6px; font-weight:bold;
-    }
     .summary-box, .data-section {
       max-width:1200px; margin:0 auto 30px; padding:20px;
       background:rgba(255,255,255,0.95); border-radius:10px;
@@ -52,7 +49,10 @@
     }
     table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #ccc; }
-    th { background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important; }
+    th {
+      background:#f0f0f0; text-align:center;
+      color:#000!important; font-weight:bold!important;
+    }
     .summary-table td:first-child { font-weight:bold; text-align:left; }
     .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
     .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
@@ -119,9 +119,27 @@
     ];
     let latestData = [], currentDate = new Date();
 
+    // fetch z timeoutem
+    function fetchWithTimeout(url, timeout = 10000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeout);
+      return fetch(url, { signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+    }
+    // retry raz przy niepowodzeniu
+    async function safeFetch(url) {
+      try {
+        return await fetchWithTimeout(url);
+      } catch (err) {
+        console.warn(`Pierwszy fetch nie powiódł się dla ${url}, retry…`, err);
+        return await fetchWithTimeout(url);
+      }
+    }
+
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g,'').trim())||[]
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+         ?.map(c => c.replace(/^"|"$/g,'').trim()) || []
       );
     }
     function normalizeDate(s) {
@@ -133,11 +151,81 @@
       }
       return '';
     }
-    function formatDate(d){ return d.toISOString().split('T')[0]; }
+    function formatDate(d) { return d.toISOString().split('T')[0]; }
+
+    async function loadData() {
+      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
+      const tgt = formatDate(currentDate), all = [];
+      for (const url of urls) {
+        try {
+          console.log('   • fetching', url);
+          const res = await safeFetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          console.log(`     → pobrano ${text.length} znaków`);
+          const rows = parseCSV(text), hdr = rows[0].map(h=>h.toUpperCase());
+          const iDate   = hdr.findIndex(h=>h==='DATE'||h==='DATA'),
+                iStatus = hdr.findIndex(h=>h==='STATUS'),
+                iName   = hdr.findIndex(h=>h==='NAME'||h==='IMIĘ'||h==='IMIE'),
+                iSN     = hdr.findIndex(h=>h==='SERIAL NUMBER'||h==='NUMER SERYJNY'||h==='NUMER S/N'),
+                iComm   = hdr.findIndex(h=>h==='COMMENT'||h==='KOMENTARZ');
+          rows.slice(1).forEach(r=>{
+            const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
+            if (d===tgt && (st==='OK'||st==='NDF')) {
+              all.push({
+                serial:  r[iSN]   || '–',
+                status:  st,
+                name:    r[iName]?.trim()||'–',
+                comment: r[iComm] || '–'
+              });
+            }
+          });
+        } catch (e) {
+          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
+          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
+          return [];
+        }
+      }
+      console.log(`✅ loadData zwraca ${all.length} wierszy`);
+      return all;
+    }
+
+    function render(data) {
+      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+      // tabela danych
+      const dataBody = document.createElement('tbody');
+      latestData.forEach(it=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML=`
+          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
+          <td>${it.serial}</td>
+          <td>${it.name}</td>
+          <td>${it.comment}</td>`;
+        dataBody.appendChild(tr);
+      });
+      document.getElementById('data-table')
+        .tBodies[0].replaceWith(dataBody);
+
+      // tabela podsumowania
+      const names = [...new Set(latestData.map(x=>x.name))].sort();
+      const sumBody = document.createElement('tbody');
+      names.forEach(name=>{
+        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
+        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
+        const tr = document.createElement('tr');
+        tr.innerHTML=`
+          <td>${name}</td>
+          <td class="ok">${ok}</td>
+          <td class="ndf">${ndf}</td>`;
+        sumBody.appendChild(tr);
+      });
+      document.getElementById('summary-table')
+        .tBodies[0].replaceWith(sumBody);
+    }
 
     function setDate(type) {
       currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate()-1);
+      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
@@ -160,94 +248,15 @@
       XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    async function loadData() {
-      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
-      const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
-        try {
-          console.log('   • fetching', url);
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const text = await res.text();
-          console.log(`     → pobrano ${text.length} znaków`);
-          const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
-          const iDate   = hdr.indexOf('DATE'),
-                iStatus = hdr.indexOf('STATUS'),
-                iName   = hdr.indexOf('NAME'),
-                iSN     = hdr.indexOf('SERIAL NUMBER'),
-                iComm   = hdr.indexOf('COMMENT');
-          rows.slice(1).forEach(r => {
-            const d  = normalizeDate(r[iDate]),
-                  st = r[iStatus]?.toUpperCase();
-            if (d === tgt && (st === 'OK' || st === 'NDF')) {
-              all.push({
-                serial:  r[iSN]   || '–',
-                status:  st,
-                name:    r[iName]?.trim() || '–',
-                comment: r[iComm] || '–'
-              });
-            }
-          });
-        } catch (e) {
-          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
-          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
-          return [];
-        }
-      }
-      console.log(`✅ loadData zwraca ${all.length} wierszy`);
-      return all;
-    }
-
-    function render(data) {
-      latestData = data;
-      latestData.sort((a,b)=>a.name.localeCompare(b.name));
-
-      // update summary headers with total counts
-      const totalOk  = latestData.filter(x=>x.status==='OK').length;
-      const totalNdf = latestData.filter(x=>x.status==='NDF').length;
-      document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
-      document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
-
-      // data table
-      const newDataTbody = document.createElement('tbody');
-      latestData.forEach(it=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
-          <td>${it.serial}</td>
-          <td>${it.name}</td>
-          <td>${it.comment}</td>`;
-        newDataTbody.appendChild(tr);
-      });
-      const dataTable = document.getElementById('data-table');
-      dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
-
-      // summary table
-      const names = Array.from(new Set(latestData.map(it=>it.name)))
-                         .sort((a,b)=>a.localeCompare(b));
-      const newSumTbody = document.createElement('tbody');
-      names.forEach(name=>{
-        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
-        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
-        const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td>${name}</td>
-          <td class="ok">${ok}</td>
-          <td class="ndf">${ndf}</td>`;
-        newSumTbody.appendChild(tr);
-      });
-      const sumTable = document.getElementById('summary-table');
-      sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
-    }
-
-    if (localStorage.getItem('theme')==='dark'){
+    // inicjalizacja
+    if(localStorage.getItem('theme')==='dark'){
       document.body.classList.add('dark-mode');
     }
     setDate('today');
     (function scheduleNext(){
       setTimeout(()=>{
         loadData().then(render).finally(scheduleNext);
-      }, 2000);
+      }, 30000);
     })();
   </script>
 </body>
