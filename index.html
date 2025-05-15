@@ -101,7 +101,12 @@
   <div class="data-section">
     <table class="data-table" id="data-table">
       <thead>
-        <tr><th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th></tr>
+        <tr>
+          <th>Status</th>
+          <th>Serial Number</th>
+          <th>Name</th>
+          <th>Comment</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -109,8 +114,8 @@
 
   <script>
     const urls = [
-      'https://docs.google.com/.../output=csv', // Twoje URL-e CSV
-      'https://docs.google.com/.../output=csv'
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
@@ -123,7 +128,7 @@
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y] = s.split('/');
+        const [d,m,y]=s.split('/');
         return `${y}-${m}-${d}`;
       }
       return '';
@@ -156,47 +161,58 @@
     }
 
     async function loadData() {
+      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
       const tgt = formatDate(currentDate), all = [];
       for (const url of urls) {
-        const text = await fetch(url).then(r=>r.text());
-        const rows = parseCSV(text),
-              hdr = rows[0].map(h=>h.toUpperCase());
-        const iDate   = hdr.indexOf('DATE'),
-              iStatus = hdr.indexOf('STATUS'),
-              iName   = hdr.indexOf('NAME'),
-              iSN     = hdr.indexOf('SERIAL NUMBER'),
-              iComm   = hdr.indexOf('COMMENT');
-        rows.slice(1).forEach(r=>{
-          const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
-          if (d===tgt && (st==='OK'||st==='NDF')) {
-            all.push({
-              serial:  r[iSN]   || '–',
-              status:  st,
-              name:    r[iName]?.trim() || '–',
-              comment: r[iComm] || '–'
-            });
-          }
-        });
+        try {
+          console.log('   • fetching', url);
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          console.log(`     → pobrano ${text.length} znaków`);
+          const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
+          const iDate   = hdr.indexOf('DATE'),
+                iStatus = hdr.indexOf('STATUS'),
+                iName   = hdr.indexOf('NAME'),
+                iSN     = hdr.indexOf('SERIAL NUMBER'),
+                iComm   = hdr.indexOf('COMMENT');
+          rows.slice(1).forEach(r => {
+            const d  = normalizeDate(r[iDate]),
+                  st = r[iStatus]?.toUpperCase();
+            if (d === tgt && (st === 'OK' || st === 'NDF')) {
+              all.push({
+                serial:  r[iSN]   || '–',
+                status:  st,
+                name:    r[iName]?.trim() || '–',
+                comment: r[iComm] || '–'
+              });
+            }
+          });
+        } catch (e) {
+          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
+          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
+          return [];
+        }
       }
+      console.log(`✅ loadData zwraca ${all.length} wierszy`);
       return all;
     }
 
     function render(data) {
       latestData = data;
-      // 1. Sort po nazwie
       latestData.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // 2. Liczby całkowite OK/NDF i aktualizacja nagłówków
-      const totalOk = latestData.filter(x=>x.status==='OK').length;
+      // update summary headers with total counts
+      const totalOk  = latestData.filter(x=>x.status==='OK').length;
       const totalNdf = latestData.filter(x=>x.status==='NDF').length;
       document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
       document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
 
-      // 3. Atomowa podmiana <tbody> danych
+      // data table
       const newDataTbody = document.createElement('tbody');
       latestData.forEach(it=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
@@ -206,7 +222,7 @@
       const dataTable = document.getElementById('data-table');
       dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
 
-      // 4. Atomowa podmiana <tbody> podsumowania
+      // summary table
       const names = Array.from(new Set(latestData.map(it=>it.name)))
                          .sort((a,b)=>a.localeCompare(b));
       const newSumTbody = document.createElement('tbody');
@@ -214,7 +230,7 @@
         const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
         const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td>${name}</td>
           <td class="ok">${ok}</td>
           <td class="ndf">${ndf}</td>`;
@@ -224,8 +240,7 @@
       sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
     }
 
-    // start + rekurencyjne odświeżanie co 2s
-    if (localStorage.getItem('theme')==='dark') {
+    if (localStorage.getItem('theme')==='dark'){
       document.body.classList.add('dark-mode');
     }
     setDate('today');
