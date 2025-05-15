@@ -6,248 +6,151 @@
   <title>LCDR LIVE DATA</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
-    :root {
-      --ok-bg: #A7F3D0;
-      --ndf-bg: #FDE68A;
-      --txt-dark: #000;
-    }
-    html, body { margin:0; padding:0; height:100%; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: url('background.jpg') center/cover no-repeat #000;
-      color: #fff;
-      transition: background-color .3s, color .3s;
-    }
-    body.dark-mode {
-      background-color: #0f172a;
-    }
-    body:not(.dark-mode)::before {
-      content: ""; position:fixed; inset:0;
-      background: rgba(0,0,0,0.75); z-index:-1;
-    }
-    .logo { text-align:center; margin:20px auto 0; }
-    .logo img { max-width:350px; width:80%; height:auto; }
-    .header-controls {
-      display:flex; flex-wrap:wrap; gap:10px;
-      justify-content:center; align-items:center; margin:30px 0;
-    }
-    .export-btn, .toggle-btn, .filter-btn {
-      padding:8px 14px; background:#fff; color:#000;
-      border:none; border-radius:5px; cursor:pointer; font-weight:bold;
-    }
-    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background:#ccc; }
-    .date {
-      padding:6px 10px; background:#fff; color:#000;
-      border-radius:6px; font-weight:bold;
-    }
-    .summary-box, .data-section {
-      max-width:1200px; margin:0 auto 30px; padding:20px;
-      background:rgba(255,255,255,0.95); border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
-      transition: background .3s, color .3s;
-    }
-    body.dark-mode .summary-box,
-    body.dark-mode .data-section {
-      background:rgba(30,41,59,0.95); color:#fff;
-    }
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:10px; border:1px solid #ccc; }
-    th { background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important; }
-    .summary-table td:first-child { font-weight:bold; text-align:left; }
-    .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
-    .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
-    .data-table td { font-size:14px; }
-    .status-ok {
-      background:var(--ok-bg); color:var(--txt-dark);
-      font-weight:bold; text-align:center;
-    }
-    .status-ndf {
-      background:var(--ndf-bg); color:var(--txt-dark);
-      font-weight:bold; text-align:center;
-    }
-    .data-table th:nth-child(1)::before { content:"📺 "; }
-    .data-table th:nth-child(2)::before { content:"🔧 "; }
-    .data-table th:nth-child(4)::before { content:"💬 "; }
-    @media(max-width:768px) {
-      th, td { font-size:12px; padding:6px; }
-      .header-controls { flex-direction:column; }
-    }
+    /* ... tu Twoje CSS bez zmian ... */
   </style>
 </head>
 <body>
-  <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
-  <div class="header-controls">
-    <div id="today-date" class="date"></div>
-    <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
-    <button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button>
-    <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
-    <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
-  </div>
-
-  <div class="summary-box">
-    <h2>Podsumowanie</h2>
-    <table class="summary-table" id="summary-table">
-      <thead>
-        <tr>
-          <th>Imię</th>
-          <th class="ok">OK</th>
-          <th class="ndf">NDF</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="data-section">
-    <table class="data-table" id="data-table">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <!-- ... tu reszta Twojego HTML bez zmian ... -->
 
   <script>
-    const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
-    ];
+    // ====== KONFIGURACJA: ======
+    const spreadsheetId = '10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU';
+    // Podmień na swoje GIDy (z paska adresu, gdy masz otwartą daną zakładkę)
+    const sheetGids     = ['0', '193025884'];
+
+    const urls = sheetGids.map(gid =>
+      `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`
+    );
+    // ==========================
+
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g,'').trim())||[]
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c=>c.replace(/^"|"$/g,'').trim())||[]
       );
     }
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y]=s.split('/');
-        return `${y}-${m}-${d}`;
+        const [d,m,y]=s.split('/'); return `${y}-${m}-${d}`;
       }
       return '';
     }
     function formatDate(d){ return d.toISOString().split('T')[0]; }
 
+    // pobiera i parsuje pojedynczy arkusz CSV -> zwraca tablicę wpisów (OK/NDF)
+    async function fetchSheet(url) {
+      try {
+        const res  = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const rows = parseCSV(text);
+        const hdr  = rows[0].map(h=>h.toUpperCase());
+        const iDate   = hdr.findIndex(h=>h==='DATE'||h==='DATA'),
+              iStatus = hdr.findIndex(h=>h==='STATUS'),
+              iName   = hdr.findIndex(h=>h==='NAME'||h==='IMIĘ'||h==='IMIE'),
+              iSN     = hdr.findIndex(h=>h==='SERIAL NUMBER'||h==='NUMER SERYJNY'),
+              iComm   = hdr.findIndex(h=>h==='COMMENT'||h==='KOMENTARZ');
+
+        const tgt = formatDate(currentDate);
+        return rows.slice(1).reduce((arr, r) => {
+          const d  = normalizeDate(r[iDate]),
+                st = (r[iStatus]||'').toUpperCase();
+          if (d===tgt && (st==='OK'||st==='NDF')) {
+            arr.push({
+              serial:  r[iSN]   || '–',
+              status:  st,
+              name:    (r[iName]||'–').trim(),
+              comment: r[iComm] || '–'
+            });
+          }
+          return arr;
+        }, []);
+      } catch (e) {
+        console.warn('✖ Nie udało się pobrać arkusza:', url, e);
+        return [];  // zamiast return[], pomijamy tylko ten arkusz
+      }
+    }
+
+    // ładuje wszystkie zakładki równolegle i scala wyniki
+    async function loadData() {
+      const sheets = await Promise.all(urls.map(fetchSheet));
+      return sheets.flat();
+    }
+
+    function render(data) {
+      if (!data.length) {
+        console.warn('⚠️ Brak danych dla tej daty – zostawiam poprzednie.');
+        return;
+      }
+      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+
+      // --- render tabeli danych ---
+      const dtb = document.createElement('tbody');
+      latestData.forEach(it=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
+          <td>${it.serial}</td>
+          <td>${it.name}</td>
+          <td>${it.comment}</td>`;
+        dtb.appendChild(tr);
+      });
+      document.getElementById('data-table').tBodies[0].replaceWith(dtb);
+
+      // --- render podsumowania ---
+      const names = [...new Set(latestData.map(x=>x.name))].sort();
+      const stb   = document.createElement('tbody');
+      names.forEach(name=>{
+        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
+        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
+        const tr  = document.createElement('tr');
+        tr.innerHTML = `<td>${name}</td><td class="ok">${ok}</td><td class="ndf">${ndf}</td>`;
+        stb.appendChild(tr);
+      });
+      document.getElementById('summary-table').tBodies[0].replaceWith(stb);
+    }
+
     function setDate(type) {
       currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate()-1);
+      if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        document.body.classList.contains('dark-mode')?'dark':'light'
       );
     }
     function exportToExcel() {
-      const data = latestData.map(d=>({
-        STATUS: d.status,
-        'SERIAL NUMBER': d.serial,
-        NAME: d.name,
-        COMMENT: d.comment
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
+      const ws = XLSX.utils.json_to_sheet(
+        latestData.map(d=>({
+          STATUS:d.status,
+          'SERIAL NUMBER':d.serial,
+          NAME:d.name,
+          COMMENT:d.comment
+        }))
+      );
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
-      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
+      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    async function loadData() {
-      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
-      const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
-        try {
-          console.log('   • fetching', url);
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const text = await res.text();
-          console.log(`     → pobrano ${text.length} znaków`);
-          const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
-          const iDate   = hdr.indexOf('DATE'),
-                iStatus = hdr.indexOf('STATUS'),
-                iName   = hdr.indexOf('NAME'),
-                iSN     = hdr.indexOf('SERIAL NUMBER'),
-                iComm   = hdr.indexOf('COMMENT');
-          rows.slice(1).forEach(r => {
-            const d  = normalizeDate(r[iDate]),
-                  st = r[iStatus]?.toUpperCase();
-            if (d === tgt && (st === 'OK' || st === 'NDF')) {
-              all.push({
-                serial:  r[iSN]   || '–',
-                status:  st,
-                name:    r[iName]?.trim() || '–',
-                comment: r[iComm] || '–'
-              });
-            }
-          });
-        } catch (e) {
-          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
-          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
-          return [];
-        }
-      }
-      console.log(`✅ loadData zwraca ${all.length} wierszy`);
-      return all;
-    }
-
-    function render(data) {
-      latestData = data;
-      latestData.sort((a,b)=>a.name.localeCompare(b.name));
-
-      // update summary headers with total counts
-      const totalOk  = latestData.filter(x=>x.status==='OK').length;
-      const totalNdf = latestData.filter(x=>x.status==='NDF').length;
-      document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
-      document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
-
-      // data table
-      const newDataTbody = document.createElement('tbody');
-      latestData.forEach(it=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
-          <td>${it.serial}</td>
-          <td>${it.name}</td>
-          <td>${it.comment}</td>`;
-        newDataTbody.appendChild(tr);
-      });
-      const dataTable = document.getElementById('data-table');
-      dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
-
-      // summary table
-      const names = Array.from(new Set(latestData.map(it=>it.name)))
-                         .sort((a,b)=>a.localeCompare(b));
-      const newSumTbody = document.createElement('tbody');
-      names.forEach(name=>{
-        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
-        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
-        const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td>${name}</td>
-          <td class="ok">${ok}</td>
-          <td class="ndf">${ndf}</td>`;
-        newSumTbody.appendChild(tr);
-      });
-      const sumTable = document.getElementById('summary-table');
-      sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
-    }
-
-    if (localStorage.getItem('theme')==='dark'){
+    // ---- start ----
+    if (localStorage.getItem('theme')==='dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-    (function scheduleNext(){
+    (function loop(){
       setTimeout(()=>{
-        loadData().then(render).finally(scheduleNext);
-      }, 100000);
+        loadData()
+          .then(render)
+          .catch(e=>console.error('🔴 błąd odświeżania',e))
+          .finally(loop);
+      }, 30000);
     })();
   </script>
 </body>
