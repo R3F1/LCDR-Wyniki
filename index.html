@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard z Google Sheets</title>
+  <title>LCDR Wyniki</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,9 +17,9 @@
     }
     .container {
       display: flex;
+      flex-wrap: wrap;
       gap: 20px;
       justify-content: center;
-      flex-wrap: wrap;
     }
     table {
       border-collapse: collapse;
@@ -69,29 +69,9 @@
     const selectedColumns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "Comment"];
 
     function parseCSV(csvText) {
-      const rows = [];
-      const lines = csvText.trim().split('\n');
-      for (let line of lines) {
-        const values = [];
-        let current = '', inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          if (char === '"' && line[i + 1] === '"') {
-            current += '"';
-            i++;
-          } else if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
-            values.push(current);
-            current = '';
-          } else {
-            current += char;
-          }
-        }
-        values.push(current);
-        rows.push(values);
-      }
-      return rows;
+      return csvText.trim().split('\n').map(line => {
+        return line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(cell => cell.replace(/^"|"$/g, ''));
+      });
     }
 
     function fetchAndDisplayCSV(url, tableId, summaryId) {
@@ -108,12 +88,48 @@
           const nameIndex = header.findIndex(col => col.trim().toUpperCase() === 'NAMEFI NAME');
 
           const today = new Date().toISOString().split('T')[0];
-          const filtered = rows.slice(1).filter(row =>
-            row[dateIndex] === today && ['OK', 'NDF'].includes(row[statusIndex]?.trim().toUpperCase())
-          );
 
-          // Podsumowanie: tylko OK
-          const summaryCounts = {};
+          const filtered = rows.slice(1).filter(row => {
+            const dateMatch = row[dateIndex] === today;
+            const status = row[statusIndex]?.toUpperCase();
+            return dateMatch && (status === 'OK' || status === 'NDF');
+          });
+
+          const summary = {};
           filtered.forEach(row => {
-            const status = row[statusIndex]?.trim().toUpperCase();
-            const name
+            const status = row[statusIndex]?.toUpperCase();
+            const name = row[nameIndex] || "Brak";
+            if (status === 'OK') {
+              summary[name] = (summary[name] || 0) + 1;
+            }
+          });
+
+          const thead = document.querySelector(`#${tableId} thead`);
+          const tbody = document.querySelector(`#${tableId} tbody`);
+          thead.innerHTML = '<tr>' + selectedColumns.map(c => `<th>${c}</th>`).join('') + '</tr>';
+          tbody.innerHTML = filtered.map(row =>
+            '<tr>' + colIndexes.map(i => `<td>${row[i] || ''}</td>`).join('') + '</tr>'
+          ).join('');
+
+          const summaryBox = document.getElementById(summaryId);
+          summaryBox.innerHTML = "<strong>Podsumowanie OK:</strong><br>" + 
+            Object.entries(summary)
+              .map(([name, count]) => `• ${name}: ${count}`)
+              .join('<br>');
+        })
+        .catch(error => {
+          document.querySelector(`#${tableId} tbody`).innerHTML = '<tr><td colspan="100%">Błąd wczytywania danych</td></tr>';
+          console.error(error);
+        });
+    }
+
+    function refreshData() {
+      fetchAndDisplayCSV(sheetUrls[0], 'sheet1', 'summary1');
+      fetchAndDisplayCSV(sheetUrls[1], 'sheet2', 'summary2');
+    }
+
+    refreshData();
+    setInterval(refreshData, 180000); // co 3 minuty
+  </script>
+</body>
+</html>
