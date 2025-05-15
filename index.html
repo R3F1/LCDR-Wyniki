@@ -14,16 +14,25 @@
     html, body { margin:0; padding:0; height:100%; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: url('background.jpg') no-repeat center center fixed;
+      background-image: url('background.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
       background-size: cover;
+      background-color: #000; /* fallback na czarne */
       color: #fff;
       position: relative;
-      transition: background .3s, color .3s;
+      transition: background-color .3s, color .3s;
     }
+    /* w ciemnym trybie zostaje ten sam obrazek + nakładamy tylko kolor pod spodem */
     body.dark-mode {
-      background: #0f172a !important;
-      color: #fff !important;
+      background-image: url('background.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      background-color: #0f172a;
+      color: #fff;
     }
+    /* tylko w jasnym trybie półprzezroczysta czarna nakładka */
     body:not(.dark-mode)::before {
       content: "";
       position: fixed;
@@ -35,8 +44,7 @@
     /* LOGO */
     .logo {
       text-align: center;
-      /* usunięty margines dolny */
-      margin: 20px auto 0;
+      margin: 20px auto 0; /* usunięty margines dolny */
     }
     .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
 
@@ -212,7 +220,7 @@
 
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
     setDate('today');
-    setInterval(() => loadData().then(render), 30000); // odświeżanie co 30 sekund
+    setInterval(() => loadData().then(render), 30000);
   </script>
 </body>
 </html>
