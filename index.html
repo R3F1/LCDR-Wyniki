@@ -14,105 +14,68 @@
     html, body { margin:0; padding:0; height:100%; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-image: url('background.jpg');
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
-      background-color: #000;
+      background: url('background.jpg') center/cover no-repeat #000;
       color: #fff;
-      position: relative;
       transition: background-color .3s, color .3s;
     }
     body.dark-mode {
-      background-image: url('background.jpg');
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
       background-color: #0f172a;
-      color: #fff;
     }
     body:not(.dark-mode)::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      z-index: -1;
+      content: ""; position:fixed; inset:0;
+      background: rgba(0,0,0,0.75); z-index:-1;
     }
-
-    /* LOGO */
-    .logo {
-      text-align: center;
-      margin: 20px auto 0;
-    }
-    .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
-
-    /* CONTROLS */
+    .logo { text-align:center; margin:20px auto 0; }
+    .logo img { max-width:350px; width:80%; height:auto; }
     .header-controls {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: center; align-items: center; margin-bottom: 30px;
+      display:flex; flex-wrap:wrap; gap:10px;
+      justify-content:center; align-items:center; margin:30px 0;
     }
     .export-btn, .toggle-btn, .filter-btn {
-      padding: 8px 14px; background: #fff; color: #000;
-      border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+      padding:8px 14px; background:#fff; color:#000;
+      border:none; border-radius:5px; cursor:pointer; font-weight:bold;
     }
-    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background: #ccc; }
+    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background:#ccc; }
     .date {
-      padding: 6px 10px; background: #fff; color: #000;
-      border-radius: 6px; font-weight: bold;
+      padding:6px 10px; background:#fff; color:#000;
+      border-radius:6px; font-weight:bold;
     }
-
-    /* SECTIONS */
     .summary-box, .data-section {
-      max-width: 1200px; margin: 0 auto 30px; padding: 20px;
-      background: rgba(255,255,255,0.95); border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-      color: #000; transition: background .3s, color .3s;
+      max-width:1200px; margin:0 auto 30px; padding:20px;
+      background:rgba(255,255,255,0.95); border-radius:10px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
+      transition: background .3s, color .3s;
     }
     body.dark-mode .summary-box,
     body.dark-mode .data-section {
-      background: rgba(30,41,59,0.95); color: #fff;
+      background:rgba(30,41,59,0.95); color:#fff;
     }
-
-    /* TABLE STYLES */
-    .summary-table, .data-table { width: 100%; border-collapse: collapse; }
-    .summary-table th, .summary-table td,
-    .data-table th, .data-table td {
-      padding: 10px; border: 1px solid #ccc;
-    }
-    .summary-table th { background: #f0f0f0; text-align: center; }
-    .summary-table td:first-child { font-weight: bold; text-align: left; }
-    .summary-table .ok { background: var(--ok-bg); color: var(--txt-dark); }
-    .summary-table .ndf { background: var(--ndf-bg); color: var(--txt-dark); }
-    .data-table td { font-size: 14px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:10px; border:1px solid #ccc; }
+    th { background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important; }
+    .summary-table td:first-child { font-weight:bold; text-align:left; }
+    .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
+    .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
+    .data-table td { font-size:14px; }
     .status-ok {
-      background: var(--ok-bg); color: var(--txt-dark);
-      font-weight: bold; text-align: center;
+      background:var(--ok-bg); color:var(--txt-dark);
+      font-weight:bold; text-align:center;
     }
     .status-ndf {
-      background: var(--ndf-bg); color: var(--txt-dark);
-      font-weight: bold; text-align: center;
+      background:var(--ndf-bg); color:var(--txt-dark);
+      font-weight:bold; text-align:center;
     }
-    .data-table th:nth-child(1)::before { content: "📺 "; }
-    .data-table th:nth-child(2)::before { content: "🔧 "; }
-    .data-table th:nth-child(4)::before { content: "💬 "; }
-
-    /* NOWY STYL: nagłówki zawsze czarne i pogrubione */
-    .summary-table th,
-    .data-table th {
-      color: #000 !important;
-      font-weight: bold !important;
-    }
-
-    @media(max-width: 768px) {
-      .header-controls { flex-direction: column; }
-      .summary-table th, .summary-table td,
-      .data-table th, .data-table td { font-size: 12px; padding: 6px; }
+    .data-table th:nth-child(1)::before { content:"📺 "; }
+    .data-table th:nth-child(2)::before { content:"🔧 "; }
+    .data-table th:nth-child(4)::before { content:"💬 "; }
+    @media(max-width:768px) {
+      th, td { font-size:12px; padding:6px; }
+      .header-controls { flex-direction:column; }
     }
   </style>
 </head>
 <body>
   <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
-
   <div class="header-controls">
     <div id="today-date" class="date"></div>
     <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
@@ -142,70 +105,69 @@
 
   <script>
     const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+      'https://docs.google.com/.../output=csv', // skrócone dla czytelności
+      'https://docs.google.com/.../output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^\",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g, '').trim()) || []
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g,'').trim())||[]
       );
     }
-
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d, m, y] = s.split('/');
+        const [d,m,y]=s.split('/');
         return `${y}-${m}-${d}`;
       }
       return '';
     }
+    function formatDate(d){return d.toISOString().split('T')[0];}
 
-    function formatDate(d) { return d.toISOString().split('T')[0]; }
-
-    function setDate(type) {
+    function setDate(type){
       currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate() - 1);
+      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
-
-    function toggleTheme() {
+    function toggleTheme(){
       document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode')?'dark':'light');
     }
-
-    function exportToExcel() {
-      const data = latestData.map(d => ({
-        STATUS: d.status,
-        'SERIAL NUMBER': d.serial,
-        NAME: d.name,
-        COMMENT: d.comment
+    function exportToExcel(){
+      const data = latestData.map(d=>({
+        STATUS:d.status,
+        'SERIAL NUMBER':d.serial,
+        NAME:d.name,
+        COMMENT:d.comment
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
-      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
+      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    async function loadData() {
+    async function loadData(){
       const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
-        const text = await fetch(url).then(r => r.text());
-        const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
-        const iDate = hdr.indexOf('DATE'), iStatus = hdr.indexOf('STATUS'),
-              iName = hdr.indexOf('NAME'), iSN = hdr.indexOf('SERIAL NUMBER'),
+      for(const url of urls){
+        const text = await fetch(url).then(r=>r.text());
+        const rows = parseCSV(text),
+              hdr = rows[0].map(h=>h.toUpperCase());
+        const iDate = hdr.indexOf('DATE'),
+              iStatus = hdr.indexOf('STATUS'),
+              iName = hdr.indexOf('NAME'),
+              iSN = hdr.indexOf('SERIAL NUMBER'),
               iComm = hdr.indexOf('COMMENT');
-        rows.slice(1).forEach(r => {
-          const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
-          if (d === tgt && (st === 'OK' || st === 'NDF')) {
+        rows.slice(1).forEach(r=>{
+          const d=normalizeDate(r[iDate]), st=r[iStatus]?.toUpperCase();
+          if(d===tgt && (st==='OK'||st==='NDF')){
             all.push({
-              serial: r[iSN] || '–',
+              serial: r[iSN]||'–',
               status: st,
-              name: r[iName]?.trim() || '–',
-              comment: r[iComm] || '–'
+              name: r[iName]?.trim()||'–',
+              comment: r[iComm]||'–'
             });
           }
         });
@@ -213,45 +175,47 @@
       return all;
     }
 
-    function render(data) {
+    function render(data){
       latestData = data;
-      latestData.sort((a, b) => a.name.localeCompare(b.name));
+      // 1. Sortowanie po nazwie
+      latestData.sort((a,b)=>a.name.localeCompare(b.name));
 
-      const dtb = document.querySelector('#data-table tbody');
-      dtb.innerHTML = '';
-      latestData.forEach(it => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+      // 2. Tworzymy NOWY <tbody> dla danych
+      const newDataTbody = document.createElement('tbody');
+      latestData.forEach(it=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
-          <td>${it.comment}</td>
-        `;
-        dtb.appendChild(tr);
+          <td>${it.comment}</td>`;
+        newDataTbody.appendChild(tr);
       });
+      // Podmieniamy stary <tbody> na nowy
+      const dataTable=document.getElementById('data-table');
+      dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
 
-      const names = Array.from(new Set(latestData.map(it => it.name)))
-                         .sort((a, b) => a.localeCompare(b));
-      const stb = document.querySelector('#summary-table tbody');
-      stb.innerHTML = '';
-      names.forEach(name => {
-        const ok   = latestData.filter(x => x.name === name && x.status === 'OK').length;
-        const ndf  = latestData.filter(x => x.name === name && x.status === 'NDF').length;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+      // 3. Analogicznie dla summary
+      const names = Array.from(new Set(latestData.map(it=>it.name)))
+                         .sort((a,b)=>a.localeCompare(b));
+      const newSumTbody=document.createElement('tbody');
+      names.forEach(name=>{
+        const ok = latestData.filter(x=>x.name===name&&x.status==='OK').length;
+        const ndf= latestData.filter(x=>x.name===name&&x.status==='NDF').length;
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
           <td>${name}</td>
           <td class="ok">${ok}</td>
-          <td class="ndf">${ndf}</td>
-        `;
-        stb.appendChild(tr);
+          <td class="ndf">${ndf}</td>`;
+        newSumTbody.appendChild(tr);
       });
+      const sumTable=document.getElementById('summary-table');
+      sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
     }
 
-    if (localStorage.getItem('theme') === 'dark') {
+    // Start i rekurencyjne odświeżanie co 2s
+    if(localStorage.getItem('theme')==='dark'){
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-    setInterval(() => loadData().then(render), 2000);
-  </script>
-</body>
-</html>
+    (function
