@@ -220,7 +220,7 @@
 
     if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
     setDate('today');
-    setInterval(() => loadData().then(render), 2000);
+    setInterval(() => loadData().then(render), 10000);
   </script>
 </body>
 </html>
