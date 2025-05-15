@@ -233,6 +233,34 @@
       color: #e5e7eb;
     }
 
+
+    .date-label {
+      font-size: 20px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      color: #fff;
+    }
+    body.light-mode .date-label {
+      background: rgba(0, 0, 0, 0.05);
+      color: #111;
+    }
+
+
+    body {
+      background: linear-gradient(-45deg, #1e3a8a, #0f172a, #1e3a8a, #0f172a);
+      background-size: 400% 400%;
+      animation: backgroundMove 15s ease infinite;
+    }
+
+    @keyframes backgroundMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
 </style>
 </head>
 <body>
