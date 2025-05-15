@@ -72,13 +72,25 @@
         .then(html => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          const table = doc.querySelector('table');
+          const tables = doc.querySelectorAll('table');
 
-          if (table) {
-            table.style.width = '100%';
-            table.style.borderCollapse = 'collapse';
+          // Znajdź właściwą tabelę
+          const realTable = [...tables].find(t => {
+            const rows = t.querySelectorAll('tr');
+            return rows.length > 1 && t.innerText.includes('LCD');
+          });
+
+          if (realTable) {
+            // Usuń pierwsze kolumny/wiersze jeśli są indeksami
+            [...realTable.querySelectorAll('tr')].forEach(row => {
+              const firstCell = row.querySelector('td, th');
+              if (firstCell && /^\d+$/.test(firstCell.innerText.trim())) {
+                firstCell.remove();
+              }
+            });
+
             document.getElementById('table-container').innerHTML = '';
-            document.getElementById('table-container').appendChild(table);
+            document.getElementById('table-container').appendChild(realTable);
           } else {
             document.getElementById('table-container').innerText = 'Nie udało się załadować tabeli.';
           }
@@ -90,7 +102,7 @@
     }
 
     fetchAndDisplayTable();
-    setInterval(fetchAndDisplayTable, 2 * 60 * 1000); // co 2 minuty
+    setInterval(fetchAndDisplayTable, 2 * 60 * 1000); // Odśwież co 2 minuty
   </script>
 </body>
 </html>
