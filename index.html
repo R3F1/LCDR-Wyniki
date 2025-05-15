@@ -88,7 +88,11 @@
     <h2>Podsumowanie</h2>
     <table class="summary-table" id="summary-table">
       <thead>
-        <tr><th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th></tr>
+        <tr>
+          <th>Imię</th>
+          <th class="ok">OK</th>
+          <th class="ndf">NDF</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -105,7 +109,7 @@
 
   <script>
     const urls = [
-      'https://docs.google.com/.../output=csv', // skrócone dla czytelności
+      'https://docs.google.com/.../output=csv', // Twoje URL-e CSV
       'https://docs.google.com/.../output=csv'
     ];
     let latestData = [], currentDate = new Date();
@@ -119,55 +123,57 @@
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y]=s.split('/');
+        const [d,m,y] = s.split('/');
         return `${y}-${m}-${d}`;
       }
       return '';
     }
-    function formatDate(d){return d.toISOString().split('T')[0];}
+    function formatDate(d){ return d.toISOString().split('T')[0]; }
 
-    function setDate(type){
+    function setDate(type) {
       currentDate = new Date();
-      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      if (type === 'yesterday') currentDate.setDate(currentDate.getDate()-1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
-    function toggleTheme(){
+    function toggleTheme() {
       document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', document.body.classList.contains('dark-mode')?'dark':'light');
+      localStorage.setItem('theme',
+        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+      );
     }
-    function exportToExcel(){
+    function exportToExcel() {
       const data = latestData.map(d=>({
-        STATUS:d.status,
-        'SERIAL NUMBER':d.serial,
-        NAME:d.name,
-        COMMENT:d.comment
+        STATUS: d.status,
+        'SERIAL NUMBER': d.serial,
+        NAME: d.name,
+        COMMENT: d.comment
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
-      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
+      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    async function loadData(){
+    async function loadData() {
       const tgt = formatDate(currentDate), all = [];
-      for(const url of urls){
+      for (const url of urls) {
         const text = await fetch(url).then(r=>r.text());
         const rows = parseCSV(text),
               hdr = rows[0].map(h=>h.toUpperCase());
-        const iDate = hdr.indexOf('DATE'),
+        const iDate   = hdr.indexOf('DATE'),
               iStatus = hdr.indexOf('STATUS'),
-              iName = hdr.indexOf('NAME'),
-              iSN = hdr.indexOf('SERIAL NUMBER'),
-              iComm = hdr.indexOf('COMMENT');
+              iName   = hdr.indexOf('NAME'),
+              iSN     = hdr.indexOf('SERIAL NUMBER'),
+              iComm   = hdr.indexOf('COMMENT');
         rows.slice(1).forEach(r=>{
-          const d=normalizeDate(r[iDate]), st=r[iStatus]?.toUpperCase();
-          if(d===tgt && (st==='OK'||st==='NDF')){
+          const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
+          if (d===tgt && (st==='OK'||st==='NDF')) {
             all.push({
-              serial: r[iSN]||'–',
-              status: st,
-              name: r[iName]?.trim()||'–',
-              comment: r[iComm]||'–'
+              serial:  r[iSN]   || '–',
+              status:  st,
+              name:    r[iName]?.trim() || '–',
+              comment: r[iComm] || '–'
             });
           }
         });
@@ -175,47 +181,59 @@
       return all;
     }
 
-    function render(data){
+    function render(data) {
       latestData = data;
-      // 1. Sortowanie po nazwie
+      // 1. Sort po nazwie
       latestData.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // 2. Tworzymy NOWY <tbody> dla danych
+      // 2. Liczby całkowite OK/NDF i aktualizacja nagłówków
+      const totalOk = latestData.filter(x=>x.status==='OK').length;
+      const totalNdf = latestData.filter(x=>x.status==='NDF').length;
+      document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
+      document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
+
+      // 3. Atomowa podmiana <tbody> danych
       const newDataTbody = document.createElement('tbody');
       latestData.forEach(it=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
           <td>${it.comment}</td>`;
         newDataTbody.appendChild(tr);
       });
-      // Podmieniamy stary <tbody> na nowy
-      const dataTable=document.getElementById('data-table');
+      const dataTable = document.getElementById('data-table');
       dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
 
-      // 3. Analogicznie dla summary
+      // 4. Atomowa podmiana <tbody> podsumowania
       const names = Array.from(new Set(latestData.map(it=>it.name)))
                          .sort((a,b)=>a.localeCompare(b));
-      const newSumTbody=document.createElement('tbody');
+      const newSumTbody = document.createElement('tbody');
       names.forEach(name=>{
-        const ok = latestData.filter(x=>x.name===name&&x.status==='OK').length;
-        const ndf= latestData.filter(x=>x.name===name&&x.status==='NDF').length;
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
+        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
+        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
           <td>${name}</td>
           <td class="ok">${ok}</td>
           <td class="ndf">${ndf}</td>`;
         newSumTbody.appendChild(tr);
       });
-      const sumTable=document.getElementById('summary-table');
+      const sumTable = document.getElementById('summary-table');
       sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
     }
 
-    // Start i rekurencyjne odświeżanie co 2s
-    if(localStorage.getItem('theme')==='dark'){
+    // start + rekurencyjne odświeżanie co 2s
+    if (localStorage.getItem('theme')==='dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-    (function
+    (function scheduleNext(){
+      setTimeout(()=>{
+        loadData().then(render).finally(scheduleNext);
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>
