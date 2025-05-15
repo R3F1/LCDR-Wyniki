@@ -38,11 +38,15 @@
       background: rgba(0, 0, 0, 0.75);
       z-index: -1;
     }
+
+    /* LOGO */
     .logo {
       text-align: center;
       margin: 20px auto 0;
     }
     .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
+
+    /* CONTROLS */
     .header-controls {
       display: flex; flex-wrap: wrap; gap: 10px;
       justify-content: center; align-items: center; margin-bottom: 30px;
@@ -56,6 +60,8 @@
       padding: 6px 10px; background: #fff; color: #000;
       border-radius: 6px; font-weight: bold;
     }
+
+    /* SECTIONS */
     .summary-box, .data-section {
       max-width: 1200px; margin: 0 auto 30px; padding: 20px;
       background: rgba(255,255,255,0.95); border-radius: 10px;
@@ -66,6 +72,8 @@
     body.dark-mode .data-section {
       background: rgba(30,41,59,0.95); color: #fff;
     }
+
+    /* TABLE STYLES */
     .summary-table, .data-table { width: 100%; border-collapse: collapse; }
     .summary-table th, .summary-table td,
     .data-table th, .data-table td {
@@ -75,7 +83,6 @@
     .summary-table td:first-child { font-weight: bold; text-align: left; }
     .summary-table .ok { background: var(--ok-bg); color: var(--txt-dark); }
     .summary-table .ndf { background: var(--ndf-bg); color: var(--txt-dark); }
-    .data-table th { background: #f0f0f0; text-align: center; }
     .data-table td { font-size: 14px; }
     .status-ok {
       background: var(--ok-bg); color: var(--txt-dark);
@@ -88,6 +95,14 @@
     .data-table th:nth-child(1)::before { content: "📺 "; }
     .data-table th:nth-child(2)::before { content: "🔧 "; }
     .data-table th:nth-child(4)::before { content: "💬 "; }
+
+    /* NOWY STYL: nagłówki zawsze czarne i pogrubione */
+    .summary-table th,
+    .data-table th {
+      color: #000 !important;
+      font-weight: bold !important;
+    }
+
     @media(max-width: 768px) {
       .header-controls { flex-direction: column; }
       .summary-table th, .summary-table td,
@@ -200,11 +215,8 @@
 
     function render(data) {
       latestData = data;
-
-      // Sortujemy dane alfabetycznie po nazwie, aby wiersze były stabilne
       latestData.sort((a, b) => a.name.localeCompare(b.name));
 
-      // Render danych
       const dtb = document.querySelector('#data-table tbody');
       dtb.innerHTML = '';
       latestData.forEach(it => {
@@ -218,7 +230,6 @@
         dtb.appendChild(tr);
       });
 
-      // Podsumowanie
       const names = Array.from(new Set(latestData.map(it => it.name)))
                          .sort((a, b) => a.localeCompare(b));
       const stb = document.querySelector('#summary-table tbody');
@@ -236,7 +247,6 @@
       });
     }
 
-    // Ustawienie trybu, data początkowa i odświeżanie co 2 sekundy
     if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark-mode');
     }
