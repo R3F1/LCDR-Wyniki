@@ -10,7 +10,7 @@ function updateClockInline() {
   const h = String(now.getHours()).padStart(2, '0');
   const m = String(now.getMinutes()).padStart(2, '0');
   const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('clock-inline').textContent = `🕒 ${h}:${m}:${s}`;
+  document.getElementById('clock-inline').textContent = `đ ${h}:${m}:${s}`;
 }
 setInterval(updateClockInline, 1000);
 updateClockInline();
@@ -20,17 +20,17 @@ updateClockInline();
 
 function updateBotPhrase() {
   const phrases = [
-    "Hey! Miłego dnia! ☀️",
-    "Czy masz ochotę coś naprawić? 🔧",
-    "Czekasz na przerwę? ☕",
-    "Mam ochotę coś naprawić! 💪"
+    "Hey! MiĹego dnia! âď¸",
+    "Czy masz ochotÄ coĹ naprawiÄ? đ§",
+    "Czekasz na przerwÄ? â",
+    "Mam ochotÄ coĹ naprawiÄ! đŞ"
   ];
 
   const randomGreeting = phrases[Math.floor(Math.random() * phrases.length)];
 
   const summary = document.getElementById('chatbot-text').innerHTML.split('<br><br>')[1] || '';
   document.getElementById('chatbot-text').innerHTML =
-    `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${summary}`;
+    `<strong>đ¤ LCDR Bot mĂłwi:</strong><br>${randomGreeting}<br><br>${summary}`;
 }
 
 updateBotPhrase();
@@ -60,7 +60,7 @@ setInterval(updateBotPhrase, 10000);
       background: rgba(0,0,0,0.75); z-index:-1;
     }
 
-    /* kontener centrujący */
+    /* kontener centrujÄcy */
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -124,12 +124,12 @@ setInterval(updateBotPhrase, 10000);
       color: #000!important; font-weight: bold!important;
     }
 
-    /* ikony w nagłówkach */
-    .summary-table th:nth-child(1)::before { content: "👤 "; }
-    .data-table th:nth-child(1)::before    { content: "📺 "; }
-    .data-table th:nth-child(2)::before    { content: "🔧 "; }
-    .data-table th:nth-child(3)::before    { content: "👤 "; }
-    .data-table th:nth-child(4)::before    { content: "💬 "; }
+    /* ikony w nagĹĂłwkach */
+    .summary-table th:nth-child(1)::before { content: "đ¤ "; }
+    .data-table th:nth-child(1)::before    { content: "đş "; }
+    .data-table th:nth-child(2)::before    { content: "đ§ "; }
+    .data-table th:nth-child(3)::before    { content: "đ¤ "; }
+    .data-table th:nth-child(4)::before    { content: "đŹ "; }
 
     /* kolumny OK/NDF/SCRAP TTL jednolite */
     .summary-table th.ok, .summary-table td.ok,
@@ -453,17 +453,73 @@ setInterval(updateBotPhrase, 10000);
 
   
 
+
+  #tv-icon {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    font-size: 36px;
+    z-index: 1001;
+    filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.4));
+    transition: transform 0.3s ease;
+  }
+
+  #tv-icon:hover {
+    transform: scale(1.1);
+  }
+
+  body.light-mode #tv-icon {
+    color: #111;
+  }
+
+
+  @media (max-width: 768px) {
+    #chatbot-container {
+      transform: scale(0.75);
+      right: 20px;
+      top: 10px;
+    }
+
+    #tv-icon {
+      font-size: 24px;
+      top: 10px;
+      left: 10px;
+    }
+
+    .filter-btn, .toggle-btn, .mode-btn {
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      margin-bottom: 6px;
+    }
+
+    #chatbot-bubble {
+      font-size: 12px;
+      max-width: 200px;
+      line-height: 1.3em;
+    }
+
+    .summary-table td {
+      font-size: 12px;
+      padding: 4px 6px;
+    }
+
+    h1, h2, h3 {
+      font-size: 1.2em;
+    }
+  }
+
 </style>
 </head>
 <body>
+<div id="tv-icon">đş</div>
 
 <div id="chatbot-container">
   <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
   <div id="chatbot-bubble">
-    <strong>🤖 LCDR Bot mówi:</strong><br>
-    Naprawiono <span id="chat-ok">–</span> OK,<br>
-    Wykryto <span id="chat-ndf">–</span> NDF,<br>
-    I <span id="chat-scrap">–</span> przypadków SCRAP TTL.
+    <strong>đ¤ LCDR Bot mĂłwi:</strong><br>
+    Naprawiono <span id="chat-ok">â</span> OK,<br>
+    Wykryto <span id="chat-ndf">â</span> NDF,<br>
+    I <span id="chat-scrap">â</span> przypadkĂłw SCRAP TTL.
   </div>
 </div>
 
@@ -471,8 +527,8 @@ setInterval(updateBotPhrase, 10000);
 
 
 
-  <div id="global-emoji-loading" style="display:none;" class="emoji-indicator">⏳</div>
-  <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
+  <div id="global-emoji-loading" style="display:none;" class="emoji-indicator">âł</div>
+  <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa Ĺadowanie danych...</div></div>
   <div class="container">
     <div class="logo">
       <img src="logo.png" alt="LCDR LIVE DATA Logo">
@@ -482,9 +538,9 @@ setInterval(updateBotPhrase, 10000);
   
       <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
       <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-      <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
-      <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
-      <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+      <button class="filter-btn" onclick="manualLoad()">đ ĹADUJ DANE </button>
+      <button class="toggle-btn" onclick="toggleTheme()">đ Tryb</button>
+      <button class="export-btn" onclick="exportToExcel()">đ¤ Excel</button>
     </div>
   </div>
 
@@ -567,10 +623,10 @@ setInterval(updateBotPhrase, 10000);
           const rows = parseCSV(text);
           const hdr  = rows[0].map(h => h.toUpperCase());
 
-          // poprawne wyszukanie indeksów:
+          // poprawne wyszukanie indeksĂłw:
           const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
           const iStatus= hdr.findIndex(h => h==='STATUS');
-          const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
+          const iName  = hdr.findIndex(h => ['NAME','IMIÄ','IMIE'].includes(h));
           const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
           const iComm  = hdr.findIndex(h => h==='COMMENT');
           const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
@@ -580,17 +636,17 @@ setInterval(updateBotPhrase, 10000);
             const st = (rw[iStatus]||'').toUpperCase();
             if (d===tgt && (st==='OK' || st==='NDF' || st==='SCRAP_TTL')) {
               all.push({
-                serial:  rw[iSN]   || '–',
+                serial:  rw[iSN]   || 'â',
                 status:  st,
-                name:    rw[iName]?.trim() || '–',
-                comment: rw[iComm] || '–',
+                name:    rw[iName]?.trim() || 'â',
+                comment: rw[iComm] || 'â',
                 station: stationName,
                 scrap:   st === 'SCRAP_TTL' ? 1 : 0
               });
             }
           });
         } catch (e) {
-          console.warn('⚠️ fetch error', url, e);
+          console.warn('â ď¸ fetch error', url, e);
         }
       }
       return all;
@@ -627,9 +683,9 @@ setInterval(updateBotPhrase, 10000);
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${n}</td>
-          <td class="ok">✅ ${okC[n]||0}</td>
-          <td class="ndf">⚠️ ${ndfC[n]||0}</td>
-          <td class="scrap-ttl">🗑️ ${scrC[n]||0}</td>`;
+          <td class="ok">â ${okC[n]||0}</td>
+          <td class="ndf">â ď¸ ${ndfC[n]||0}</td>
+          <td class="scrap-ttl">đď¸ ${scrC[n]||0}</td>`;
         stb.appendChild(tr);
       });
       
@@ -718,7 +774,7 @@ function updateClockInline() {
   const h = String(now.getHours()).padStart(2, '0');
   const m = String(now.getMinutes()).padStart(2, '0');
   const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('clock-inline').textContent = `🕒 ${h}:${m}:${s}`;
+  document.getElementById('clock-inline').textContent = `đ ${h}:${m}:${s}`;
 }
 setInterval(updateClockInline, 1000);
 updateClockInline();
@@ -728,17 +784,17 @@ updateClockInline();
 
 function updateBotPhrase() {
   const phrases = [
-    "Hey! Miłego dnia! ☀️",
-    "Czy masz ochotę coś naprawić? 🔧",
-    "Czekasz na przerwę? ☕",
-    "Mam ochotę coś naprawić! 💪"
+    "Hey! MiĹego dnia! âď¸",
+    "Czy masz ochotÄ coĹ naprawiÄ? đ§",
+    "Czekasz na przerwÄ? â",
+    "Mam ochotÄ coĹ naprawiÄ! đŞ"
   ];
 
   const randomGreeting = phrases[Math.floor(Math.random() * phrases.length)];
 
   const summary = document.getElementById('chatbot-text').innerHTML.split('<br><br>')[1] || '';
   document.getElementById('chatbot-text').innerHTML =
-    `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${summary}`;
+    `<strong>đ¤ LCDR Bot mĂłwi:</strong><br>${randomGreeting}<br><br>${summary}`;
 }
 
 updateBotPhrase();
