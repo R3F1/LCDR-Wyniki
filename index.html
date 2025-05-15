@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LCDR LIVE DATA</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --ok-bg: #A7F3D0;
-      --ndf-bg: #FDE68A;
-      --txt-dark: #000;
+      /* kolory w trybie jasnym */
+      --ok-bg:      #A7F3D0;
+      --ndf-bg:     #FDE68A;
+      --txt-dark:   #000;
+      --section-bg: rgba(240,240,240,0.9); /* nieco ciemniejsze tło sekcji */
     }
     html, body { margin:0; padding:0; height:100%; }
     body {
@@ -18,93 +21,104 @@
       background-repeat: no-repeat;
       background-position: center center;
       background-size: cover;
-      background-color: #000; /* fallback na czarne */
+      background-color: #000;
       color: #fff;
       position: relative;
       transition: background-color .3s, color .3s;
     }
-    /* w ciemnym trybie zostaje ten sam obrazek + nakładamy tylko kolor pod spodem */
+    /* ciemny motyw: zostawiamy obrazek, zmieniamy jedynie nakładkę kolorową */
     body.dark-mode {
-      background-image: url('background.jpg');
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
       background-color: #0f172a;
-      color: #fff;
+      /* przygaszone kolory OK/NDF */
+      --ok-bg:  rgba(  6,  95,  70, 0.6);
+      --ndf-bg: rgba(161,  98,   7, 0.6);
     }
-    /* tylko w jasnym trybie półprzezroczysta czarna nakładka */
+    /* w jasnym trybie ciemna półprzezroczysta nakładka */
     body:not(.dark-mode)::before {
       content: "";
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0,0,0,0.75);
       z-index: -1;
     }
 
     /* LOGO */
-    .logo {
-      text-align: center;
-      margin: 20px auto 0; /* usunięty margines dolny */
-    }
-    .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
+    .logo { text-align:center; margin:20px auto 0; }
+    .logo img { max-width:350px; width:80%; height:auto; }
 
     /* CONTROLS */
     .header-controls {
-      display: flex; flex-wrap: wrap; gap: 10px;
-      justify-content: center; align-items: center; margin-bottom: 30px;
+      display:flex; flex-wrap:wrap; gap:10px;
+      justify-content:center; align-items:center;
+      margin:20px 0;
     }
-    .export-btn, .toggle-btn, .filter-btn {
-      padding: 8px 14px; background: #fff; color: #000;
-      border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
+    .header-controls button, .header-controls .date {
+      padding:8px 14px; background:#fff; color:#000;
+      border:none; border-radius:5px; font-weight:bold; cursor:pointer;
     }
-    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background: #ccc; }
-    .date {
-      padding: 6px 10px; background: #fff; color: #000;
-      border-radius: 6px; font-weight: bold;
+    .header-controls button:hover { background:#ccc; }
+
+    /* SUMMARY + CHARTS WRAPPER */
+    .summary-wrapper {
+      display: flex;
+      gap:20px;
+      align-items: flex-start;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .summary-wrapper canvas {
+      flex: 0 0 240px;
+      height: 240px;
+      background: var(--section-bg);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    body.dark-mode .summary-wrapper canvas {
+      background: rgba(30,41,59,0.95);
     }
 
     /* SECTIONS */
     .summary-box, .data-section {
-      max-width: 1200px; margin: 0 auto 30px; padding: 20px;
-      background: rgba(255,255,255,0.95); border-radius: 10px;
+      background: var(--section-bg);
+      color: #000;
+      max-width: 1200px;
+      margin: 0 auto 30px;
+      padding: 20px;
+      border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-      color: #000; transition: background .3s, color .3s;
+      transition: background .3s, color .3s;
     }
     body.dark-mode .summary-box,
     body.dark-mode .data-section {
-      background: rgba(30,41,59,0.95); color: #fff;
+      background: rgba(30,41,59,0.95);
+      color: #fff;
     }
 
     /* TABLE STYLES */
-    .summary-table, .data-table { width: 100%; border-collapse: collapse; }
+    .summary-table, .data-table { width:100%; border-collapse:collapse; }
     .summary-table th, .summary-table td,
     .data-table th, .data-table td {
-      padding: 10px; border: 1px solid #ccc;
+      padding:10px; border:1px solid #ccc;
     }
-    .summary-table th { background: #f0f0f0; text-align: center; }
-    .summary-table td:first-child { font-weight: bold; text-align: left; }
+    .summary-table th, .data-table th { background:#f0f0f0; text-align:center; }
+    .summary-table td:first-child { font-weight:bold; text-align:left; }
     .summary-table .ok { background: var(--ok-bg); color: var(--txt-dark); }
     .summary-table .ndf { background: var(--ndf-bg); color: var(--txt-dark); }
-    .data-table th { background: #f0f0f0; text-align: center; }
-    .data-table td { font-size: 14px; }
-    .status-ok {
-      background: var(--ok-bg); color: var(--txt-dark);
-      font-weight: bold; text-align: center;
-    }
-    .status-ndf {
-      background: var(--ndf-bg); color: var(--txt-dark);
-      font-weight: bold; text-align: center;
-    }
+    .data-table td { font-size:14px; }
+    .status-ok  { background: var(--ok-bg);  color: var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background: var(--ndf-bg); color: var(--txt-dark); font-weight:bold; text-align:center; }
 
     /* HEADER ICONS */
-    .data-table th:nth-child(1)::before { content: "📺 "; }
-    .data-table th:nth-child(2)::before { content: "🔧 "; }
-    .data-table th:nth-child(4)::before { content: "💬 "; }
+    .data-table th:nth-child(1)::before { content:"📺 "; }
+    .data-table th:nth-child(2)::before { content:"🔧 "; }
+    .data-table th:nth-child(4)::before { content:"💬 "; }
 
-    @media(max-width: 768px) {
-      .header-controls { flex-direction: column; }
+    @media(max-width:768px){
+      .summary-wrapper { flex-direction:column; align-items:center; }
+      .header-controls { flex-direction:column; }
       .summary-table th, .summary-table td,
-      .data-table th, .data-table td { font-size: 12px; padding: 6px; }
+      .data-table th, .data-table td { font-size:12px; padding:6px; }
     }
   </style>
 </head>
@@ -115,43 +129,58 @@
   <!-- CONTROLS -->
   <div class="header-controls">
     <div id="today-date" class="date"></div>
-    <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
-    <button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button>
-    <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
-    <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+    <button onclick="setDate('today')">Dzisiaj</button>
+    <button onclick="setDate('yesterday')">Wczoraj</button>
+    <button onclick="toggleTheme()">🌓 Tryb</button>
+    <button onclick="exportToExcel()">📤 Excel</button>
   </div>
 
-  <!-- SUMMARY -->
-  <div class="summary-box">
-    <h2>Podsumowanie</h2>
-    <table class="summary-table" id="summary-table">
-      <thead>
-        <tr><th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <!-- CHART + SUMMARY WRAPPER -->
+  <div class="summary-wrapper">
+    <canvas id="okChart"></canvas>
+    <div class="summary-box">
+      <h2>Podsumowanie</h2>
+      <table class="summary-table" id="summary-table">
+        <thead>
+          <tr>
+            <th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <canvas id="ndfChart"></canvas>
   </div>
 
   <!-- DATA -->
   <div class="data-section">
     <table class="data-table" id="data-table">
       <thead>
-        <tr><th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th></tr>
+        <tr>
+          <th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
   <script>
+    // URL-e arkuszy
     const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=193025884&single=true&output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
+    // Kontekst i instancje Chart.js
+    const okCtx  = document.getElementById('okChart').getContext('2d');
+    const ndfCtx = document.getElementById('ndfChart').getContext('2d');
+    let okChart, ndfChart;
+
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^\",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g, '').trim()) || []
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+         ?.map(c => c.replace(/^"|"$/g, '').trim()) || []
       );
     }
 
@@ -159,13 +188,151 @@
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d, m, y] = s.split('/');
+        const [d,m,y] = s.split('/');
         return `${y}-${m}-${d}`;
       }
       return '';
     }
 
-    function formatDate(d) { return d.toISOString().split('T')[0]; }
+    function formatDate(d) {
+      return d.toISOString().split('T')[0];
+    }
+
+    async function loadData() {
+      const tgt = formatDate(currentDate);
+      const all = [];
+      for (const url of urls) {
+        const text = await fetch(url).then(r => r.text());
+        const rows = parseCSV(text);
+        const hdr  = rows[0].map(h => h.toUpperCase());
+        const iDate   = hdr.indexOf('DATE'),
+              iStatus = hdr.indexOf('STATUS'),
+              iName   = hdr.indexOf('NAME'),
+              iSN     = hdr.indexOf('SERIAL NUMBER'),
+              iComm   = hdr.indexOf('COMMENT');
+
+        rows.slice(1).forEach(r => {
+          const d  = normalizeDate(r[iDate]);
+          const st = r[iStatus]?.toUpperCase();
+          if (d === tgt && (st === 'OK' || st === 'NDF')) {
+            all.push({
+              serial:  r[iSN]   || '–',
+              status:  st,
+              name:    r[iName]?.trim() || '–',
+              comment: r[iComm] || '–'
+            });
+          }
+        });
+      }
+      return all;
+    }
+
+    function render(data) {
+      latestData = data;
+
+      // Podsumowanie
+      const okC = {}, ndfC = {}, names = new Set();
+      data.forEach(it => {
+        if (!it.name) return;
+        names.add(it.name);
+        if (it.status === 'OK') okC[it.name] = (okC[it.name]||0) + 1;
+        if (it.status === 'NDF') ndfC[it.name] = (ndfC[it.name]||0) + 1;
+      });
+
+      // Sortowane imiona
+      const sortedNames = Array.from(names).sort((a,b) =>
+        (okC[b]||0) - (okC[a]||0)
+      );
+
+      // Render tabeli podsumowania
+      const stb = document.querySelector('#summary-table tbody');
+      stb.innerHTML = '';
+      sortedNames.forEach(name => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${name}</td>
+          <td class="ok">${okC[name]||0}</td>
+          <td class="ndf">${ndfC[name]||0}</td>`;
+        stb.appendChild(tr);
+      });
+
+      // Render tabeli danych
+      const dtb = document.querySelector('#data-table tbody');
+      dtb.innerHTML = '';
+      data.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
+          <td>${it.serial}</td>
+          <td>${it.name}</td>
+          <td>${it.comment}</td>`;
+        dtb.appendChild(tr);
+      });
+
+      // Przygotuj dane do wykresów
+      const okData  = sortedNames.map(n => okC[n]  || 0);
+      const ndfData = sortedNames.map(n => ndfC[n] || 0);
+
+      // Utwórz lub zaktualizuj wykres OK
+      if (!okChart) {
+        okChart = new Chart(okCtx, {
+          type: 'bar',
+          data: {
+            labels: sortedNames,
+            datasets: [{
+              label: 'OK',
+              data: okData,
+              backgroundColor: 'rgba( 23,191, 99,0.6)',
+              borderColor:   'rgba( 23,191, 99,1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display:false } },
+            scales: {
+              x: { ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } },
+              y: { beginAtZero:true, ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } }
+            }
+          }
+        });
+      } else {
+        okChart.data.labels   = sortedNames;
+        okChart.data.datasets[0].data = okData;
+        okChart.update();
+      }
+
+      // Utwórz lub zaktualizuj wykres NDF
+      if (!ndfChart) {
+        ndfChart = new Chart(ndfCtx, {
+          type: 'bar',
+          data: {
+            labels: sortedNames,
+            datasets: [{
+              label: 'NDF',
+              data: ndfData,
+              backgroundColor: 'rgba(255,205, 86,0.6)',
+              borderColor:   'rgba(255,205, 86,1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display:false } },
+            scales: {
+              x: { ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } },
+              y: { beginAtZero:true, ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } }
+            }
+          }
+        });
+      } else {
+        ndfChart.data.labels   = sortedNames;
+        ndfChart.data.datasets[0].data = ndfData;
+        ndfChart.update();
+      }
+    }
 
     function setDate(type) {
       currentDate = new Date();
@@ -176,7 +343,12 @@
 
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+      localStorage.setItem('theme',
+        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+      );
+      // Po zmianie motywu odśwież wykresy tak, by osie miały odpowiedni kolor
+      if (okChart) okChart.update();
+      if (ndfChart) ndfChart.update();
     }
 
     function exportToExcel() {
@@ -192,35 +364,12 @@
       XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    async function loadData() {
-      const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
-        const text = await fetch(url).then(r => r.text());
-        const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
-        const iDate = hdr.indexOf('DATE'), iStatus = hdr.indexOf('STATUS'), iName = hdr.indexOf('NAME'), iSN = hdr.indexOf('SERIAL NUMBER'), iComm = hdr.indexOf('COMMENT');
-        rows.slice(1).forEach(r => {
-          const d = normalizeDate(r[iDate]), st = r[iStatus]?.toUpperCase();
-          if (d === tgt && (st === 'OK' || st === 'NDF')) {
-            all.push({ serial: r[iSN] || '–', status: st, name: r[iName]?.trim() || '–', comment: r[iComm] || '–' });
-          }
-        });
-      }
-      return all;
+    // Przy starcie
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
     }
-
-    function render(data) {
-      latestData = data;
-      const okC = {}, ndfC = {}, names = new Set();
-      data.forEach(it => { if (it.name) { names.add(it.name); if (it.status === 'OK') okC[it.name] = (okC[it.name] || 0) + 1; if (it.status === 'NDF') ndfC[it.name] = (ndfC[it.name] || 0) + 1; } });
-      const dtb = document.querySelector('#data-table tbody'); dtb.innerHTML = '';
-      data.forEach(it => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="status-${it.status.toLowerCase()}">${it.status}</td><td>${it.serial}</td><td>${it.name}</td><td>${it.comment}</td>`; dtb.appendChild(tr); });
-      const stb = document.querySelector('#summary-table tbody'); stb.innerHTML = '';
-      Array.from(names).sort((a, b) => (okC[b] || 0) - (okC[a] || 0)).forEach(name => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${name}</td><td class="ok">${okC[name] || 0}</td><td class="ndf">${ndfC[name] || 0}</td>`; stb.appendChild(tr); });
-    }
-
-    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
     setDate('today');
-    setInterval(() => loadData().then(render), 30000);
+    setInterval(() => loadData().then(render), 30_000);
   </script>
 </body>
 </html>
