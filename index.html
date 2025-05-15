@@ -9,6 +9,7 @@
     :root {
       --ok-bg:    #A7F3D0;
       --ndf-bg:   #FDE68A;
+      --scrap-bg: #F87171;
       --txt-dark: #000;
       --btn-border: #fff;
       --btn-bg: transparent;
@@ -105,20 +106,19 @@
       background:#f0f0f0; text-align:center;
       color:#000!important; font-weight:bold!important;
     }
+    /* Summary table specific */
     .summary-table td:first-child { font-weight:bold; text-align:left; }
-    .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
-    .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
+    .summary-table .ok       { background:var(--ok-bg);    color:var(--txt-dark); }
+    .summary-table .ndf      { background:var(--ndf-bg);   color:var(--txt-dark); }
+    .summary-table .scrap-ttl{ background:var(--scrap-bg); color:var(--txt-dark); }
+    /* Data table */
     .data-table td { font-size:14px; }
-    .status-ok {
-      background:var(--ok-bg); color:var(--txt-dark);
-      font-weight:bold; text-align:center;
-    }
-    .status-ndf {
-      background:var(--ndf-bg); color:var(--txt-dark);
-      font-weight:bold; text-align:center;
-    }
+    .status-ok  { background:var(--ok-bg);    color:var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background:var(--ndf-bg);   color:var(--txt-dark); font-weight:bold; text-align:center; }
+    /* Emojis in headers */
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
+    .data-table th:nth-child(3)::before { content:"🪪 "; }
     .data-table th:nth-child(4)::before { content:"💬 "; }
 
     @media(max-width:768px) {
@@ -129,12 +129,10 @@
   </style>
 </head>
 <body>
-  <!-- LOGO -->
   <div class="logo">
     <img src="logo.png" alt="LCDR LIVE DATA Logo">
   </div>
 
-  <!-- CONTROLS -->
   <div class="header-controls">
     <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
     <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
@@ -142,7 +140,6 @@
     <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
   </div>
 
-  <!-- SUMMARY -->
   <div class="summary-box">
     <div class="summary-header">
       <h2>PODSUMOWANIE</h2>
@@ -150,79 +147,99 @@
     </div>
     <table class="summary-table" id="summary-table">
       <thead>
-        <tr><th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th></tr>
+        <tr>
+          <th>🪪 Imię</th>
+          <th class="ok">OK</th>
+          <th class="ndf">NDF</th>
+          <th class="scrap-ttl">SCRAP TTL</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <!-- DATA -->
   <div class="data-section">
     <table class="data-table" id="data-table">
       <thead>
-        <tr><th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th></tr>
+        <tr>
+          <th>Status</th>
+          <th>Serial Number</th>
+          <th>Name</th>
+          <th>Comment</th>
+        </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
   <script>
-    // ↪ Podstaw swój ID arkusza i prawidłowe GID-y zakładek:
-    const spreadsheetId = '10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU';
-    const sheetGids     = ['0','193025884']; // 0 = pierwsza zakładka, druga = GID z paska adresu
-
-    const urls = sheetGids.map(gid =>
-      `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`
-    );
+    const urls = [
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+    ];
 
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
-      return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-         ?.map(c=>c.replace(/^"|"$/g,'').trim())||[]
+      return text.trim().split('\n').map(row =>
+        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+           ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
       );
     }
     function normalizeDate(s) {
-      if(!s) return '';
-      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-      if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y]=s.split('/'); return `${y}-${m}-${d}`;
+      if (!s) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+        const [d,m,y] = s.split('/');
+        return `${y}-${m}-${d}`;
       }
       return '';
     }
-    function formatDate(d){ return d.toISOString().split('T')[0]; }
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
 
     function highlightActive(type) {
-      document.querySelectorAll('.filter-btn')
-        .forEach(btn=>btn.classList.toggle('active', btn.dataset.type===type));
+      document.querySelectorAll('.filter-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.type === type)
+      );
     }
 
     async function loadData() {
-      const tgt = formatDate(currentDate), all = [];
-      for(const url of urls){
+      const tgt = formatDate(currentDate);
+      const all = [];
+
+      for (const url of urls) {
         try {
-          const res = await fetch(url);
-          if(!res.ok) throw new Error(`HTTP ${res.status}`);
-          const txt = await res.text();
-          const rows= parseCSV(txt), hdr= rows[0].map(h=>h.toUpperCase());
-          const iDate   = hdr.indexOf('DATE'),
-                iStatus = hdr.indexOf('STATUS'),
-                iName   = hdr.indexOf('NAME'),
-                iSN     = hdr.indexOf('SERIAL NUMBER'),
-                iComm   = hdr.indexOf('COMMENT');
-          rows.slice(1).forEach(r=>{
-            const d = normalizeDate(r[iDate]), st=(r[iStatus]||'').toUpperCase();
-            if(d===tgt && (st==='OK'||st==='NDF')){
+          const res  = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          const rows = parseCSV(text);
+          const hdr  = rows[0].map(h => h.toUpperCase());
+          const iDate  = hdr.findIndex(h => h==='DATE'||h==='DATA');
+          const iStatus= hdr.findIndex(h => h==='STATUS');
+          const iName  = hdr.findIndex(h => h==='NAME'||h==='IMIĘ'||h==='IMIE');
+          const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
+          const iComm  = hdr.findIndex(h => h==='COMMENT');
+          const iScrap = hdr.findIndex(h =>
+            h==='SCRAP TTL' || h==='SCRAP_TTL' || h==='SCRAP-TTL'
+          );
+
+          rows.slice(1).forEach(r => {
+            const d  = normalizeDate(r[iDate]);
+            const st = (r[iStatus]||'').toUpperCase();
+            if (d===tgt && (st==='OK' || st==='NDF')) {
+              const scrap = iScrap >= 0 ? Number(r[iScrap]) || 0 : 0;
               all.push({
                 serial:  r[iSN]   || '–',
                 status:  st,
                 name:    r[iName]?.trim() || '–',
-                comment: r[iComm] || '–'
+                comment: r[iComm] || '–',
+                scrap
               });
             }
           });
-        } catch(e) {
+        } catch (e) {
           console.warn('⚠️ fetch error', url, e);
         }
       }
@@ -230,42 +247,55 @@
     }
 
     function render(data) {
-      if(!data.length){
+      if (!data.length) {
         console.warn('Brak danych – pozostawiam poprzednie');
         return;
       }
-      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+      latestData = data.sort((a,b) => a.name.localeCompare(b.name));
 
-      // tabela danych
+      // update data table
       const dtb = document.createElement('tbody');
-      latestData.forEach(it=>{
+      latestData.forEach(it => {
         const tr = document.createElement('tr');
-        tr.innerHTML=`
+        tr.innerHTML = `
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
           <td>${it.comment}</td>`;
         dtb.appendChild(tr);
       });
-      document.getElementById('data-table').tBodies[0].replaceWith(dtb);
+      document.getElementById('data-table')
+              .tBodies[0].replaceWith(dtb);
 
-      // tabela podsumowania
-      const names = [...new Set(latestData.map(x=>x.name))].sort();
-      const stb   = document.createElement('tbody');
-      names.forEach(n=>{
-        const ok = latestData.filter(x=>x.name===n&&x.status==='OK').length;
-        const nd = latestData.filter(x=>x.name===n&&x.status==='NDF').length;
+      // build summary counts
+      const okC = {}, ndfC = {}, scrapC = {}, names = new Set();
+      latestData.forEach(it => {
+        names.add(it.name);
+        okC[it.name]    = (okC[it.name] || 0) + (it.status==='OK'?1:0);
+        ndfC[it.name]   = (ndfC[it.name]|| 0) + (it.status==='NDF'?1:0);
+        scrapC[it.name] = (scrapC[it.name]||0) + it.scrap;
+      });
+
+      // update summary table
+      const stb = document.createElement('tbody');
+      Array.from(names).sort().forEach(name => {
         const tr = document.createElement('tr');
-        tr.innerHTML=`<td>${n}</td><td class="ok">${ok}</td><td class="ndf">${nd}</td>`;
+        tr.innerHTML = `
+          <td>${name}</td>
+          <td class="ok">${okC[name]||0}</td>
+          <td class="ndf">${ndfC[name]||0}</td>
+          <td class="scrap-ttl">${scrapC[name]||0}</td>`;
         stb.appendChild(tr);
       });
-      document.getElementById('summary-table').tBodies[0].replaceWith(stb);
+      document.getElementById('summary-table')
+              .tBodies[0].replaceWith(stb);
     }
 
     function setDate(type) {
       currentDate = new Date();
-      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
-      document.getElementById('summary-date').textContent = formatDate(currentDate);
+      if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      document.getElementById('summary-date')
+              .textContent = formatDate(currentDate);
       highlightActive(type);
       loadData().then(render);
     }
@@ -273,17 +303,18 @@
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode')?'dark':'light'
+        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
       );
     }
 
     function exportToExcel() {
       const ws = XLSX.utils.json_to_sheet(
-        latestData.map(d=>({
+        latestData.map(d => ({
           STATUS: d.status,
           'SERIAL NUMBER': d.serial,
           NAME: d.name,
-          COMMENT: d.comment
+          COMMENT: d.comment,
+          'SCRAP TTL': d.scrap
         }))
       );
       const wb = XLSX.utils.book_new();
@@ -292,10 +323,12 @@
     }
 
     // init
-    if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark-mode');
+    if (localStorage.getItem('theme')==='dark') {
+      document.body.classList.add('dark-mode');
+    }
     setDate('today');
     (function loop(){
-      setTimeout(()=>loadData().then(render).finally(loop),30000);
+      setTimeout(() => loadData().then(render).finally(loop), 30000);
     })();
   </script>
 </body>
