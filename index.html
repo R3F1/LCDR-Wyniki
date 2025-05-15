@@ -36,6 +36,16 @@ function updateBotPhrase() {
 updateBotPhrase();
 setInterval(updateBotPhrase, 10000);
 
+
+function toggleBot() {
+  const bot = document.getElementById('chatbot-container');
+  if (bot.style.display === 'none') {
+    bot.style.display = 'flex';
+  } else {
+    bot.style.display = 'none';
+  }
+}
+
 </script>
   <style>
     :root {
@@ -508,9 +518,34 @@ setInterval(updateBotPhrase, 10000);
     }
   }
 
+
+  #toggle-bot {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 1004;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    background: #1f2937;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  #toggle-bot:hover {
+    background: #374151;
+  }
+
+  body.light-mode #toggle-bot {
+    background: #e5e7eb;
+    color: #111;
+  }
+
 </style>
 </head>
 <body>
+<button id="toggle-bot" class="toggle-btn" onclick="toggleBot()">🤖 Pokaż/Ukryj Bota</button>
 <div id="tv-icon">📺</div>
 
 <div id="chatbot-container">
@@ -799,6 +834,16 @@ function updateBotPhrase() {
 
 updateBotPhrase();
 setInterval(updateBotPhrase, 10000);
+
+
+function toggleBot() {
+  const bot = document.getElementById('chatbot-container');
+  if (bot.style.display === 'none') {
+    bot.style.display = 'flex';
+  } else {
+    bot.style.display = 'none';
+  }
+}
 
 </script>
 </body>
