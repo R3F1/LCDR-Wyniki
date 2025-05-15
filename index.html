@@ -44,64 +44,68 @@
       line-height: 1.4em;
     }
   </style>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
   <h1>LCDR WYNIKI LIVE</h1>
   <div id="data-container">Ładowanie danych...</div>
 
   <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=1731536831&single=true&output=csv';
+    const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05";
 
-    async function loadCSV() {
-      const response = await fetch(CSV_URL);
-      const text = await response.text();
-      const rows = text.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+    google.charts.load('current', { packages: ['corechart', 'table'] });
+    google.charts.setOnLoadCallback(draw);
 
+    function draw() {
+      const query = new google.visualization.Query(SPREADSHEET_URL + "/gviz/tq?gid=1731536831");
+      query.send(handleQueryResponse);
+    }
+
+    function handleQueryResponse(response) {
+      const data = response.getDataTable();
       const container = document.getElementById('data-container');
       container.innerHTML = '';
 
       let currentFI = '';
-      let headers = [];
+      let section;
 
-      rows.forEach((row, index) => {
-        if (row[0].startsWith('FI #')) {
-          currentFI = row[0];
-          const section = document.createElement('div');
+      for (let row = 0; row < data.getNumberOfRows(); row++) {
+        const firstCell = data.getValue(row, 0);
+        if (firstCell && firstCell.startsWith("FI #")) {
+          currentFI = firstCell;
+          section = document.createElement('div');
           section.classList.add('section');
-
           const title = document.createElement('div');
           title.classList.add('fi-title');
           title.textContent = currentFI;
           section.appendChild(title);
           container.appendChild(section);
-        } else if (row[0] === 'Name') {
-          headers = row;
-        } else if (row[0] && row[0] !== 'Suma całkowita') {
+        } else if (firstCell && firstCell !== "Name" && firstCell !== "Suma całkowita") {
           const person = document.createElement('div');
           person.classList.add('person');
 
           const name = document.createElement('div');
           name.classList.add('person-name');
-          name.textContent = row[0];
+          name.textContent = firstCell;
           person.appendChild(name);
 
-          for (let i = 1; i < row.length; i++) {
-            if (row[i]) {
+          for (let col = 1; col < data.getNumberOfColumns(); col++) {
+            const header = data.getColumnLabel(col);
+            const value = data.getValue(row, col);
+            if (value !== null && value !== '') {
               const stat = document.createElement('div');
               stat.classList.add('stat');
-              stat.textContent = `- ${headers[i]}: ${row[i]}`;
+              stat.textContent = `- ${header}: ${value}`;
               person.appendChild(stat);
             }
           }
 
-          const lastSection = container.lastElementChild;
-          lastSection.appendChild(person);
+          section.appendChild(person);
         }
-      });
+      }
     }
 
-    loadCSV();
-    setInterval(loadCSV, 2 * 60 * 1000); // Odśwież co 2 minuty
+    setInterval(draw, 2 * 60 * 1000); // odświeżanie co 2 minuty
   </script>
 </body>
 </html>
