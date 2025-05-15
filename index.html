@@ -1,90 +1,107 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>LCDR WYNIKI LIVE</title>
   <style>
     body {
       background-color: #121212;
-      color: #fff;
-      font-family: Arial, sans-serif;
-      padding: 20px 40px;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
     }
 
     h1 {
       color: #00e676;
-      font-size: 28px;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #1e1e1e;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 10px rgba(0,255,135,0.15);
+    .section {
+      margin-bottom: 40px;
     }
 
-    th, td {
-      border: 1px solid #333;
-      padding: 10px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #2c2c2c;
+    .fi-title {
+      font-size: 20px;
       color: #00e676;
+      margin-bottom: 15px;
     }
 
-    tr:nth-child(even) {
-      background-color: #2a2a2a;
+    .person {
+      margin-bottom: 20px;
+      padding-left: 10px;
+      border-left: 3px solid #00e676;
     }
 
-    tr:hover {
-      background-color: #333;
+    .person-name {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .stat {
+      margin-left: 10px;
+      font-size: 14px;
+      line-height: 1.4em;
     }
   </style>
 </head>
 <body>
   <h1>LCDR WYNIKI LIVE</h1>
-  <div id="table-container">Ładowanie danych...</div>
+  <div id="data-container">Ładowanie danych...</div>
 
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=1731536831&single=true&output=csv';
 
-    async function loadCSVAndBuildTable() {
-      try {
-        const response = await fetch(CSV_URL);
-        const csvText = await response.text();
+    async function loadCSV() {
+      const response = await fetch(CSV_URL);
+      const text = await response.text();
+      const rows = text.split('\n').map(row => row.split(',').map(cell => cell.trim()));
 
-        const rows = csvText.split('\n').map(row => row.split(','));
-        const container = document.getElementById('table-container');
+      const container = document.getElementById('data-container');
+      container.innerHTML = '';
 
-        // Tworzymy tabelę
-        const table = document.createElement('table');
+      let currentFI = '';
+      let headers = [];
 
-        rows.forEach((row, index) => {
-          const tr = document.createElement('tr');
-          row.forEach(cell => {
-            const td = document.createElement(index === 0 ? 'th' : 'td');
-            td.textContent = cell.trim();
-            tr.appendChild(td);
-          });
-          table.appendChild(tr);
-        });
+      rows.forEach((row, index) => {
+        if (row[0].startsWith('FI #')) {
+          currentFI = row[0];
+          const section = document.createElement('div');
+          section.classList.add('section');
 
-        container.innerHTML = '';
-        container.appendChild(table);
-      } catch (err) {
-        console.error('Błąd ładowania CSV:', err);
-        document.getElementById('table-container').textContent = 'Błąd ładowania danych.';
-      }
+          const title = document.createElement('div');
+          title.classList.add('fi-title');
+          title.textContent = currentFI;
+          section.appendChild(title);
+          container.appendChild(section);
+        } else if (row[0] === 'Name') {
+          headers = row;
+        } else if (row[0] && row[0] !== 'Suma całkowita') {
+          const person = document.createElement('div');
+          person.classList.add('person');
+
+          const name = document.createElement('div');
+          name.classList.add('person-name');
+          name.textContent = row[0];
+          person.appendChild(name);
+
+          for (let i = 1; i < row.length; i++) {
+            if (row[i]) {
+              const stat = document.createElement('div');
+              stat.classList.add('stat');
+              stat.textContent = `- ${headers[i]}: ${row[i]}`;
+              person.appendChild(stat);
+            }
+          }
+
+          const lastSection = container.lastElementChild;
+          lastSection.appendChild(person);
+        }
+      });
     }
 
-    loadCSVAndBuildTable();
-    setInterval(loadCSVAndBuildTable, 2 * 60 * 1000); // Odśwież co 2 min
+    loadCSV();
+    setInterval(loadCSV, 2 * 60 * 1000); // Odśwież co 2 minuty
   </script>
 </body>
 </html>
