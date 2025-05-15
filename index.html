@@ -4,7 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LCDR LIVE DATA</title>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">
+function updateClockInline() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock-inline').textContent = `🕒 ${h}:${m}:${s}`;
+}
+setInterval(updateClockInline, 1000);
+updateClockInline();
+
+
+function updateTimestampLabel() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
+}
+
+</script>
   <style>
     :root {
       --ok-bg:    #A7F3D0;
@@ -329,19 +349,7 @@
     }
 
     /* Clock in the corner */
-    #clock {
-      position: fixed;
-      top: 10px;
-      left: 16px;
-      font-size: 16px;
-      font-weight: 500;
-      color: white;
-      z-index: 1002;
-      font-family: monospace;
-    }
-    body.light-mode #clock {
-      color: #111;
-    }
+    
 
     /* Disable scrolling when loading */
     body.loading {
@@ -417,9 +425,39 @@
     color: #111;
   }
 
+
+  #clock-inline {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #ccc;
+    font-family: monospace;
+    text-align: right;
+  }
+
+  body.light-mode #clock-inline {
+    color: #555;
+  }
+
+
+  .update-info {
+    position: fixed;
+    top: 10px;
+    left: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    font-family: monospace;
+    z-index: 1002;
+  }
+
+  body.light-mode .update-info {
+    color: #111;
+  }
+
 </style>
 </head>
 <body>
+<div id="last-update" class="update-info">🔄 Zaktualizowano o --:--:--</div>
 
 <div id="chatbot-container">
   <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
@@ -434,7 +472,7 @@
 
 
 
-<div id="clock">🕒 --:--:--</div>
+
   <div id="global-emoji-loading" style="display:none;" class="emoji-indicator">⏳</div>
   <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
   <div class="container">
@@ -676,6 +714,26 @@ function manualLoad() {
     (function loop(){
       setTimeout(()=>loadData().then(render).finally(loop),30000);
     })();
-  </script>
+  
+function updateClockInline() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock-inline').textContent = `🕒 ${h}:${m}:${s}`;
+}
+setInterval(updateClockInline, 1000);
+updateClockInline();
+
+
+function updateTimestampLabel() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
+}
+
+</script>
 </body>
 </html>
