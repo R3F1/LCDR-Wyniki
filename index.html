@@ -1,4 +1,3 @@
-<!-- pełny kod z poprawką -->
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -29,6 +28,7 @@
       background: rgba(0,0,0,0.75); z-index:-1;
     }
 
+    /* kontener centrujący */
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -89,12 +89,14 @@
       color: #000!important; font-weight: bold!important;
     }
 
+    /* ikony w nagłówkach */
     .summary-table th:nth-child(1)::before { content: "👤 "; }
     .data-table th:nth-child(1)::before    { content: "📺 "; }
     .data-table th:nth-child(2)::before    { content: "🔧 "; }
     .data-table th:nth-child(3)::before    { content: "👤 "; }
     .data-table th:nth-child(4)::before    { content: "💬 "; }
 
+    /* kolumny OK/NDF/SCRAP TTL jednolite */
     .summary-table th.ok, .summary-table td.ok,
     .summary-table th.ndf, .summary-table td.ndf,
     .summary-table th.scrap-ttl, .summary-table td.scrap-ttl {
@@ -127,6 +129,8 @@
       <img src="logo.png" alt="LCDR LIVE DATA Logo">
     </div>
     <div class="header-controls">
+  <a class="filter-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
+  
       <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
       <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
       <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
@@ -180,7 +184,6 @@
            ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
       );
     }
-
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
@@ -190,7 +193,6 @@
       }
       return '';
     }
-
     function formatDate(date) {
       return date.toISOString().split('T')[0];
     }
@@ -212,6 +214,7 @@
           const rows = parseCSV(text);
           const hdr  = rows[0].map(h => h.toUpperCase());
 
+          // poprawne wyszukanie indeksów:
           const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
           const iStatus= hdr.findIndex(h => h==='STATUS');
           const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
@@ -222,7 +225,7 @@
           rows.slice(1).forEach(rw => {
             const d  = normalizeDate(rw[iDate]);
             const st = (rw[iStatus]||'').toUpperCase();
-            if (d === tgt) {
+            if (d===tgt && (st==='OK' || st==='NDF')) {
               all.push({
                 serial:  rw[iSN]   || '–',
                 status:  st,
@@ -243,6 +246,7 @@
       if (!data.length) return;
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
+      // data table
       const dtb = document.createElement('tbody');
       latestData.forEach(it => {
         const tr = document.createElement('tr');
@@ -255,6 +259,7 @@
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
 
+      // summary
       const okC={}, ndfC={}, scrC={}, names=new Set();
       latestData.forEach(it=>{
         names.add(it.name);
@@ -305,6 +310,7 @@
       XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
+    // init
     if (localStorage.getItem('theme')==='dark')
       document.body.classList.add('dark-mode');
     setDate('today');
