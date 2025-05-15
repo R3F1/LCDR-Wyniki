@@ -417,12 +417,7 @@
 
 <div id="chatbot-container">
   <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
-  <div id="chatbot-bubble">
-    <strong>🤖 LCDR Bot mówi:</strong><br>
-    Naprawiono <span id="chat-ok">–</span> OK,<br>
-    Wykryto <span id="chat-ndf">–</span> NDF,<br>
-    I <span id="chat-scrap">–</span> przypadków SCRAP TTL.
-  </div>
+  <div id="chatbot-bubble"><span id="chatbot-text"></span></div>
 </div>
 
 
@@ -605,6 +600,22 @@
       document.getElementById('chat-ok').textContent = sumOK;
       document.getElementById('chat-ndf').textContent = sumNDF;
       document.getElementById('chat-scrap').textContent = sumSCR;
+
+      const phrases = [
+        "Hey! Miłego dnia! ☀️",
+        "Czy masz ochotę coś naprawić? 🔧",
+        "Czekasz na przerwę? ☕",
+        "LCDR Bot czuwa nad statusem!",
+        "Dziś naprawiono " + sumOK + " OK 📺",
+        "Zgłoszono " + sumNDF + " NDF ⚠️",
+        sumSCR + " przypadków SCRAP TTL 🗑️"
+      ];
+
+      const randomGreeting = phrases[Math.floor(Math.random() * 3)];
+      const statusSummary = phrases.slice(3).join('<br>');
+
+      document.getElementById('chatbot-text').innerHTML =
+        `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${statusSummary}`;
 
       document.querySelectorAll('.summary-table td.ok').forEach(td => td.classList.add('flash'));
       document.querySelectorAll('.summary-table td.ndf').forEach(td => td.classList.add('flash'));
