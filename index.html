@@ -8,11 +8,10 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      /* kolory w trybie jasnym */
-      --ok-bg:      #A7F3D0;
-      --ndf-bg:     #FDE68A;
-      --txt-dark:   #000;
-      --section-bg: rgba(240,240,240,0.9); /* nieco ciemniejsze tło sekcji */
+      --ok-bg:    #A7F3D0;
+      --ndf-bg:   #FDE68A;
+      --txt-dark: #000;
+      --section-bg: rgba(240,240,240,0.9);
     }
     html, body { margin:0; padding:0; height:100%; }
     body {
@@ -26,67 +25,62 @@
       position: relative;
       transition: background-color .3s, color .3s;
     }
-    /* ciemny motyw: zostawiamy obrazek, zmieniamy jedynie nakładkę kolorową */
     body.dark-mode {
       background-color: #0f172a;
-      /* przygaszone kolory OK/NDF */
       --ok-bg:  rgba(  6,  95,  70, 0.6);
       --ndf-bg: rgba(161,  98,   7, 0.6);
     }
-    /* w jasnym trybie ciemna półprzezroczysta nakładka */
     body:not(.dark-mode)::before {
       content: "";
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top:0; left:0; right:0; bottom:0;
       background: rgba(0,0,0,0.75);
-      z-index: -1;
+      z-index:-1;
     }
 
-    /* LOGO */
     .logo { text-align:center; margin:20px auto 0; }
     .logo img { max-width:350px; width:80%; height:auto; }
 
-    /* CONTROLS */
     .header-controls {
       display:flex; flex-wrap:wrap; gap:10px;
       justify-content:center; align-items:center;
       margin:20px 0;
     }
-    .header-controls button, .header-controls .date {
-      padding:8px 14px; background:#fff; color:#000;
-      border:none; border-radius:5px; font-weight:bold; cursor:pointer;
+    .header-controls button,
+    .header-controls .date {
+      padding:8px 14px;
+      background:#fff; color:#000;
+      border:none; border-radius:5px;
+      font-weight:bold; cursor:pointer;
     }
     .header-controls button:hover { background:#ccc; }
 
-    /* SUMMARY + CHARTS WRAPPER */
     .summary-wrapper {
-      display: flex;
-      gap:20px;
-      align-items: flex-start;
-      justify-content: center;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
+      display:flex; gap:20px;
+      align-items:flex-start;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-bottom:30px;
     }
     .summary-wrapper canvas {
-      flex: 0 0 240px;
-      height: 240px;
+      flex:0 0 240px;
+      height:240px;
       background: var(--section-bg);
-      border-radius: 10px;
-      padding: 10px;
+      border-radius:10px;
+      padding:10px;
     }
     body.dark-mode .summary-wrapper canvas {
       background: rgba(30,41,59,0.95);
     }
 
-    /* SECTIONS */
     .summary-box, .data-section {
       background: var(--section-bg);
       color: #000;
-      max-width: 1200px;
-      margin: 0 auto 30px;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      max-width:1200px;
+      margin:0 auto 30px;
+      padding:20px;
+      border-radius:10px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4);
       transition: background .3s, color .3s;
     }
     body.dark-mode .summary-box,
@@ -95,21 +89,25 @@
       color: #fff;
     }
 
-    /* TABLE STYLES */
-    .summary-table, .data-table { width:100%; border-collapse:collapse; }
+    .summary-table, .data-table {
+      width:100%; border-collapse:collapse;
+    }
     .summary-table th, .summary-table td,
     .data-table th, .data-table td {
       padding:10px; border:1px solid #ccc;
     }
-    .summary-table th, .data-table th { background:#f0f0f0; text-align:center; }
-    .summary-table td:first-child { font-weight:bold; text-align:left; }
+    .summary-table th, .data-table th {
+      background:#f0f0f0; text-align:center;
+    }
+    .summary-table td:first-child {
+      font-weight:bold; text-align:left;
+    }
     .summary-table .ok { background: var(--ok-bg); color: var(--txt-dark); }
     .summary-table .ndf { background: var(--ndf-bg); color: var(--txt-dark); }
     .data-table td { font-size:14px; }
     .status-ok  { background: var(--ok-bg);  color: var(--txt-dark); font-weight:bold; text-align:center; }
     .status-ndf { background: var(--ndf-bg); color: var(--txt-dark); font-weight:bold; text-align:center; }
 
-    /* HEADER ICONS */
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
     .data-table th:nth-child(4)::before { content:"💬 "; }
@@ -118,15 +116,14 @@
       .summary-wrapper { flex-direction:column; align-items:center; }
       .header-controls { flex-direction:column; }
       .summary-table th, .summary-table td,
-      .data-table th, .data-table td { font-size:12px; padding:6px; }
+      .data-table th, .data-table td {
+        font-size:12px; padding:6px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- LOGO -->
   <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
-
-  <!-- CONTROLS -->
   <div class="header-controls">
     <div id="today-date" class="date"></div>
     <button onclick="setDate('today')">Dzisiaj</button>
@@ -135,16 +132,13 @@
     <button onclick="exportToExcel()">📤 Excel</button>
   </div>
 
-  <!-- CHART + SUMMARY WRAPPER -->
   <div class="summary-wrapper">
     <canvas id="okChart"></canvas>
     <div class="summary-box">
       <h2>Podsumowanie</h2>
       <table class="summary-table" id="summary-table">
         <thead>
-          <tr>
-            <th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th>
-          </tr>
+          <tr><th>Imię</th><th class="ok">OK</th><th class="ndf">NDF</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -152,27 +146,22 @@
     <canvas id="ndfChart"></canvas>
   </div>
 
-  <!-- DATA -->
   <div class="data-section">
     <table class="data-table" id="data-table">
       <thead>
-        <tr>
-          <th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th>
-        </tr>
+        <tr><th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
   <script>
-    // URL-e arkuszy
     const urls = [
       'https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/.../pub?gid=193025884&single=true&output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
-    // Kontekst i instancje Chart.js
     const okCtx  = document.getElementById('okChart').getContext('2d');
     const ndfCtx = document.getElementById('ndfChart').getContext('2d');
     let okChart, ndfChart;
@@ -205,16 +194,17 @@
         const text = await fetch(url).then(r => r.text());
         const rows = parseCSV(text);
         const hdr  = rows[0].map(h => h.toUpperCase());
-        const iDate   = hdr.indexOf('DATE'),
-              iStatus = hdr.indexOf('STATUS'),
-              iName   = hdr.indexOf('NAME'),
-              iSN     = hdr.indexOf('SERIAL NUMBER'),
-              iComm   = hdr.indexOf('COMMENT');
+
+        const iDate   = hdr.findIndex(h => h==='DATE'    || h==='DATA');
+        const iStatus = hdr.findIndex(h => h==='STATUS');
+        const iName   = hdr.findIndex(h => h==='NAME'    || h==='IMIĘ' || h==='IMIE');
+        const iSN     = hdr.findIndex(h => h==='SERIAL NUMBER' || h==='NUMER SERYJNY' || h==='NUMER S/N');
+        const iComm   = hdr.findIndex(h => h==='COMMENT' || h==='KOMENTARZ');
 
         rows.slice(1).forEach(r => {
           const d  = normalizeDate(r[iDate]);
           const st = r[iStatus]?.toUpperCase();
-          if (d === tgt && (st === 'OK' || st === 'NDF')) {
+          if (d===tgt && (st==='OK'||st==='NDF')) {
             all.push({
               serial:  r[iSN]   || '–',
               status:  st,
@@ -229,39 +219,31 @@
 
     function render(data) {
       latestData = data;
-
-      // Podsumowanie
-      const okC = {}, ndfC = {}, names = new Set();
-      data.forEach(it => {
-        if (!it.name) return;
+      const okC={}, ndfC={}, names=new Set();
+      data.forEach(it=>{
+        if(!it.name) return;
         names.add(it.name);
-        if (it.status === 'OK') okC[it.name] = (okC[it.name]||0) + 1;
-        if (it.status === 'NDF') ndfC[it.name] = (ndfC[it.name]||0) + 1;
+        if(it.status==='OK')  okC[it.name]=(okC[it.name]||0)+1;
+        if(it.status==='NDF') ndfC[it.name]=(ndfC[it.name]||0)+1;
       });
 
-      // Sortowane imiona
-      const sortedNames = Array.from(names).sort((a,b) =>
-        (okC[b]||0) - (okC[a]||0)
-      );
-
-      // Render tabeli podsumowania
+      const sorted = Array.from(names).sort((a,b)=>(okC[b]||0)-(okC[a]||0));
       const stb = document.querySelector('#summary-table tbody');
       stb.innerHTML = '';
-      sortedNames.forEach(name => {
+      sorted.forEach(name=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td>${name}</td>
           <td class="ok">${okC[name]||0}</td>
           <td class="ndf">${ndfC[name]||0}</td>`;
         stb.appendChild(tr);
       });
 
-      // Render tabeli danych
       const dtb = document.querySelector('#data-table tbody');
       dtb.innerHTML = '';
-      data.forEach(it => {
+      data.forEach(it=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
@@ -269,66 +251,51 @@
         dtb.appendChild(tr);
       });
 
-      // Przygotuj dane do wykresów
-      const okData  = sortedNames.map(n => okC[n]  || 0);
-      const ndfData = sortedNames.map(n => ndfC[n] || 0);
+      const okData  = sorted.map(n=>okC[n]||0);
+      const ndfData = sorted.map(n=>ndfC[n]||0);
 
-      // Utwórz lub zaktualizuj wykres OK
-      if (!okChart) {
-        okChart = new Chart(okCtx, {
-          type: 'bar',
-          data: {
-            labels: sortedNames,
-            datasets: [{
-              label: 'OK',
-              data: okData,
-              backgroundColor: 'rgba( 23,191, 99,0.6)',
-              borderColor:   'rgba( 23,191, 99,1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display:false } },
-            scales: {
-              x: { ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } },
-              y: { beginAtZero:true, ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } }
+      if(!okChart) {
+        okChart = new Chart(okCtx,{
+          type:'bar',
+          data:{ labels:sorted, datasets:[{
+            label:'OK', data:okData,
+            backgroundColor:'rgba(23,191,99,0.6)',
+            borderColor:'rgba(23,191,99,1)', borderWidth:1
+          }]},
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ display:false }},
+            scales:{
+              x:{ ticks:{ color: document.body.classList.contains('dark-mode')?'#fff':'#000' }},
+              y:{ beginAtZero:true, ticks:{ color: document.body.classList.contains('dark-mode')?'#fff':'#000' }}
             }
           }
         });
       } else {
-        okChart.data.labels   = sortedNames;
+        okChart.data.labels = sorted;
         okChart.data.datasets[0].data = okData;
         okChart.update();
       }
 
-      // Utwórz lub zaktualizuj wykres NDF
-      if (!ndfChart) {
-        ndfChart = new Chart(ndfCtx, {
-          type: 'bar',
-          data: {
-            labels: sortedNames,
-            datasets: [{
-              label: 'NDF',
-              data: ndfData,
-              backgroundColor: 'rgba(255,205, 86,0.6)',
-              borderColor:   'rgba(255,205, 86,1)',
-              borderWidth: 1
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display:false } },
-            scales: {
-              x: { ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } },
-              y: { beginAtZero:true, ticks: { color: body.classList.contains('dark-mode') ? '#fff' : '#000' } }
+      if(!ndfChart) {
+        ndfChart = new Chart(ndfCtx,{
+          type:'bar',
+          data:{ labels:sorted, datasets:[{
+            label:'NDF', data:ndfData,
+            backgroundColor:'rgba(255,205,86,0.6)',
+            borderColor:'rgba(255,205,86,1)', borderWidth:1
+          }]},
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ display:false }},
+            scales:{
+              x:{ ticks:{ color: document.body.classList.contains('dark-mode')?'#fff':'#000' }},
+              y:{ beginAtZero:true, ticks:{ color: document.body.classList.contains('dark-mode')?'#fff':'#000' }}
             }
           }
         });
       } else {
-        ndfChart.data.labels   = sortedNames;
+        ndfChart.data.labels = sorted;
         ndfChart.data.datasets[0].data = ndfData;
         ndfChart.update();
       }
@@ -336,7 +303,7 @@
 
     function setDate(type) {
       currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate() - 1);
+      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
@@ -344,32 +311,30 @@
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        document.body.classList.contains('dark-mode')?'dark':'light'
       );
-      // Po zmianie motywu odśwież wykresy tak, by osie miały odpowiedni kolor
-      if (okChart) okChart.update();
-      if (ndfChart) ndfChart.update();
+      if(okChart)  okChart.update();
+      if(ndfChart) ndfChart.update();
     }
 
     function exportToExcel() {
-      const data = latestData.map(d => ({
-        STATUS: d.status,
-        'SERIAL NUMBER': d.serial,
-        NAME: d.name,
-        COMMENT: d.comment
+      const data = latestData.map(d=>({
+        STATUS:d.status,
+        'SERIAL NUMBER':d.serial,
+        NAME:d.name,
+        COMMENT:d.comment
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
-      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
+      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    // Przy starcie
-    if (localStorage.getItem('theme') === 'dark') {
+    if(localStorage.getItem('theme')==='dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-    setInterval(() => loadData().then(render), 30_000);
+    setInterval(()=> loadData().then(render), 30000);
   </script>
 </body>
 </html>
