@@ -24,13 +24,14 @@
     table {
       border-collapse: collapse;
       width: 100%;
-      max-width: 600px;
+      max-width: 700px;
       background: #1e1e1e;
     }
     th, td {
       border: 1px solid #444;
-      padding: 8px;
+      padding: 6px;
       text-align: left;
+      font-size: 14px;
     }
     th {
       background: #333;
@@ -56,12 +57,15 @@
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
 
+    const selectedColumns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "Comment"];
+
     function fetchAndDisplayCSV(url, tableId) {
       fetch(url)
         .then(res => res.text())
         .then(csv => {
           const rows = csv.trim().split('\n').map(r => r.split(','));
           const header = rows[0];
+          const colIndexes = selectedColumns.map(col => header.findIndex(h => h.trim().toUpperCase() === col.toUpperCase()));
           const dateIndex = header.findIndex(col => col.trim().toUpperCase() === 'DATE');
 
           const today = new Date().toISOString().split('T')[0];
@@ -69,9 +73,9 @@
 
           const thead = document.querySelector(`#${tableId} thead`);
           const tbody = document.querySelector(`#${tableId} tbody`);
-          thead.innerHTML = '<tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr>';
+          thead.innerHTML = '<tr>' + selectedColumns.map(c => `<th>${c}</th>`).join('') + '</tr>';
           tbody.innerHTML = filtered.map(row =>
-            '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>'
+            '<tr>' + colIndexes.map(i => `<td>${row[i] || ''}</td>`).join('') + '</tr>'
           ).join('');
         })
         .catch(err => {
