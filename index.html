@@ -348,9 +348,46 @@
       overflow: hidden;
     }
 
+
+    .summary-table td.ok.flash,
+    .summary-table td.ndf.flash,
+    .summary-table td.scrap-ttl.flash {
+      animation: flashStatus 1.2s ease-in-out;
+    }
+
+    @keyframes flashStatus {
+      0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+      50% { box-shadow: 0 0 12px rgba(255,255,255,0.7); }
+      100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+    }
+
+    /* Chatbot okienko */
+    #chatbot {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      max-width: 220px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1003;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
 </style>
 </head>
 <body>
+
+<div id="chatbot">
+  🤖 <strong>LCDR Assistant:</strong><br>
+  Dziś naprawiono <span id="chat-ok">–</span> OK,<br>
+  znaleziono <span id="chat-ndf">–</span> NDF<br>
+  oraz <span id="chat-scrap">–</span> przypadków SCRAP TTL.
+</div>
+
 <div id="clock">🕒 --:--:--</div>
   <div id="global-emoji-loading" style="display:none;" class="emoji-indicator">⏳</div>
   <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
@@ -516,12 +553,26 @@
       
       // dodajemy sumaryczny wiersz
       
+      
       const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
       const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
       const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
+
       document.getElementById('count-ok').textContent = `(${sumOK})`;
       document.getElementById('count-ndf').textContent = `(${sumNDF})`;
       document.getElementById('count-scrap').textContent = `(${sumSCR})`;
+
+      document.getElementById('chat-ok').textContent = sumOK;
+      document.getElementById('chat-ndf').textContent = sumNDF;
+      document.getElementById('chat-scrap').textContent = sumSCR;
+
+      document.querySelectorAll('.summary-table td.ok').forEach(td => td.classList.add('flash'));
+      document.querySelectorAll('.summary-table td.ndf').forEach(td => td.classList.add('flash'));
+      document.querySelectorAll('.summary-table td.scrap-ttl').forEach(td => td.classList.add('flash'));
+
+      setTimeout(() => {
+        document.querySelectorAll('.flash').forEach(td => td.classList.remove('flash'));
+      }, 1500);
 
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
     }
