@@ -36,6 +36,13 @@
     th {
       background: #333;
     }
+    .summary {
+      margin-top: 10px;
+      font-size: 14px;
+      background: #1e1e1e;
+      padding: 10px;
+      border: 1px solid #444;
+    }
   </style>
 </head>
 <body>
@@ -44,10 +51,12 @@
     <div>
       <h3>Arkusz 1</h3>
       <table id="sheet1"><thead></thead><tbody></tbody></table>
+      <div id="summary1" class="summary"></div>
     </div>
     <div>
       <h3>Arkusz 2</h3>
       <table id="sheet2"><thead></thead><tbody></tbody></table>
+      <div id="summary2" class="summary"></div>
     </div>
   </div>
 
@@ -85,7 +94,7 @@
       return rows;
     }
 
-    function fetchAndDisplayCSV(url, tableId) {
+    function fetchAndDisplayCSV(url, tableId, summaryId) {
       fetch(url)
         .then(res => res.text())
         .then(csv => {
@@ -96,32 +105,15 @@
           );
           const dateIndex = header.findIndex(col => col.trim().toUpperCase() === 'DATE');
           const statusIndex = header.findIndex(col => col.trim().toUpperCase() === 'STATUS');
+          const nameIndex = header.findIndex(col => col.trim().toUpperCase() === 'NAMEFI NAME');
 
           const today = new Date().toISOString().split('T')[0];
           const filtered = rows.slice(1).filter(row =>
             row[dateIndex] === today && ['OK', 'NDF'].includes(row[statusIndex]?.trim().toUpperCase())
           );
 
-          const thead = document.querySelector(`#${tableId} thead`);
-          const tbody = document.querySelector(`#${tableId} tbody`);
-          thead.innerHTML = '<tr>' + selectedColumns.map(c => `<th>${c}</th>`).join('') + '</tr>';
-          tbody.innerHTML = filtered.map(row =>
-            '<tr>' + colIndexes.map(i => `<td>${row[i] || ''}</td>`).join('') + '</tr>'
-          ).join('');
-        })
-        .catch(err => {
-          document.querySelector(`#${tableId} tbody`).innerHTML = '<tr><td colspan="100%">Błąd wczytywania danych</td></tr>';
-          console.error('Błąd:', err);
-        });
-    }
-
-    function refreshData() {
-      fetchAndDisplayCSV(sheetUrls[0], 'sheet1');
-      fetchAndDisplayCSV(sheetUrls[1], 'sheet2');
-    }
-
-    refreshData();
-    setInterval(refreshData, 180000); // co 3 minuty
-  </script>
-</body>
-</html>
+          // Podsumowanie: tylko OK
+          const summaryCounts = {};
+          filtered.forEach(row => {
+            const status = row[statusIndex]?.trim().toUpperCase();
+            const name
