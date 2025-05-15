@@ -23,49 +23,27 @@
       content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
     }
-    .logo { text-align:center; margin:20px auto 0; }
-    .logo img { max-width:350px; width:80%; height:auto; }
-    .header-controls {
-      display:flex; flex-wrap:wrap; gap:10px;
-      justify-content:center; align-items:center; margin:30px 0;
+    .header-controls, .summary-box, .data-section { max-width:1200px; margin:0 auto 30px; }
+    .header-controls { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; align-items:center; margin:30px 0; }
+    .filter-btn, .toggle-btn, .export-btn {
+      padding:8px 14px; background:#fff; color:#000; border:none; border-radius:5px;
+      cursor:pointer; font-weight:bold;
     }
-    .export-btn, .toggle-btn, .filter-btn {
-      padding:8px 14px; background:#fff; color:#000;
-      border:none; border-radius:5px; cursor:pointer; font-weight:bold;
-    }
-    .export-btn:hover, .toggle-btn:hover, .filter-btn:hover { background:#ccc; }
+    .filter-btn:hover, .toggle-btn:hover, .export-btn:hover { background:#ccc; }
     .date {
-      padding:6px 10px; background:#fff; color:#000;
-      border-radius:6px; font-weight:bold;
+      padding:6px 10px; background:#fff; color:#000; border-radius:6px; font-weight:bold;
     }
-    .summary-box, .data-section {
-      max-width:1200px; margin:0 auto 30px; padding:20px;
-      background:rgba(255,255,255,0.95); border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
-      transition: background .3s, color .3s;
-    }
-    body.dark-mode .summary-box,
-    body.dark-mode .data-section {
-      background:rgba(30,41,59,0.95); color:#fff;
-    }
-    table { width:100%; border-collapse:collapse; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
     th, td { padding:10px; border:1px solid #ccc; }
     th {
-      background:#f0f0f0; text-align:center;
-      color:#000!important; font-weight:bold!important;
+      background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important;
     }
-    .summary-table td:first-child { font-weight:bold; text-align:left; }
+    .summary-table td:first-child { text-align:left; font-weight:bold; }
     .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
     .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
     .data-table td { font-size:14px; }
-    .status-ok {
-      background:var(--ok-bg); color:var(--txt-dark);
-      font-weight:bold; text-align:center;
-    }
-    .status-ndf {
-      background:var(--ndf-bg); color:var(--txt-dark);
-      font-weight:bold; text-align:center;
-    }
+    .status-ok { background:var(--ok-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background:var(--ndf-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
     .data-table th:nth-child(4)::before { content:"💬 "; }
@@ -76,7 +54,6 @@
   </style>
 </head>
 <body>
-  <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
   <div class="header-controls">
     <div id="today-date" class="date"></div>
     <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
@@ -115,12 +92,11 @@
 
   <script>
     const urls = [
-      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=193025884&single=true&output=csv'
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
-    // lokalne formatowanie YYYY-MM-DD
     function formatDate(d) {
       const y = d.getFullYear();
       const m = String(d.getMonth()+1).padStart(2,'0');
@@ -131,7 +107,7 @@
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
         r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-          ?.map(c => c.replace(/^"|"$/g,'').trim())||[]
+          ?.map(c => c.replace(/^"|"$/g,'').trim()) || []
       );
     }
 
@@ -147,7 +123,7 @@
 
     function setDate(type) {
       currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate()-1);
+      if (type === 'yesterday') currentDate.setDate(currentDate.getDate() - 1);
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
@@ -158,7 +134,7 @@
     }
 
     function exportToExcel() {
-      const data = latestData.map(d=>({
+      const data = latestData.map(d => ({
         STATUS: d.status,
         'SERIAL NUMBER': d.serial,
         NAME: d.name,
@@ -171,26 +147,28 @@
     }
 
     async function loadData() {
-      const tgt = formatDate(currentDate), all = [];
+      console.log('▶️ loadData start, date =', formatDate(currentDate));
+      const tgt = formatDate(currentDate);
+      const all = [];
       for (let url of urls) {
-        // dodajemy cacheBust i wymuszamy no-cache
-        const sep = url.includes('?') ? '&' : '?';
-        const fetchUrl = url + sep + 'cacheBust=' + Date.now();
+        const urlWithBust = url + '&cacheBust=' + Date.now();
         try {
-          const res = await fetch(fetchUrl, { cache: 'no-store' });
+          console.log('   • fetching', urlWithBust);
+          const res = await fetch(urlWithBust, { cache: 'no-store' });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const text = await res.text();
-          const rows = parseCSV(text),
-                hdr  = rows[0].map(h=>h.toUpperCase());
-          const iDate   = hdr.indexOf('DATE'),
-                iStatus = hdr.indexOf('STATUS'),
-                iName   = hdr.indexOf('NAME'),
-                iSN     = hdr.indexOf('SERIAL NUMBER'),
-                iComm   = hdr.indexOf('COMMENT');
-          rows.slice(1).forEach(r=>{
-            const d  = normalizeDate(r[iDate]),
-                  st = r[iStatus]?.toUpperCase();
-            if (d===tgt && (st==='OK'||st==='NDF')) {
+          console.log(`     → pobrano ${text.length} znaków`);
+          const rows = parseCSV(text);
+          const hdr  = rows[0].map(h => h.toUpperCase());
+          const iDate   = hdr.indexOf('DATE');
+          const iStatus = hdr.indexOf('STATUS');
+          const iName   = hdr.indexOf('NAME');
+          const iSN     = hdr.indexOf('SERIAL NUMBER');
+          const iComm   = hdr.indexOf('COMMENT');
+          rows.slice(1).forEach(r => {
+            const d  = normalizeDate(r[iDate]);
+            const st = r[iStatus]?.toUpperCase();
+            if (d === tgt && (st === 'OK' || st === 'NDF')) {
               all.push({
                 serial:  r[iSN]   || '–',
                 status:  st,
@@ -199,25 +177,27 @@
               });
             }
           });
-        } catch(e) {
-          console.error('Fetch error:', e);
+        } catch (e) {
+          console.error('❌ fetch error:', e);
+          document.getElementById('today-date').textContent = 'Błąd: ' + e.message;
         }
       }
+      console.log(`✅ loadData zwraca ${all.length} wierszy`);
       return all;
     }
 
     function render(data) {
-      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+      latestData = data.sort((a,b) => a.name.localeCompare(b.name));
 
-      // aktualizuj nagłówki z łącznymi liczbami
-      const totalOk  = latestData.filter(x=>x.status==='OK').length;
-      const totalNdf = latestData.filter(x=>x.status==='NDF').length;
+      // aktualizacja nagłówków OK/NDF
+      const totalOk  = latestData.filter(x => x.status==='OK').length;
+      const totalNdf = latestData.filter(x => x.status==='NDF').length;
       document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
       document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
 
-      // atomowa podmiana tbody danych
+      // podmiana danych
       const newDataTbody = document.createElement('tbody');
-      latestData.forEach(it=>{
+      latestData.forEach(it => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
@@ -229,13 +209,13 @@
       const dataTable = document.getElementById('data-table');
       dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
 
-      // atomowa podmiana tbody podsumowania
-      const names = Array.from(new Set(latestData.map(x=>x.name)))
-                         .sort((a,b)=>a.localeCompare(b));
+      // podmiana podsumowania
+      const names = Array.from(new Set(latestData.map(x => x.name)))
+                         .sort((a,b) => a.localeCompare(b));
       const newSumTbody = document.createElement('tbody');
-      names.forEach(name=>{
-        const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
-        const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
+      names.forEach(name => {
+        const ok  = latestData.filter(x => x.name===name && x.status==='OK').length;
+        const ndf = latestData.filter(x => x.name===name && x.status==='NDF').length;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${name}</td>
@@ -248,14 +228,14 @@
     }
 
     // inicjalizacja
-    if (localStorage.getItem('theme')==='dark') {
+    if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
 
-    // cykliczne odświeżanie co 2 s
-    (function loop(){
-      setTimeout(()=>{
+    // cykliczne odświeżanie co 2s
+    (function loop() {
+      setTimeout(() => {
         loadData().then(render).finally(loop);
       }, 2000);
     })();
