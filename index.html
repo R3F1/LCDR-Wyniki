@@ -232,7 +232,7 @@
           rows.slice(1).forEach(rw => {
             const d  = normalizeDate(rw[iDate]);
             const st = (rw[iStatus]||'').toUpperCase();
-            if (d===tgt && (st==='OK' || st==='NDF')) {
+            if (d===tgt && (st==='OK' || st==='NDF' || st==='SCRAP_TTL')) {
               all.push({
                 serial:  rw[iSN]   || '–',
                 status:  st,
