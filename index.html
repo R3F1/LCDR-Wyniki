@@ -381,8 +381,8 @@
 
   #chatbot-container {
     position: fixed;
-    top: 20px;
-    right: 40px;
+    top: 10px;
+    right: 60px;
     z-index: 1003;
     display: flex;
     align-items: flex-start;
@@ -417,30 +417,12 @@
     color: #111;
   }
 
-
-  #robot-eyes {
-    position: absolute;
-    top: 40px;
-    left: 16px;
-    width: 16px;
-    height: 6px;
-    background: white;
-    border-radius: 50%;
-    animation: blink 4s infinite;
-    z-index: 1004;
-  }
-
-  @keyframes blink {
-    0%, 97%, 100% { transform: scaleY(1); }
-    98%, 99% { transform: scaleY(0.1); }
-  }
-
 </style>
 </head>
 <body>
 
 <div id="chatbot-container">
-  <div id="robot-eyes"></div><img src="robotlcdr.png" alt="Robot" id="chatbot-img">
+  <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
   <div id="chatbot-bubble">
     <strong>🤖 LCDR Bot mówi:</strong><br>
     Naprawiono <span id="chat-ok">–</span> OK,<br>
