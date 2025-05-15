@@ -1,115 +1,92 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>LCDR - Wyniki Live</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard z Google Sheets</title>
   <style>
     body {
-      background-color: #121212;
-      color: #f0f0f0;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 30px;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
     }
-
-    h1 {
-      color: #00e676;
-      margin-bottom: 30px;
+    h2 {
+      text-align: center;
     }
-
-    .section {
-      margin-bottom: 40px;
+    .container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
-
-    .fi-title {
-      font-size: 22px;
-      color: #00e676;
-      margin-bottom: 15px;
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px;
+      background: #1e1e1e;
     }
-
-    .entry {
-      background-color: #1e1e1e;
-      border-left: 4px solid #00e676;
-      padding: 10px 15px;
-      margin-bottom: 10px;
-      border-radius: 6px;
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: left;
     }
-
-    .entry strong {
-      color: #ffffff;
-    }
-
-    .stat-line {
-      font-size: 14px;
-      margin-left: 10px;
+    th {
+      background: #333;
     }
   </style>
 </head>
 <body>
-  <h1>LCDR - Wyniki z dzisiejszego dnia</h1>
-  <div id="data-container">Ładowanie danych...</div>
+  <h2>Dane z dzisiejszego dnia</h2>
+  <div class="container">
+    <div>
+      <h3>Arkusz 1</h3>
+      <table id="sheet1"><thead></thead><tbody></tbody></table>
+    </div>
+    <div>
+      <h3>Arkusz 2</h3>
+      <table id="sheet2"><thead></thead><tbody></tbody></table>
+    </div>
+  </div>
 
   <script>
-    const TODAY = '2025-05-15';
-    const SHEETS = [
-      { url: 'https://docs.google.com/spreadsheets/d/1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/gviz/tq?gid=0', label: 'FI #1' },
-      { url: 'https://docs.google.com/spreadsheets/d/1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/gviz/tq?gid=193025884', label: 'FI #2' }
+    const sheetUrls = [
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
 
-    async function fetchSheetData(url) {
-      const response = await fetch(url);
-      const text = await response.text();
-      const json = JSON.parse(text.substring(47).slice(0, -2));
-      return json.table;
-    }
+    function fetchAndDisplayCSV(url, tableId) {
+      fetch(url)
+        .then(res => res.text())
+        .then(csv => {
+          const rows = csv.trim().split('\n').map(r => r.split(','));
+          const header = rows[0];
+          const dateIndex = header.findIndex(col => col.trim().toUpperCase() === 'DATE');
 
-    function renderSection(data, label) {
-      const section = document.createElement('div');
-      section.classList.add('section');
+          const today = new Date().toISOString().split('T')[0];
+          const filtered = rows.slice(1).filter(row => row[dateIndex] === today);
 
-      const title = document.createElement('div');
-      title.classList.add('fi-title');
-      title.textContent = label;
-      section.appendChild(title);
-
-      const cols = data.cols.map(col => col.label);
-      const dateIndex = cols.findIndex(col => col.toLowerCase().includes('data') || col.toLowerCase().includes('date'));
-
-      data.rows.forEach(row => {
-        if (!row.c[dateIndex]) return;
-        const rowDate = row.c[dateIndex].f || row.c[dateIndex].v;
-        if (!rowDate.includes(TODAY)) return;
-
-        const entry = document.createElement('div');
-        entry.classList.add('entry');
-
-        row.c.forEach((cell, i) => {
-          if (cell && cols[i] !== 'Data') {
-            const line = document.createElement('div');
-            line.classList.add('stat-line');
-            line.innerHTML = `<strong>${cols[i]}:</strong> ${cell.f || cell.v}`;
-            entry.appendChild(line);
-          }
+          const thead = document.querySelector(`#${tableId} thead`);
+          const tbody = document.querySelector(`#${tableId} tbody`);
+          thead.innerHTML = '<tr>' + header.map(h => `<th>${h}</th>`).join('') + '</tr>';
+          tbody.innerHTML = filtered.map(row =>
+            '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>'
+          ).join('');
+        })
+        .catch(err => {
+          document.querySelector(`#${tableId} tbody`).innerHTML = '<tr><td colspan="100%">Błąd wczytywania danych</td></tr>';
+          console.error('Błąd:', err);
         });
-
-        section.appendChild(entry);
-      });
-
-      return section;
     }
 
-    async function loadAndRender() {
-      const container = document.getElementById('data-container');
-      container.innerHTML = '';
-
-      for (const sheet of SHEETS) {
-        const data = await fetchSheetData(sheet.url);
-        const section = renderSection(data, sheet.label);
-        container.appendChild(section);
-      }
+    function refreshData() {
+      fetchAndDisplayCSV(sheetUrls[0], 'sheet1');
+      fetchAndDisplayCSV(sheetUrls[1], 'sheet2');
     }
 
-    loadAndRender();
-    setInterval(loadAndRender, 2 * 60 * 1000); // Odśwież co 2 minuty
+    refreshData();
+    setInterval(refreshData, 180000); // co 3 minuty
   </script>
 </body>
 </html>
