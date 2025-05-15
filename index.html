@@ -77,12 +77,22 @@
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
 
-    const selectedColumns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "Comment"];
+    const selectedColumns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "NAME", "Comment"];
 
     function parseCSV(csvText) {
       return csvText.trim().split('\n').map(line => {
-        return line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(cell => cell.replace(/^"|"$/g, ''));
+        return line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(cell => cell.replace(/^"|"$/g, '').trim()) || [];
       });
+    }
+
+    function normalizeDate(dateStr) {
+      if (!dateStr) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        const [d, m, y] = dateStr.split('/');
+        return `${y}-${m}-${d}`;
+      }
+      return '';
     }
 
     function fetchAndDisplayCSV(url, tableId, summaryId) {
@@ -101,9 +111,9 @@
           const today = new Date().toISOString().split('T')[0];
 
           const filtered = rows.slice(1).filter(row => {
-            const dateMatch = row[dateIndex] === today;
+            const rawDate = normalizeDate(row[dateIndex]);
             const status = row[statusIndex]?.toUpperCase();
-            return dateMatch && (status === 'OK' || status === 'NDF');
+            return rawDate === today && ['OK', 'NDF'].includes(status);
           });
 
           const summaryOK = {};
