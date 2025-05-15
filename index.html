@@ -367,14 +367,7 @@
       const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
       const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
       const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
-      const sumRow = document.createElement('tr');
-      sumRow.innerHTML = `
-        <td><strong>Łącznie</strong></td>
-        <td class="ok"><strong>✅ ${sumOK}</strong></td>
-        <td class="ndf"><strong>⚠️ ${sumNDF}</strong></td>
-        <td class="scrap-ttl"><strong>🗑️ ${sumSCR}</strong></td>`;
-      stb.appendChild(sumRow);
-
+      
       document.getElementById('count-ok').textContent = `(${sumOK})`;
       document.getElementById('count-ndf').textContent = `(${sumNDF})`;
       document.getElementById('count-scrap').textContent = `(${sumSCR})`;
