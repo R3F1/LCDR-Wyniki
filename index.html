@@ -18,9 +18,7 @@
       color: #fff;
       transition: background-color .3s, color .3s;
     }
-    body.dark-mode {
-      background-color: #0f172a;
-    }
+    body.dark-mode { background-color: #0f172a; }
     body:not(.dark-mode)::before {
       content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
@@ -52,7 +50,10 @@
     }
     table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #ccc; }
-    th { background:#f0f0f0; text-align:center; color:#000!important; font-weight:bold!important; }
+    th {
+      background:#f0f0f0; text-align:center;
+      color:#000!important; font-weight:bold!important;
+    }
     .summary-table td:first-child { font-weight:bold; text-align:left; }
     .summary-table .ok { background:var(--ok-bg); color:var(--txt-dark); }
     .summary-table .ndf { background:var(--ndf-bg); color:var(--txt-dark); }
@@ -114,26 +115,35 @@
 
   <script>
     const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=193025884&single=true&output=csv'
     ];
     let latestData = [], currentDate = new Date();
 
+    // lokalne formatowanie YYYY-MM-DD
+    function formatDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(c => c.replace(/^"|"$/g,'').trim())||[]
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+          ?.map(c => c.replace(/^"|"$/g,'').trim())||[]
       );
     }
+
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y]=s.split('/');
+        const [d,m,y] = s.split('/');
         return `${y}-${m}-${d}`;
       }
       return '';
     }
-    function formatDate(d){ return d.toISOString().split('T')[0]; }
 
     function setDate(type) {
       currentDate = new Date();
@@ -141,12 +151,12 @@
       document.getElementById('today-date').textContent = formatDate(currentDate);
       loadData().then(render);
     }
+
     function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
-      );
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
+
     function exportToExcel() {
       const data = latestData.map(d=>({
         STATUS: d.status,
@@ -161,25 +171,26 @@
     }
 
     async function loadData() {
-      console.log('▶️ loadData start, currentDate =', formatDate(currentDate));
       const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
+      for (let url of urls) {
+        // dodajemy cacheBust i wymuszamy no-cache
+        const sep = url.includes('?') ? '&' : '?';
+        const fetchUrl = url + sep + 'cacheBust=' + Date.now();
         try {
-          console.log('   • fetching', url);
-          const res = await fetch(url);
+          const res = await fetch(fetchUrl, { cache: 'no-store' });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const text = await res.text();
-          console.log(`     → pobrano ${text.length} znaków`);
-          const rows = parseCSV(text), hdr = rows[0].map(h => h.toUpperCase());
+          const rows = parseCSV(text),
+                hdr  = rows[0].map(h=>h.toUpperCase());
           const iDate   = hdr.indexOf('DATE'),
                 iStatus = hdr.indexOf('STATUS'),
                 iName   = hdr.indexOf('NAME'),
                 iSN     = hdr.indexOf('SERIAL NUMBER'),
                 iComm   = hdr.indexOf('COMMENT');
-          rows.slice(1).forEach(r => {
+          rows.slice(1).forEach(r=>{
             const d  = normalizeDate(r[iDate]),
                   st = r[iStatus]?.toUpperCase();
-            if (d === tgt && (st === 'OK' || st === 'NDF')) {
+            if (d===tgt && (st==='OK'||st==='NDF')) {
               all.push({
                 serial:  r[iSN]   || '–',
                 status:  st,
@@ -188,31 +199,27 @@
               });
             }
           });
-        } catch (e) {
-          console.error('❌ Błąd przy fetchowaniu arkusza:', url, e);
-          document.getElementById('today-date').textContent = `Błąd: ${e.message}`;
-          return [];
+        } catch(e) {
+          console.error('Fetch error:', e);
         }
       }
-      console.log(`✅ loadData zwraca ${all.length} wierszy`);
       return all;
     }
 
     function render(data) {
-      latestData = data;
-      latestData.sort((a,b)=>a.name.localeCompare(b.name));
+      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // update summary headers with total counts
+      // aktualizuj nagłówki z łącznymi liczbami
       const totalOk  = latestData.filter(x=>x.status==='OK').length;
       const totalNdf = latestData.filter(x=>x.status==='NDF').length;
       document.querySelector('.summary-table th.ok').textContent = `OK (${totalOk})`;
       document.querySelector('.summary-table th.ndf').textContent = `NDF (${totalNdf})`;
 
-      // data table
+      // atomowa podmiana tbody danych
       const newDataTbody = document.createElement('tbody');
       latestData.forEach(it=>{
         const tr = document.createElement('tr');
-        tr.innerHTML=`
+        tr.innerHTML = `
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
@@ -222,15 +229,15 @@
       const dataTable = document.getElementById('data-table');
       dataTable.tBodies[0].parentNode.replaceChild(newDataTbody, dataTable.tBodies[0]);
 
-      // summary table
-      const names = Array.from(new Set(latestData.map(it=>it.name)))
+      // atomowa podmiana tbody podsumowania
+      const names = Array.from(new Set(latestData.map(x=>x.name)))
                          .sort((a,b)=>a.localeCompare(b));
       const newSumTbody = document.createElement('tbody');
       names.forEach(name=>{
         const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
         const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
         const tr = document.createElement('tr');
-        tr.innerHTML=`
+        tr.innerHTML = `
           <td>${name}</td>
           <td class="ok">${ok}</td>
           <td class="ndf">${ndf}</td>`;
@@ -240,13 +247,16 @@
       sumTable.tBodies[0].parentNode.replaceChild(newSumTbody, sumTable.tBodies[0]);
     }
 
-    if (localStorage.getItem('theme')==='dark'){
+    // inicjalizacja
+    if (localStorage.getItem('theme')==='dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-    (function scheduleNext(){
+
+    // cykliczne odświeżanie co 2 s
+    (function loop(){
       setTimeout(()=>{
-        loadData().then(render).finally(scheduleNext);
+        loadData().then(render).finally(loop);
       }, 2000);
     })();
   </script>
