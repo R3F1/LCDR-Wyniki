@@ -7,60 +7,63 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     :root {
-      --bg: #121212;
-      --fg: #fff;
-      --ok-bg: #4CAF50;
-      --ndf-bg: #FFEB3B;
+      --ok-bg: #A7F3D0;
+      --ndf-bg: #FDE68A;
       --txt-dark: #000;
     }
 
     body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #f1f5f9, #e2e8f0);
+      color: #1e293b;
     }
 
     .header {
+      max-width: 1200px;
+      margin: 0 auto 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 1200px;
-      margin: 0 auto 20px;
     }
 
     .logo {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
       letter-spacing: 1px;
     }
 
+    .logo::before {
+      content: '📡 ';
+    }
+
     .export-btn {
-      padding: 8px 16px;
-      background: #444;
+      padding: 10px 16px;
+      background: #1e293b;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
     }
 
     .export-btn:hover {
-      background: #666;
+      background: #334155;
     }
 
     .summary-box {
       max-width: 700px;
       margin: 0 auto 30px;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 8px;
+      background: #ffffff;
+      border-radius: 10px;
       padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
     .summary-box h2 {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
 
     .summary-table {
@@ -69,13 +72,13 @@
     }
 
     .summary-table th, .summary-table td {
-      padding: 8px;
-      border: 1px solid #333;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
       text-align: center;
     }
 
     .summary-table th {
-      background: #2c2c2c;
+      background: #f8fafc;
     }
 
     .summary-table .ok {
@@ -91,9 +94,10 @@
     .data-section {
       max-width: 1200px;
       margin: 0 auto;
-      background: #1e1e1e;
+      background: #ffffff;
       border-radius: 10px;
       padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
     table.data-table {
@@ -102,14 +106,14 @@
     }
 
     table.data-table th, table.data-table td {
-      padding: 10px;
-      border: 1px solid #333;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
       font-size: 14px;
       text-align: left;
     }
 
     table.data-table th {
-      background: #2c2c2c;
+      background: #f8fafc;
       text-align: center;
     }
 
@@ -127,12 +131,22 @@
       text-align: center;
     }
 
+    .icon::before {
+      margin-right: 6px;
+      font-weight: bold;
+    }
+
+    .th-status::before { content: '🛠️'; }
+    .th-sn::before { content: '🆔'; }
+    .th-name::before { content: '👤'; }
+    .th-comment::before { content: '📝'; }
+
     @media(max-width: 768px) {
       .header, .summary-box, .data-section {
         padding: 10px;
       }
 
-      table.data-table th, table.data-table td {
+      table th, table td {
         font-size: 12px;
         padding: 6px;
       }
@@ -163,16 +177,17 @@
     <table class="data-table" id="data-table">
       <thead>
         <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
+          <th class="icon th-status">Status</th>
+          <th class="icon th-sn">Serial Number</th>
+          <th class="icon th-name">Name</th>
+          <th class="icon th-comment">Comment</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const urls = [
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
@@ -229,8 +244,8 @@
       latestData = data;
       const okCount = {}, ndfCount = {}, names = new Set();
 
-      const dataTable = document.querySelector('#data-table tbody');
-      dataTable.innerHTML = '';
+      const tbody = document.querySelector('#data-table tbody');
+      tbody.innerHTML = '';
       data.forEach(item => {
         if (item.name) {
           names.add(item.name);
@@ -245,11 +260,11 @@
           <td>${item.name}</td>
           <td>${item.comment}</td>
         `;
-        dataTable.appendChild(row);
+        tbody.appendChild(row);
       });
 
-      const summaryTable = document.querySelector('#summary-table tbody');
-      summaryTable.innerHTML = '';
+      const sumTbody = document.querySelector('#summary-table tbody');
+      sumTbody.innerHTML = '';
       Array.from(names).sort().forEach(name => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -257,7 +272,7 @@
           <td class="ok">${okCount[name] || 0}</td>
           <td class="ndf">${ndfCount[name] || 0}</td>
         `;
-        summaryTable.appendChild(row);
+        sumTbody.appendChild(row);
       });
     }
 
