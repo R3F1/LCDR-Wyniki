@@ -167,10 +167,14 @@
   </div>
 
   <script>
-    const urls = [
-      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/.../pub?gid=193025884&single=true&output=csv'
-    ];
+    // ↪ Podstaw swój ID arkusza i prawidłowe GID-y zakładek:
+    const spreadsheetId = '10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU';
+    const sheetGids     = ['0','193025884']; // 0 = pierwsza zakładka, druga = GID z paska adresu
+
+    const urls = sheetGids.map(gid =>
+      `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`
+    );
+
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
@@ -190,37 +194,36 @@
     function formatDate(d){ return d.toISOString().split('T')[0]; }
 
     function highlightActive(type) {
-      document.querySelectorAll('.filter-btn').forEach(btn=>{
-        btn.classList.toggle('active', btn.dataset.type===type);
-      });
+      document.querySelectorAll('.filter-btn')
+        .forEach(btn=>btn.classList.toggle('active', btn.dataset.type===type));
     }
 
     async function loadData() {
-      const tgt = formatDate(currentDate), all=[];
+      const tgt = formatDate(currentDate), all = [];
       for(const url of urls){
-        try{
-          const res  = await fetch(url);
-          if(!res.ok) throw new Error(res.status);
-          const txt  = await res.text();
-          const rows = parseCSV(txt), hdr=rows[0].map(h=>h.toUpperCase());
+        try {
+          const res = await fetch(url);
+          if(!res.ok) throw new Error(`HTTP ${res.status}`);
+          const txt = await res.text();
+          const rows= parseCSV(txt), hdr= rows[0].map(h=>h.toUpperCase());
           const iDate   = hdr.indexOf('DATE'),
                 iStatus = hdr.indexOf('STATUS'),
                 iName   = hdr.indexOf('NAME'),
                 iSN     = hdr.indexOf('SERIAL NUMBER'),
                 iComm   = hdr.indexOf('COMMENT');
           rows.slice(1).forEach(r=>{
-            const d=r[iDate], st=(r[iStatus]||'').toUpperCase();
+            const d = normalizeDate(r[iDate]), st=(r[iStatus]||'').toUpperCase();
             if(d===tgt && (st==='OK'||st==='NDF')){
               all.push({
-                serial: r[iSN]||'–',
-                status: st,
-                name:   r[iName]?.trim()||'–',
-                comment:r[iComm]||'–'
+                serial:  r[iSN]   || '–',
+                status:  st,
+                name:    r[iName]?.trim() || '–',
+                comment: r[iComm] || '–'
               });
             }
           });
-        }catch(e){
-          console.warn('⚠️ fetch error',url,e);
+        } catch(e) {
+          console.warn('⚠️ fetch error', url, e);
         }
       }
       return all;
@@ -232,10 +235,11 @@
         return;
       }
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
-      // data table
-      const dtb=document.createElement('tbody');
+
+      // tabela danych
+      const dtb = document.createElement('tbody');
       latestData.forEach(it=>{
-        const tr=document.createElement('tr');
+        const tr = document.createElement('tr');
         tr.innerHTML=`
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
@@ -245,13 +249,13 @@
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
 
-      // summary table
-      const names=[...new Set(latestData.map(x=>x.name))].sort();
-      const stb=document.createElement('tbody');
+      // tabela podsumowania
+      const names = [...new Set(latestData.map(x=>x.name))].sort();
+      const stb   = document.createElement('tbody');
       names.forEach(n=>{
-        const ok=latestData.filter(x=>x.name===n&&x.status==='OK').length;
-        const nd=latestData.filter(x=>x.name===n&&x.status==='NDF').length;
-        const tr=document.createElement('tr');
+        const ok = latestData.filter(x=>x.name===n&&x.status==='OK').length;
+        const nd = latestData.filter(x=>x.name===n&&x.status==='NDF').length;
+        const tr = document.createElement('tr');
         tr.innerHTML=`<td>${n}</td><td class="ok">${ok}</td><td class="ndf">${nd}</td>`;
         stb.appendChild(tr);
       });
@@ -261,8 +265,7 @@
     function setDate(type) {
       currentDate = new Date();
       if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
-      const txt = formatDate(currentDate);
-      document.getElementById('summary-date').textContent = txt;
+      document.getElementById('summary-date').textContent = formatDate(currentDate);
       highlightActive(type);
       loadData().then(render);
     }
@@ -277,15 +280,15 @@
     function exportToExcel() {
       const ws = XLSX.utils.json_to_sheet(
         latestData.map(d=>({
-          STATUS:d.status,
-          'SERIAL NUMBER':d.serial,
-          NAME:d.name,
-          COMMENT:d.comment
+          STATUS: d.status,
+          'SERIAL NUMBER': d.serial,
+          NAME: d.name,
+          COMMENT: d.comment
         }))
       );
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
-      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
+      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
     // init
