@@ -59,17 +59,48 @@
 
     const selectedColumns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "Comment"];
 
+    function parseCSV(csvText) {
+      const rows = [];
+      const lines = csvText.trim().split('\n');
+      for (let line of lines) {
+        const values = [];
+        let current = '', inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"' && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(current);
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current);
+        rows.push(values);
+      }
+      return rows;
+    }
+
     function fetchAndDisplayCSV(url, tableId) {
       fetch(url)
         .then(res => res.text())
         .then(csv => {
-          const rows = csv.trim().split('\n').map(r => r.split(','));
+          const rows = parseCSV(csv);
           const header = rows[0];
-          const colIndexes = selectedColumns.map(col => header.findIndex(h => h.trim().toUpperCase() === col.toUpperCase()));
+          const colIndexes = selectedColumns.map(col =>
+            header.findIndex(h => h.trim().toUpperCase() === col.toUpperCase())
+          );
           const dateIndex = header.findIndex(col => col.trim().toUpperCase() === 'DATE');
+          const statusIndex = header.findIndex(col => col.trim().toUpperCase() === 'STATUS');
 
           const today = new Date().toISOString().split('T')[0];
-          const filtered = rows.slice(1).filter(row => row[dateIndex] === today);
+          const filtered = rows.slice(1).filter(row =>
+            row[dateIndex] === today && ['OK', 'NDF'].includes(row[statusIndex]?.trim().toUpperCase())
+          );
 
           const thead = document.querySelector(`#${tableId} thead`);
           const tbody = document.querySelector(`#${tableId} tbody`);
