@@ -382,11 +382,17 @@
   #chatbot-container {
     position: fixed;
     top: 20px;
-    right: 20px;
+    right: 40px;
     z-index: 1003;
     display: flex;
     align-items: flex-start;
     gap: 12px;
+    animation: robotTalk 3s ease-in-out infinite;
+  }
+
+  @keyframes robotTalk {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-3px); }
   }
 
   #chatbot-img {
