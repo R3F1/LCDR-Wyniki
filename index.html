@@ -28,127 +28,115 @@
       background: rgba(0,0,0,0.75); z-index:-1;
     }
 
-    /* CONTROLS */
+    /* kontener centrujący */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .logo { text-align: center; margin: 20px 0; }
+    .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
+
     .header-controls {
-      display:flex; flex-wrap:wrap; gap:10px;
-      justify-content:center; align-items:center; margin:30px 0;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; align-items: center; margin: 30px 0;
     }
     .filter-btn, .toggle-btn, .export-btn {
-      padding:6px 14px;
-      background: var(--btn-bg);
-      color: #fff;
-      border: 2px solid var(--btn-border);
-      border-radius: var(--btn-radius);
-      cursor: pointer;
-      font-weight: bold;
-      transition: background .2s, color .2s;
+      padding: 6px 14px; background: var(--btn-bg);
+      color: #fff; border: 2px solid var(--btn-border);
+      border-radius: var(--btn-radius); cursor: pointer;
+      font-weight: bold; transition: background .2s, color .2s;
     }
     .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
       background: rgba(255,255,255,0.1);
     }
-    .filter-btn.active {
-      background: #fff;
-      color: #000;
+    .filter-btn.active { background: #fff; color: #000; }
+
+    .summary-box, .data-section {
+      background: rgba(255,255,255,0.95); color: #000;
+      border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      transition: background .3s, color .3s;
+      margin: 0 auto 30px; padding: 20px;
+    }
+    body.dark-mode .summary-box,
+    body.dark-mode .data-section {
+      background: rgba(30,41,59,0.95); color: #fff;
     }
 
-    /* SUMMARY BOX */
-    .summary-box {
-      max-width:1200px; margin:0 auto 30px; padding:20px;
-      background:rgba(255,255,255,0.95); border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
-      transition: background .3s, color .3s;
-    }
-    body.dark-mode .summary-box {
-      background:rgba(30,41,59,0.95); color:#fff;
-    }
     .summary-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 16px;
     }
     .summary-header h2 {
-      margin: 0;
-      font-size: 2.25rem;
+      margin: 0; font-size: 2.25rem;
       text-transform: uppercase;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     .date-summary {
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: rgba(0,0,0,0.1);
-      font-weight: bold;
+      padding: 6px 12px; border-radius: 8px;
+      background: rgba(0,0,0,0.1); font-weight: bold;
       color: inherit;
     }
     body.dark-mode .date-summary {
       background: rgba(255,255,255,0.1);
     }
 
-    /* DATA SECTION */
-    .data-section {
-      max-width:1200px; margin:0 auto 30px; padding:20px;
-      background:rgba(255,255,255,0.95); border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
-      transition: background .3s, color .3s;
-    }
-    body.dark-mode .data-section {
-      background:rgba(30,41,59,0.95); color:#fff;
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border: 1px solid #ccc; }
+    th {
+      background: #f0f0f0; text-align: center;
+      color: #000!important; font-weight: bold!important;
     }
 
-    /* TABLE STYLES */
-    table { width:100%; border-collapse:collapse; }
-    th, td { padding:10px; border:1px solid #ccc; }
-    th {
-      background:#f0f0f0; text-align:center;
-      color:#000!important; font-weight:bold!important;
-    }
-    /* Ensure OK, NDF, SCRAP TTL columns are same width */
-    th.ok, th.ndf, th.scrap-ttl {
+    /* ikony w nagłówkach */
+    .summary-table th:nth-child(1)::before { content: "👤 "; }
+    .data-table th:nth-child(1)::before    { content: "📺 "; }
+    .data-table th:nth-child(2)::before    { content: "🔧 "; }
+    .data-table th:nth-child(3)::before    { content: "👤 "; }
+    .data-table th:nth-child(4)::before    { content: "💬 "; }
+
+    /* kolumny OK/NDF/SCRAP TTL jednolite */
+    .summary-table th.ok, .summary-table td.ok,
+    .summary-table th.ndf, .summary-table td.ndf,
+    .summary-table th.scrap-ttl, .summary-table td.scrap-ttl {
       width: 100px;
-    }
-    /* Summary table: center & bold counts */
-    .summary-table td {
-      text-align: left;
     }
     .summary-table td.ok,
     .summary-table td.ndf,
     .summary-table td.scrap-ttl {
-      text-align: center;
-      font-weight: bold;
+      text-align: center; font-weight: bold;
     }
-    .summary-table .ok       { background:var(--ok-bg);    color:var(--txt-dark); }
-    .summary-table .ndf      { background:var(--ndf-bg);   color:var(--txt-dark); }
-    .summary-table .scrap-ttl{ background:var(--scrap-bg); color:var(--txt-dark); }
-    /* Data table */
-    .data-table td { font-size:14px; }
-    .status-ok  { background:var(--ok-bg);    color:var(--txt-dark); font-weight:bold; text-align:center; }
-    .status-ndf { background:var(--ndf-bg);   color:var(--txt-dark); font-weight:bold; text-align:center; }
-    /* Emojis in headers */
-    .data-table th:nth-child(1)::before { content:"đź“ş "; }
-    .data-table th:nth-child(2)::before { content:"đź”§ "; }
-    .data-table th:nth-child(3)::before { content:"đźŞŞ "; }
-    .data-table th:nth-child(4)::before { content:"đź’¬ "; }
+    .summary-table .ok        { background: var(--ok-bg);    color: var(--txt-dark); }
+    .summary-table .ndf       { background: var(--ndf-bg);   color: var(--txt-dark); }
+    .summary-table .scrap-ttl { background: var(--scrap-bg); color: var(--txt-dark); }
+
+    .data-table td { font-size: 14px; }
+    .status-ok  { background: var(--ok-bg);  color: var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background: var(--ndf-bg); color: var(--txt-dark); font-weight:bold; text-align:center; }
 
     @media(max-width:768px) {
       th, td { font-size:12px; padding:6px; }
-      .header-controls { flex-direction:column; }
-      .summary-header { flex-direction:column; align-items:flex-start; gap:8px; }
+      .header-controls, .summary-header {
+        flex-direction:column; align-items:flex-start; gap:8px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="logo.png" alt="LCDR LIVE DATA Logo">
+  <div class="container">
+    <div class="logo">
+      <img src="logo.png" alt="LCDR LIVE DATA Logo">
+    </div>
+    <div class="header-controls">
+      <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
+      <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
+      <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
+      <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+    </div>
   </div>
 
-  <div class="header-controls">
-    <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
-    <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-    <button class="toggle-btn" onclick="toggleTheme()">đźŚ“ Tryb</button>
-    <button class="export-btn" onclick="exportToExcel()">đź“¤ Excel</button>
-  </div>
-
-  <div class="summary-box">
+  <div class="container summary-box">
     <div class="summary-header">
       <h2>PODSUMOWANIE</h2>
       <div id="summary-date" class="date-summary"></div>
@@ -156,7 +144,7 @@
     <table class="summary-table" id="summary-table">
       <thead>
         <tr>
-          <th>đźŞŞ ImiÄ™</th>
+          <th>Imię</th>
           <th class="ok">OK</th>
           <th class="ndf">NDF</th>
           <th class="scrap-ttl">SCRAP TTL</th>
@@ -166,11 +154,14 @@
     </table>
   </div>
 
-  <div class="data-section">
+  <div class="container data-section">
     <table class="data-table" id="data-table">
       <thead>
         <tr>
-          <th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th>
+          <th>Status</th>
+          <th>Serial Number</th>
+          <th>Name</th>
+          <th>Comment</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -213,7 +204,6 @@
     async function loadData() {
       const tgt = formatDate(currentDate);
       const all = [];
-
       for (const url of urls) {
         try {
           const res  = await fetch(url);
@@ -221,44 +211,40 @@
           const text = await res.text();
           const rows = parseCSV(text);
           const hdr  = rows[0].map(h => h.toUpperCase());
-          const iDate  = hdr.findIndex(h => h==='DATE'||h==='DATA');
+
+          // poprawne wyszukanie indeksów:
+          const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
           const iStatus= hdr.findIndex(h => h==='STATUS');
-          const iName  = hdr.findIndex(h => h==='NAME'||h==='IMIÄ'||h==='IMIE');
+          const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
           const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
           const iComm  = hdr.findIndex(h => h==='COMMENT');
-          const iScrap = hdr.findIndex(h =>
-            h==='SCRAP TTL' || h==='SCRAP_TTL' || h==='SCRAP-TTL'
-          );
+          const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
 
-          rows.slice(1).forEach(r => {
-            const d  = normalizeDate(r[iDate]);
-            const st = (r[iStatus]||'').toUpperCase();
+          rows.slice(1).forEach(rw => {
+            const d  = normalizeDate(rw[iDate]);
+            const st = (rw[iStatus]||'').toUpperCase();
             if (d===tgt && (st==='OK' || st==='NDF')) {
-              const scrapVal = iScrap >= 0 ? Number(r[iScrap])||0 : 0;
               all.push({
-                serial:  r[iSN]   || 'â€“',
+                serial:  rw[iSN]   || '–',
                 status:  st,
-                name:    r[iName]?.trim() || 'â€“',
-                comment: r[iComm] || 'â€“',
-                scrap:   scrapVal
+                name:    rw[iName]?.trim() || '–',
+                comment: rw[iComm] || '–',
+                scrap:   iScrap>=0 ? Number(rw[iScrap])||0 : 0
               });
             }
           });
         } catch (e) {
-          console.warn('âš ď¸Ź fetch error', url, e);
+          console.warn('⚠️ fetch error', url, e);
         }
       }
       return all;
     }
 
     function render(data) {
-      if (!data.length) {
-        console.warn('Brak danych â€“ pozostawiam poprzednie');
-        return;
-      }
-      latestData = data.sort((a,b) => a.name.localeCompare(b.name));
+      if (!data.length) return;
+      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // Data table
+      // data table
       const dtb = document.createElement('tbody');
       latestData.forEach(it => {
         const tr = document.createElement('tr');
@@ -271,22 +257,22 @@
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
 
-      // Summary table
-      const okC = {}, ndfC = {}, scrapC = {}, names = new Set();
-      latestData.forEach(it => {
+      // summary
+      const okC={}, ndfC={}, scrC={}, names=new Set();
+      latestData.forEach(it=>{
         names.add(it.name);
-        okC[it.name]    = (okC[it.name]  ||0) + (it.status==='OK'?1:0);
-        ndfC[it.name]   = (ndfC[it.name] ||0) + (it.status==='NDF'?1:0);
-        scrapC[it.name] = (scrapC[it.name]||0) + it.scrap;
+        okC[it.name]  = (okC[it.name]||0) + (it.status==='OK'?1:0);
+        ndfC[it.name] = (ndfC[it.name]||0)+(it.status==='NDF'?1:0);
+        scrC[it.name] = (scrC[it.name]||0)+it.scrap;
       });
       const stb = document.createElement('tbody');
-      Array.from(names).sort().forEach(name => {
+      Array.from(names).sort().forEach(n=>{
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${name}</td>
-          <td class="ok">${okC[name]||0}</td>
-          <td class="ndf">${ndfC[name]||0}</td>
-          <td class="scrap-ttl">${scrapC[name]||0}</td>`;
+          <td>${n}</td>
+          <td class="ok">${okC[n]||0}</td>
+          <td class="ndf">${ndfC[n]||0}</td>
+          <td class="scrap-ttl">${scrC[n]||0}</td>`;
         stb.appendChild(tr);
       });
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
@@ -295,8 +281,7 @@
     function setDate(type) {
       currentDate = new Date();
       if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
-      document.getElementById('summary-date')
-              .textContent = formatDate(currentDate);
+      document.getElementById('summary-date').textContent = formatDate(currentDate);
       highlightActive(type);
       loadData().then(render);
     }
@@ -304,13 +289,13 @@
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        document.body.classList.contains('dark-mode')?'dark':'light'
       );
     }
 
     function exportToExcel() {
       const ws = XLSX.utils.json_to_sheet(
-        latestData.map(d => ({
+        latestData.map(d=>({
           STATUS: d.status,
           'SERIAL NUMBER': d.serial,
           NAME: d.name,
@@ -323,13 +308,12 @@
       XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    // Init
-    if (localStorage.getItem('theme')==='dark') {
+    // init
+    if (localStorage.getItem('theme')==='dark')
       document.body.classList.add('dark-mode');
-    }
     setDate('today');
     (function loop(){
-      setTimeout(() => loadData().then(render).finally(loop), 30000);
+      setTimeout(()=>loadData().then(render).finally(loop),30000);
     })();
   </script>
 </body>
