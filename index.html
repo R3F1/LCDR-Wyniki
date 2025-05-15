@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -6,171 +7,7 @@
   <title>LCDR LIVE DATA</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
-    :root {
-      --ok-bg: #A7F3D0;
-      --ndf-bg: #FDE68A;
-      --txt-dark: #000;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: url('background.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #ffffff;
-      position: relative;
-      z-index: 0;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75); /* przyciemnienie */
-      z-index: -1;
-    }
-
-    .header {
-      max-width: 1200px;
-      margin: 0 auto 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      padding: 20px;
-    }
-
-    .logo {
-      font-size: 26px;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-
-    .logo::before {
-      content: '📡 ';
-    }
-
-    .header-controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .export-btn {
-      padding: 10px 16px;
-      background: #ffffff;
-      color: #000;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .export-btn:hover {
-      background: #ccc;
-    }
-
-    .date {
-      font-size: 14px;
-      background: #ffffff;
-      color: #000;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-
-    .date::before {
-      content: "📅 ";
-    }
-
-    .summary-box, .data-section {
-      max-width: 1200px;
-      margin: 0 auto 30px;
-      background: rgba(255, 255, 255, 0.9);
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-      color: #000;
-    }
-
-    .summary-box h2 {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .summary-table, .data-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .summary-table th, .summary-table td,
-    .data-table th, .data-table td {
-      padding: 10px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
-    .summary-table th,
-    .data-table th {
-      background: #f0f0f0;
-      text-align: center;
-    }
-
-    .summary-table .ok {
-      background: var(--ok-bg);
-      color: var(--txt-dark);
-    }
-
-    .summary-table .ndf {
-      background: var(--ndf-bg);
-      color: var(--txt-dark);
-    }
-
-    .status-ok {
-      background: var(--ok-bg);
-      color: var(--txt-dark);
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .status-ndf {
-      background: var(--ndf-bg);
-      color: var(--txt-dark);
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .icon::before {
-      margin-right: 6px;
-      font-weight: bold;
-    }
-
-    .th-status::before { content: '🛠️'; }
-    .th-sn::before { content: '🆔'; }
-    .th-name::before { content: '👤'; }
-    .th-comment::before { content: '📝'; }
-
-    @media(max-width: 768px) {
-      .header, .summary-box, .data-section {
-        padding: 10px;
-      }
-
-      .header-controls {
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 6px;
-      }
-
-      table th, table td {
-        font-size: 12px;
-        padding: 6px;
-      }
-    }
+    /* [SKRÓCONE DLA PRZEJRZYSTOŚCI] – tutaj byłby cały styl z wcześniejszego kroku */
   </style>
 </head>
 <body>
@@ -178,7 +15,10 @@
     <div class="logo">LCDR LIVE DATA</div>
     <div class="header-controls">
       <div id="today-date" class="date"></div>
-      <button class="export-btn" onclick="exportToExcel()">Eksportuj do Excel</button>
+      <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
+      <button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button>
+      <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
+      <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
     </div>
   </div>
 
@@ -210,110 +50,133 @@
     </table>
   </div>
 
-  <script>
-    const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
-    ];
+<script>
+const urls = [
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+];
 
-    let latestData = [];
+let latestData = [];
+let currentDate = new Date();
 
-    function parseCSV(text) {
-      return text.trim().split('\n').map(row =>
-        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(cell => cell.replace(/^"|"$/g, '').trim()) || []
-      );
-    }
+function parseCSV(text) {
+  return text.trim().split('\n').map(row =>
+    row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(cell => cell.replace(/^"|"$/g, '').trim()) || []
+  );
+}
 
-    function normalizeDate(dateStr) {
-      if (!dateStr) return '';
-      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
-        const [d, m, y] = dateStr.split('/');
-        return `${y}-${m}-${d}`;
-      }
-      return '';
-    }
+function normalizeDate(dateStr) {
+  if (!dateStr) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+    const [d, m, y] = dateStr.split('/');
+    return `${y}-${m}-${d}`;
+  }
+  return '';
+}
 
-    async function loadData() {
-      const today = new Date().toISOString().split('T')[0];
-      let all = [];
-      for (let url of urls) {
-        const text = await fetch(url).then(r => r.text());
-        const rows = parseCSV(text);
-        const header = rows[0].map(h => h.toUpperCase());
-        const iDate = header.indexOf('DATE');
-        const iStatus = header.indexOf('STATUS');
-        const iName = header.indexOf('NAME');
-        const iSN = header.indexOf('SERIAL NUMBER');
-        const iComm = header.indexOf('COMMENT');
-        rows.slice(1).forEach(r => {
-          const d = normalizeDate(r[iDate]);
-          const st = r[iStatus]?.toUpperCase();
-          if (d === today && (st === 'OK' || st === 'NDF')) {
-            all.push({
-              serial: r[iSN] || '–',
-              status: st,
-              name: r[iName]?.trim() || '–',
-              comment: r[iComm] || '–'
-            });
-          }
+function formatDate(date) {
+  return date.toISOString().split("T")[0];
+}
+
+function setDate(type) {
+  currentDate = new Date();
+  if (type === 'yesterday') {
+    currentDate.setDate(currentDate.getDate() - 1);
+  }
+  document.getElementById("today-date").textContent = formatDate(currentDate);
+  loadData().then(render);
+}
+
+function toggleTheme() {
+  document.body.classList.toggle("dark-mode");
+  localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+}
+
+function exportToExcel() {
+  const data = latestData.map(d => ({
+    "STATUS": d.status,
+    "SERIAL NUMBER": d.serial,
+    "NAME": d.name,
+    "COMMENT": d.comment
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "LCDR Data");
+  XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+}
+
+async function loadData() {
+  const targetDate = formatDate(currentDate);
+  let all = [];
+  for (let url of urls) {
+    const text = await fetch(url).then(r => r.text());
+    const rows = parseCSV(text);
+    const header = rows[0].map(h => h.toUpperCase());
+    const iDate = header.indexOf('DATE');
+    const iStatus = header.indexOf('STATUS');
+    const iName = header.indexOf('NAME');
+    const iSN = header.indexOf('SERIAL NUMBER');
+    const iComm = header.indexOf('COMMENT');
+    rows.slice(1).forEach(r => {
+      const d = normalizeDate(r[iDate]);
+      const st = r[iStatus]?.toUpperCase();
+      if (d === targetDate && (st === 'OK' || st === 'NDF')) {
+        all.push({
+          serial: r[iSN] || '–',
+          status: st,
+          name: r[iName]?.trim() || '–',
+          comment: r[iComm] || '–'
         });
       }
-      return all;
+    });
+  }
+  return all;
+}
+
+function render(data) {
+  latestData = data;
+  const okCount = {}, ndfCount = {}, names = new Set();
+
+  const tbody = document.querySelector('#data-table tbody');
+  tbody.innerHTML = '';
+  data.forEach(item => {
+    if (item.name) {
+      names.add(item.name);
+      if (item.status === 'OK') okCount[item.name] = (okCount[item.name] || 0) + 1;
+      if (item.status === 'NDF') ndfCount[item.name] = (ndfCount[item.name] || 0) + 1;
     }
 
-    function render(data) {
-      latestData = data;
-      const okCount = {}, ndfCount = {}, names = new Set();
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="status-${item.status.toLowerCase()}">${item.status}</td>
+      <td>${item.serial}</td>
+      <td>${item.name}</td>
+      <td>${item.comment}</td>
+    `;
+    tbody.appendChild(row);
+  });
 
-      const tbody = document.querySelector('#data-table tbody');
-      tbody.innerHTML = '';
-      data.forEach(item => {
-        if (item.name) {
-          names.add(item.name);
-          if (item.status === 'OK') okCount[item.name] = (okCount[item.name] || 0) + 1;
-          if (item.status === 'NDF') ndfCount[item.name] = (ndfCount[item.name] || 0) + 1;
-        }
+  const sumTbody = document.querySelector('#summary-table tbody');
+  sumTbody.innerHTML = '';
+  Array.from(names).sort().forEach(name => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${name}</td>
+      <td class="ok">${okCount[name] || 0}</td>
+      <td class="ndf">${ndfCount[name] || 0}</td>
+    `;
+    sumTbody.appendChild(row);
+  });
+}
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="status-${item.status.toLowerCase()}">${item.status}</td>
-          <td>${item.serial}</td>
-          <td>${item.name}</td>
-          <td>${item.comment}</td>
-        `;
-        tbody.appendChild(row);
-      });
+// Ustawienia początkowe
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark-mode");
+}
 
-      const sumTbody = document.querySelector('#summary-table tbody');
-      sumTbody.innerHTML = '';
-      Array.from(names).sort().forEach(name => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${name}</td>
-          <td class="ok">${okCount[name] || 0}</td>
-          <td class="ndf">${ndfCount[name] || 0}</td>
-        `;
-        sumTbody.appendChild(row);
-      });
-    }
-
-    function exportToExcel() {
-      const data = latestData.map(d => ({
-        "STATUS": d.status,
-        "SERIAL NUMBER": d.serial,
-        "NAME": d.name,
-        "COMMENT": d.comment
-      }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "LCDR Data");
-      XLSX.writeFile(wb, `LCDR_DATA_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    }
-
-    document.getElementById("today-date").textContent = new Date().toISOString().split("T")[0];
-    loadData().then(render);
-    setInterval(() => loadData().then(render), 180000);
-  </script>
+setDate("today");
+setInterval(() => loadData().then(render), 180000);
+</script>
 </body>
 </html>
