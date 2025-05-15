@@ -453,9 +453,65 @@ setInterval(updateBotPhrase, 10000);
 
   
 
+
+  #tv-icon {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    font-size: 36px;
+    z-index: 1001;
+    filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.4));
+    transition: transform 0.3s ease;
+  }
+
+  #tv-icon:hover {
+    transform: scale(1.1);
+  }
+
+  body.light-mode #tv-icon {
+    color: #111;
+  }
+
+
+  @media (max-width: 768px) {
+    #chatbot-container {
+      transform: scale(0.75);
+      right: 20px;
+      top: 10px;
+    }
+
+    #tv-icon {
+      font-size: 24px;
+      top: 10px;
+      left: 10px;
+    }
+
+    .filter-btn, .toggle-btn, .mode-btn {
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      margin-bottom: 6px;
+    }
+
+    #chatbot-bubble {
+      font-size: 12px;
+      max-width: 200px;
+      line-height: 1.3em;
+    }
+
+    .summary-table td {
+      font-size: 12px;
+      padding: 4px 6px;
+    }
+
+    h1, h2, h3 {
+      font-size: 1.2em;
+    }
+  }
+
 </style>
 </head>
 <body>
+<div id="tv-icon">📺</div>
 
 <div id="chatbot-container">
   <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
