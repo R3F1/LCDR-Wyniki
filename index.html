@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LCDR Wyniki</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
       background: #121212;
       color: #fff;
-      margin: 0;
+      font-family: Arial, sans-serif;
       padding: 20px;
     }
     h2 {
@@ -22,15 +21,14 @@
       justify-content: center;
     }
     table {
-      border-collapse: collapse;
       width: 100%;
       max-width: 700px;
+      border-collapse: collapse;
       background: #1e1e1e;
     }
     th, td {
       border: 1px solid #444;
       padding: 6px;
-      text-align: left;
       font-size: 14px;
     }
     th {
@@ -43,7 +41,6 @@
     .summary-title-ok {
       color: #4CAF50;
       font-weight: bold;
-      margin-bottom: 4px;
     }
     .summary-title-ndf {
       background: #FFEB3B;
@@ -52,7 +49,7 @@
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: bold;
-      margin-top: 6px;
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -72,17 +69,17 @@
   </div>
 
   <script>
-    const sheetUrls = [
+    const urls = [
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
 
-    const selectedColumns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "NAME", "Comment"];
+    const columns = ["DATE", "HRS", "SERIAL NUMBER", "REPAIR", "TYPE", "STATUS", "NameFI NAME", "NAME", "Comment"];
 
-    function parseCSV(csvText) {
-      return csvText.trim().split('\n').map(line => {
-        return line.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(cell => cell.replace(/^"|"$/g, '').trim()) || [];
-      });
+    function parseCSV(text) {
+      return text.trim().split('\n').map(row =>
+        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(cell => cell.replace(/^"|"$/g, '').trim()) || []
+      );
     }
 
     function normalizeDate(dateStr) {
@@ -95,75 +92,67 @@
       return '';
     }
 
-    function fetchAndDisplayCSV(url, tableId, summaryId) {
+    function fetchSheet(url, tableId, summaryId) {
       fetch(url)
-        .then(res => res.text())
-        .then(csv => {
-          const rows = parseCSV(csv);
+        .then(r => r.text())
+        .then(text => {
+          const rows = parseCSV(text);
           const header = rows[0];
-          const colIndexes = selectedColumns.map(col =>
-            header.findIndex(h => h.trim().toUpperCase() === col.toUpperCase())
-          );
-          const dateIndex = header.findIndex(col => col.trim().toUpperCase() === 'DATE');
-          const statusIndex = header.findIndex(col => col.trim().toUpperCase() === 'STATUS');
-          const nameIndex = header.findIndex(col => col.trim().toUpperCase() === 'NAMEFI NAME');
-
           const today = new Date().toISOString().split('T')[0];
 
+          const indexes = columns.map(col =>
+            header.findIndex(h => h.trim().toUpperCase() === col.toUpperCase())
+          );
+          const idxDate = header.findIndex(h => h.toUpperCase() === "DATE");
+          const idxStatus = header.findIndex(h => h.toUpperCase() === "STATUS");
+          const idxName = header.findIndex(h => h.toUpperCase() === "NAME");
+
           const filtered = rows.slice(1).filter(row => {
-            const rawDate = normalizeDate(row[dateIndex]);
-            const status = row[statusIndex]?.toUpperCase();
-            return rawDate === today && ['OK', 'NDF'].includes(status);
+            const date = normalizeDate(row[idxDate]);
+            const status = row[idxStatus]?.toUpperCase();
+            return date === today && (status === "OK" || status === "NDF");
           });
 
-          const summaryOK = {};
-          const summaryNDF = {};
+          const okCount = {};
+          const ndfCount = {};
+
           filtered.forEach(row => {
-            const status = row[statusIndex]?.toUpperCase();
-            const name = row[nameIndex]?.trim();
+            const name = row[idxName]?.trim();
+            const status = row[idxStatus]?.toUpperCase();
             if (!name) return;
-            if (status === 'OK') {
-              summaryOK[name] = (summaryOK[name] || 0) + 1;
-            } else if (status === 'NDF') {
-              summaryNDF[name] = (summaryNDF[name] || 0) + 1;
-            }
+            if (status === "OK") okCount[name] = (okCount[name] || 0) + 1;
+            if (status === "NDF") ndfCount[name] = (ndfCount[name] || 0) + 1;
           });
+
+          const summaryDiv = document.getElementById(summaryId);
+          summaryDiv.innerHTML = `
+            <div class="summary-title-ok">Podsumowanie OK:</div>
+            ${Object.entries(okCount).map(([n, c]) => `• ${n}: ${c}`).join('<br>') || '<i>brak</i>'}
+            <br><br>
+            <div class="summary-title-ndf">Podsumowanie NDF:</div>
+            ${Object.entries(ndfCount).map(([n, c]) => `• ${n}: ${c}`).join('<br>') || '<i>brak</i>'}
+          `;
 
           const thead = document.querySelector(`#${tableId} thead`);
           const tbody = document.querySelector(`#${tableId} tbody`);
-          thead.innerHTML = '<tr>' + selectedColumns.map(c => `<th>${c}</th>`).join('') + '</tr>';
+          thead.innerHTML = `<tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr>`;
           tbody.innerHTML = filtered.map(row =>
-            '<tr>' + colIndexes.map(i => `<td>${row[i] || ''}</td>`).join('') + '</tr>'
+            `<tr>${indexes.map(i => `<td>${row[i] || ''}</td>`).join('')}</tr>`
           ).join('');
-
-          const summaryBox = document.getElementById(summaryId);
-          let summaryHTML = '';
-
-          if (Object.keys(summaryOK).length > 0) {
-            summaryHTML += `<div class="summary-title-ok">Podsumowanie OK:</div>` +
-              Object.entries(summaryOK).map(([name, count]) => `• ${name}: ${count}`).join('<br>') + '<br><br>';
-          }
-
-          if (Object.keys(summaryNDF).length > 0) {
-            summaryHTML += `<div class="summary-title-ndf">Podsumowanie NDF:</div><br>` +
-              Object.entries(summaryNDF).map(([name, count]) => `• ${name}: ${count}`).join('<br>');
-          }
-
-          summaryBox.innerHTML = summaryHTML || "<i>Brak danych do wyświetlenia</i>";
         })
-        .catch(error => {
-          document.querySelector(`#${tableId} tbody`).innerHTML = '<tr><td colspan="100%">Błąd wczytywania danych</td></tr>';
-          console.error(error);
+        .catch(err => {
+          document.getElementById(summaryId).innerHTML = "<span style='color:red'>Błąd wczytywania danych</span>";
+          console.error(err);
         });
     }
 
-    function refreshData() {
-      fetchAndDisplayCSV(sheetUrls[0], 'sheet1', 'summary1');
-      fetchAndDisplayCSV(sheetUrls[1], 'sheet2', 'summary2');
+    function loadAll() {
+      fetchSheet(urls[0], 'sheet1', 'summary1');
+      fetchSheet(urls[1], 'sheet2', 'summary2');
     }
 
-    refreshData();
-    setInterval(refreshData, 180000); // co 3 minuty
+    loadAll();
+    setInterval(loadAll, 180000);
   </script>
 </body>
 </html>
