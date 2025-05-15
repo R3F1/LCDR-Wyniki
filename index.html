@@ -16,13 +16,6 @@ setInterval(updateClockInline, 1000);
 updateClockInline();
 
 
-function updateTimestampLabel() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
-}
 
 
 function updateBotPhrase() {
@@ -458,25 +451,11 @@ setInterval(updateBotPhrase, 10000);
   }
 
 
-  .update-info {
-    position: fixed;
-    top: 10px;
-    left: 16px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #fff;
-    font-family: monospace;
-    z-index: 1002;
-  }
-
-  body.light-mode .update-info {
-    color: #111;
-  }
+  
 
 </style>
 </head>
 <body>
-<div id="last-update" class="update-info">🔄 Zaktualizowano o --:--:--</div>
 
 <div id="chatbot-container">
   <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
@@ -745,13 +724,6 @@ setInterval(updateClockInline, 1000);
 updateClockInline();
 
 
-function updateTimestampLabel() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
-  document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
-}
 
 
 function updateBotPhrase() {
