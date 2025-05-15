@@ -28,6 +28,17 @@
       background: rgba(0,0,0,0.75); z-index:-1;
     }
 
+    /* nowy kontener ograniczający szerokość i centrujący */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* LOGO */
+    .logo { text-align:center; margin:20px auto 0; }
+    .logo img { max-width:350px; width:80%; height:auto; }
+
     /* CONTROLS */
     .header-controls {
       display:flex; flex-wrap:wrap; gap:10px;
@@ -52,10 +63,13 @@
 
     /* SUMMARY BOX */
     .summary-box {
-      max-width:1200px; margin:0 auto 30px; padding:20px;
-      background:rgba(255,255,255,0.95); border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
+      background:rgba(255,255,255,0.95);
+      border-radius:10px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4);
+      color:#000;
       transition: background .3s, color .3s;
+      margin: 0 auto 30px;
+      padding:20px;
     }
     body.dark-mode .summary-box {
       background:rgba(30,41,59,0.95); color:#fff;
@@ -81,10 +95,13 @@
 
     /* DATA SECTION */
     .data-section {
-      max-width:1200px; margin:0 auto 30px; padding:20px;
-      background:rgba(255,255,255,0.95); border-radius:10px;
-      box-shadow:0 2px 10px rgba(0,0,0,0.4); color:#000;
+      background:rgba(255,255,255,0.95);
+      border-radius:10px;
+      box-shadow:0 2px 10px rgba(0,0,0,0.4);
+      color:#000;
       transition: background .3s, color .3s;
+      margin: 0 auto 30px;
+      padding:20px;
     }
     body.dark-mode .data-section {
       background:rgba(30,41,59,0.95); color:#fff;
@@ -97,36 +114,30 @@
       background:#f0f0f0; text-align:center;
       color:#000!important; font-weight:bold!important;
     }
-
-    /* Make OK, NDF, SCRAP TTL same width in summary */
-    .summary-table th.ok, 
-    .summary-table td.ok,
-    .summary-table th.ndf, 
-    .summary-table td.ndf,
-    .summary-table th.scrap-ttl, 
-    .summary-table td.scrap-ttl {
+    /* jednakowa szerokość kolumn w podsumowaniu */
+    .summary-table th.ok, .summary-table td.ok,
+    .summary-table th.ndf, .summary-table td.ndf,
+    .summary-table th.scrap-ttl, .summary-table td.scrap-ttl {
       width: 100px;
     }
-
-    /* Center & bold counts */
+    /* wyśrodkowanie i pogrubienie liczb */
     .summary-table td.ok,
     .summary-table td.ndf,
     .summary-table td.scrap-ttl {
       text-align: center;
       font-weight: bold;
     }
-
-    /* Cell background colors */
+    /* kolory */
     .summary-table .ok       { background:var(--ok-bg);    color:var(--txt-dark); }
     .summary-table .ndf      { background:var(--ndf-bg);   color:var(--txt-dark); }
     .summary-table .scrap-ttl{ background:var(--scrap-bg); color:var(--txt-dark); }
 
-    /* Data table styles */
+    /* Data table */
     .data-table td { font-size:14px; }
-    .status-ok  { background:var(--ok-bg);    color:var(--txt-dark); font-weight:bold; text-align:center; }
-    .status-ndf { background:var(--ndf-bg);   color:var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ok  { background:var(--ok-bg);  color:var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background:var(--ndf-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
 
-    /* Header emojis */
+    /* Emojis in headers */
     .data-table th:nth-child(1)::before { content:"📺 "; }
     .data-table th:nth-child(2)::before { content:"🔧 "; }
     .data-table th:nth-child(3)::before { content:"🪪 "; }
@@ -134,24 +145,24 @@
 
     @media(max-width:768px) {
       th, td { font-size:12px; padding:6px; }
-      .header-controls { flex-direction:column; }
-      .summary-header { flex-direction:column; align-items:flex-start; gap:8px; }
+      .header-controls, .summary-header { flex-direction:column; align-items:flex-start; gap:8px; }
     }
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="logo.png" alt="LCDR LIVE DATA Logo">
+  <div class="container">
+    <div class="logo">
+      <img src="logo.png" alt="LCDR LIVE DATA Logo">
+    </div>
+    <div class="header-controls">
+      <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
+      <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
+      <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
+      <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+    </div>
   </div>
 
-  <div class="header-controls">
-    <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
-    <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-    <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
-    <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
-  </div>
-
-  <div class="summary-box">
+  <div class="container summary-box">
     <div class="summary-header">
       <h2>PODSUMOWANIE</h2>
       <div id="summary-date" class="date-summary"></div>
@@ -169,7 +180,7 @@
     </table>
   </div>
 
-  <div class="data-section">
+  <div class="container data-section">
     <table class="data-table" id="data-table">
       <thead>
         <tr>
@@ -233,6 +244,7 @@
           const iScrap = hdr.findIndex(h =>
             h==='SCRAP TTL' || h==='SCRAP_TTL' || h==='SCRAP-TTL'
           );
+
           rows.slice(1).forEach(r => {
             const d  = normalizeDate(r[iDate]);
             const st = (r[iStatus]||'').toUpperCase();
