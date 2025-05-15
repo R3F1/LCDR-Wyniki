@@ -54,9 +54,7 @@
     .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
       background: rgba(255,255,255,0.1);
     }
-    .filter-btn.active {
-      background: #fff; color: #000;
-    }
+    .filter-btn.active { background: #fff; color: #000; }
 
     .summary-box, .data-section {
       background:rgba(255,255,255,0.95);
@@ -86,9 +84,7 @@
       background:rgba(0,0,0,0.1); font-weight:bold;
       color:inherit;
     }
-    body.dark-mode .date-summary {
-      background:rgba(255,255,255,0.1);
-    }
+    body.dark-mode .date-summary { background:rgba(255,255,255,0.1); }
 
     table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #ccc; }
@@ -193,6 +189,7 @@
            ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
       );
     }
+
     function normalizeDate(s) {
       if (!s) return '';
       if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
@@ -202,6 +199,7 @@
       }
       return '';
     }
+
     function formatDate(date) {
       return date.toISOString().split('T')[0];
     }
@@ -216,25 +214,25 @@
       const tgt = formatDate(currentDate), all = [];
       for (const url of urls) {
         try {
-          const res  = await fetch(url);
+          const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const text = await res.text();
           const rows = parseCSV(text);
           const hdr  = rows[0].map(h => h.toUpperCase());
-          const iDate  = hdr.findIndex(h => h==='DATE'||h==='DATA');
-          const iStatus= hdr.findIndex(h => h==='STATUS');
-          const iName  = hdr.findIndex(h => h==='NAME'||h==='IMIĘ'||h==='IMIE');
-          const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
-          const iComm  = hdr.findIndex(h => h==='COMMENT');
-          const iScrap = hdr.findIndex(h =>
-            h==='SCRAP TTL' || h==='SCRAP_TTL' || h==='SCRAP-TTL'
+          const iDate   = hdr.findIndex(h => h === 'DATE' || h === 'DATA');
+          const iStatus = hdr.findIndex(h => h === 'STATUS');
+          const iName   = hdr.findIndex(h => h === 'NAME' || h === 'IMIĘ' || h === 'IMIE');
+          const iSN     = hdr.findIndex(h => h === 'SERIAL NUMBER');
+          const iComm   = hdr.findIndex(h => h === 'COMMENT');
+          const iScrap  = hdr.findIndex(h =>
+            h === 'SCRAP TTL' || h === 'SCRAP_TTL' || h === 'SCRAP-TTL'
           );
 
           rows.slice(1).forEach(r => {
             const d  = normalizeDate(r[iDate]);
-            const st = (r[iStatus]||'').toUpperCase();
-            if (d===tgt && (st==='OK' || st==='NDF')) {
-              const scrapVal = iScrap >= 0 ? Number(r[iScrap])||0 : 0;
+            const st = (r[iStatus] || '').toUpperCase();
+            if (d === tgt && (st === 'OK' || st === 'NDF')) {
+              const scrapVal = iScrap >= 0 ? Number(r[iScrap]) || 0 : 0;
               all.push({
                 serial:  r[iSN]   || '–',
                 status:  st,
@@ -258,6 +256,7 @@
       }
       latestData = data.sort((a,b) => a.name.localeCompare(b.name));
 
+      // Data table
       const dtb = document.createElement('tbody');
       latestData.forEach(it => {
         const tr = document.createElement('tr');
@@ -270,21 +269,22 @@
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
 
-      const okC={}, ndfC={}, scrapC={}, names=new Set();
+      // Summary table
+      const okC = {}, ndfC = {}, scrapC = {}, names = new Set();
       latestData.forEach(it => {
         names.add(it.name);
-        okC[it.name]    = (okC[it.name]  ||0) + (it.status==='OK'?1:0);
-        ndfC[it.name]   = (ndfC[it.name] ||0) + (it.status==='NDF'?1:0);
-        scrapC[it.name] = (scrapC[it.name]||0) + it.scrap;
+        okC[it.name]    = (okC[it.name]    || 0) + (it.status === 'OK'  ? 1 : 0);
+        ndfC[it.name]   = (ndfC[it.name]   || 0) + (it.status === 'NDF' ? 1 : 0);
+        scrapC[it.name] = (scrapC[it.name] || 0) + it.scrap;
       });
-      const stb=document.createElement('tbody');
+      const stb = document.createElement('tbody');
       Array.from(names).sort().forEach(name => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${name}</td>
-          <td class="ok">${okC[name]||0}</td>
-          <td class="ndf">${ndfC[name]||0}</td>
-          <td class="scrap-ttl">${scrapC[name]||0}</td>`;
+          <td class="ok">${okC[name] || 0}</td>
+          <td class="ndf">${ndfC[name] || 0}</td>
+          <td class="scrap-ttl">${scrapC[name] || 0}</td>`;
         stb.appendChild(tr);
       });
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
@@ -292,7 +292,7 @@
 
     function setDate(type) {
       currentDate = new Date();
-      if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      if (type === 'yesterday') currentDate.setDate(currentDate.getDate() - 1);
       document.getElementById('summary-date').textContent = formatDate(currentDate);
       highlightActive(type);
       loadData().then(render);
@@ -300,7 +300,9 @@
 
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+      localStorage.setItem('theme',
+        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+      );
     }
 
     function exportToExcel() {
@@ -318,7 +320,8 @@
       XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    if (localStorage.getItem('theme')==='dark') {
+    // Init
+    if (localStorage.getItem('theme') === 'dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
