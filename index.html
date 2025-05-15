@@ -44,43 +44,52 @@
       line-height: 1.4em;
     }
   </style>
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
   <h1>LCDR WYNIKI LIVE</h1>
   <div id="data-container">Ładowanie danych...</div>
 
   <script>
-    const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05";
+    const SPREADSHEET_ID = '1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05';
+    const GID = '1731536831';
 
-    google.charts.load('current', { packages: ['corechart', 'table'] });
-    google.charts.setOnLoadCallback(draw);
-
-    function draw() {
-      const query = new google.visualization.Query(SPREADSHEET_URL + "/gviz/tq?gid=1731536831");
-      query.send(handleQueryResponse);
+    async function fetchData() {
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?gid=${GID}`;
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const jsonData = JSON.parse(text.substring(47, text.length - 2));
+        return jsonData.table;
+      } catch (error) {
+        console.error('Błąd podczas pobierania danych:', error);
+        return null;
+      }
     }
 
-    function handleQueryResponse(response) {
-      const data = response.getDataTable();
+    function renderData(table) {
       const container = document.getElementById('data-container');
       container.innerHTML = '';
 
-      let currentFI = '';
-      let section;
+      const rows = table.rows;
+      const cols = table.cols.map(col => col.label);
 
-      for (let row = 0; row < data.getNumberOfRows(); row++) {
-        const firstCell = data.getValue(row, 0);
-        if (firstCell && firstCell.startsWith("FI #")) {
-          currentFI = firstCell;
-          section = document.createElement('div');
-          section.classList.add('section');
+      let currentSection = null;
+      let sectionElement = null;
+
+      rows.forEach(row => {
+        const firstCell = row.c[0] ? row.c[0].v : '';
+        if (firstCell.startsWith('FI #')) {
+          currentSection = firstCell;
+          sectionElement = document.createElement('div');
+          sectionElement.classList.add('section');
+
           const title = document.createElement('div');
           title.classList.add('fi-title');
-          title.textContent = currentFI;
-          section.appendChild(title);
-          container.appendChild(section);
-        } else if (firstCell && firstCell !== "Name" && firstCell !== "Suma całkowita") {
+          title.textContent = currentSection;
+          sectionElement.appendChild(title);
+
+          container.appendChild(sectionElement);
+        } else if (firstCell && firstCell !== 'Name' && firstCell !== 'Suma całkowita') {
           const person = document.createElement('div');
           person.classList.add('person');
 
@@ -89,23 +98,34 @@
           name.textContent = firstCell;
           person.appendChild(name);
 
-          for (let col = 1; col < data.getNumberOfColumns(); col++) {
-            const header = data.getColumnLabel(col);
-            const value = data.getValue(row, col);
-            if (value !== null && value !== '') {
+          for (let i = 1; i < row.c.length; i++) {
+            const cell = row.c[i];
+            if (cell && cell.v !== null && cell.v !== '') {
               const stat = document.createElement('div');
               stat.classList.add('stat');
-              stat.textContent = `- ${header}: ${value}`;
+              stat.textContent = `- ${cols[i]}: ${cell.v}`;
               person.appendChild(stat);
             }
           }
 
-          section.appendChild(person);
+          if (sectionElement) {
+            sectionElement.appendChild(person);
+          }
         }
+      });
+    }
+
+    async function loadData() {
+      const table = await fetchData();
+      if (table) {
+        renderData(table);
+      } else {
+        document.getElementById('data-container').textContent = 'Nie udało się załadować danych.';
       }
     }
 
-    setInterval(draw, 2 * 60 * 1000); // odświeżanie co 2 minuty
+    loadData();
+    setInterval(loadData, 2 * 60 * 1000); // Odśwież co 2 minuty
   </script>
 </body>
 </html>
