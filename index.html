@@ -235,7 +235,7 @@
                 status:  st,
                 name:    rw[iName]?.trim() || '–',
                 comment: rw[iComm] || '–',
-                scrap:   iScrap>=0 ? Number(rw[iScrap])||0 : 0
+                scrap:   st === 'SCRAP_TTL' ? 1 : 0
               });
             }
           });
