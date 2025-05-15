@@ -24,6 +24,25 @@ function updateTimestampLabel() {
   document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
 }
 
+
+function updateBotPhrase() {
+  const phrases = [
+    "Hey! Miłego dnia! ☀️",
+    "Czy masz ochotę coś naprawić? 🔧",
+    "Czekasz na przerwę? ☕",
+    "Mam ochotę coś naprawić! 💪"
+  ];
+
+  const randomGreeting = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const summary = document.getElementById('chatbot-text').innerHTML.split('<br><br>')[1] || '';
+  document.getElementById('chatbot-text').innerHTML =
+    `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${summary}`;
+}
+
+updateBotPhrase();
+setInterval(updateBotPhrase, 10000);
+
 </script>
   <style>
     :root {
@@ -733,6 +752,25 @@ function updateTimestampLabel() {
   const s = String(now.getSeconds()).padStart(2, '0');
   document.getElementById('last-update').textContent = `🔄 Zaktualizowano o ${h}:${m}:${s}`;
 }
+
+
+function updateBotPhrase() {
+  const phrases = [
+    "Hey! Miłego dnia! ☀️",
+    "Czy masz ochotę coś naprawić? 🔧",
+    "Czekasz na przerwę? ☕",
+    "Mam ochotę coś naprawić! 💪"
+  ];
+
+  const randomGreeting = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const summary = document.getElementById('chatbot-text').innerHTML.split('<br><br>')[1] || '';
+  document.getElementById('chatbot-text').innerHTML =
+    `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${summary}`;
+}
+
+updateBotPhrase();
+setInterval(updateBotPhrase, 10000);
 
 </script>
 </body>
