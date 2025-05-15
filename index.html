@@ -129,59 +129,54 @@
     }
     function formatDate(d) { return d.toISOString().split('T')[0]; }
 
-    // ładuje i sparsuje jeden arkusz, zwraca tablicę wpisów lub rzuca błąd
+    // fetchSheet zawsze zwraca tablicę (nawet pustą), nigdy nie rzuca
     async function fetchSheet(url) {
-      const res = await safeFetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const text = await res.text();
-      const rows = parseCSV(text);
-      const hdr  = rows[0].map(h=>h.toUpperCase());
-      const iDate   = hdr.findIndex(h=>h==='DATE'||h==='DATA'),
-            iStatus = hdr.findIndex(h=>h==='STATUS'),
-            iName   = hdr.findIndex(h=>h==='NAME'||h==='IMIĘ'||h==='IMIE'),
-            iSN     = hdr.findIndex(h=>h==='SERIAL NUMBER'||h==='NUMER SERYJNY'||h==='NUMER S/N'),
-            iComm   = hdr.findIndex(h=>h==='COMMENT'||h==='KOMENTARZ');
-      const tgt = formatDate(currentDate);
-      return rows.slice(1).reduce((arr, r) => {
-        const d  = normalizeDate(r[iDate]),
-              st = r[iStatus]?.toUpperCase();
-        if (d===tgt && (st==='OK'||st==='NDF')) {
-          arr.push({
-            serial:  r[iSN]   || '–',
-            status:  st,
-            name:    r[iName]?.trim() || '–',
-            comment: r[iComm] || '–'
-          });
-        }
-        return arr;
-      }, []);
+      try {
+        const res = await safeFetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        const rows = parseCSV(text);
+        const hdr  = rows[0].map(h=>h.toUpperCase());
+        const iDate   = hdr.findIndex(h=>h==='DATE'||h==='DATA'),
+              iStatus = hdr.findIndex(h=>h==='STATUS'),
+              iName   = hdr.findIndex(h=>h==='NAME'||h==='IMIĘ'||h==='IMIE'),
+              iSN     = hdr.findIndex(h=>h==='SERIAL NUMBER'||h==='NUMER SERYJNY'||h==='NUMER S/N'),
+              iComm   = hdr.findIndex(h=>h==='COMMENT'||h==='KOMENTARZ');
+        const tgt = formatDate(currentDate);
+        return rows.slice(1).reduce((arr, r) => {
+          const d  = normalizeDate(r[iDate]),
+                st = r[iStatus]?.toUpperCase();
+          if (d===tgt && (st==='OK'||st==='NDF')) {
+            arr.push({
+              serial:  r[iSN]   || '–',
+              status:  st,
+              name:    r[iName]?.trim() || '–',
+              comment: r[iComm] || '–'
+            });
+          }
+          return arr;
+        }, []);
+      } catch (e) {
+        console.error('⚠️ Błąd w fetchSheet:', url, e);
+        return [];
+      }
     }
 
-    // zwraca płaską tablicę lub null, jeśli którykolwiek arkusz nie załadował się
+    // ładuje wszystkie arkusze i scala wyniki
     async function loadData() {
-      try {
-        const sheets = await Promise.all(urls.map(fetchSheet));
-        return sheets.flat();
-      } catch (e) {
-        console.error('❌ Błąd przy ładowaniu arkuszy, pomijam render:', e);
-        return null;
-      }
+      console.log('🔄 loadData', formatDate(currentDate));
+      const sheets = await Promise.all(urls.map(fetchSheet));
+      return sheets.flat();
     }
 
     function render(data) {
-      if (!data) return;            // null => nie ruszamy tabel
-      if (!data.length) {
-        console.warn('⚠️ Brak wierszy dla wybranej daty');
-        // można tu ewentualnie wyczyścić tabele, ale zostawiamy poprzednie
-        return;
-      }
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
-      // RENDER DATA TABLE
+      // tabela danych
       const dtb = document.createElement('tbody');
-      latestData.forEach(it=>{
+      latestData.forEach(it => {
         const tr = document.createElement('tr');
-        tr.innerHTML=`
+        tr.innerHTML = `
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
           <td>${it.serial}</td>
           <td>${it.name}</td>
@@ -190,14 +185,14 @@
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
 
-      // RENDER SUMMARY
+      // podsumowanie
       const names = [...new Set(latestData.map(x=>x.name))].sort();
       const stb   = document.createElement('tbody');
-      names.forEach(name=>{
+      names.forEach(name => {
         const ok  = latestData.filter(x=>x.name===name&&x.status==='OK').length;
         const ndf = latestData.filter(x=>x.name===name&&x.status==='NDF').length;
         const tr  = document.createElement('tr');
-        tr.innerHTML=`<td>${name}</td><td class="ok">${ok}</td><td class="ndf">${ndf}</td>`;
+        tr.innerHTML = `<td>${name}</td><td class="ok">${ok}</td><td class="ndf">${ndf}</td>`;
         stb.appendChild(tr);
       });
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
@@ -212,7 +207,7 @@
     function toggleTheme() {
       document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
+        document.body.classList.contains('dark-mode')?'dark':'light'
       );
     }
     function exportToExcel() {
@@ -229,14 +224,12 @@
       XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    // inicjalne ustawienia
+    // start
     if (localStorage.getItem('theme')==='dark') {
       document.body.classList.add('dark-mode');
     }
     setDate('today');
-
-    // pętla odświeżania
-    (function loop(){
+    (function loop() {
       setTimeout(()=>{
         loadData()
           .then(render)
