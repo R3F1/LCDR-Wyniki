@@ -411,12 +411,12 @@ function toggleBot() {
 
   #chatbot-container {
     position: fixed;
-    top: 20px;
+    top: 60px;
     right: 40px;
     z-index: 1003;
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 6px;
     animation: robotTalk 3s ease-in-out infinite;
   }
 
@@ -485,10 +485,15 @@ function toggleBot() {
 
   @media (max-width: 768px) {
     #chatbot-container {
-      transform: scale(0.75);
-      right: 20px;
-      top: 10px;
-    }
+    position: fixed;
+    top: 60px;
+    right: 40px;
+    z-index: 1003;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: robotTalk 3s ease-in-out infinite;
+  }
 
     #tv-icon {
       font-size: 24px;
