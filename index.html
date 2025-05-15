@@ -251,12 +251,18 @@
 
     body {
       background:
-        linear-gradient(-45deg, rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.35), rgba(30, 58, 138, 0.35), rgba(15, 23, 42, 0.35)),
-        url('background.jpg'); /* or background.svg */
-      background-size: 400% 400%, cover;
-      background-position: center center;
+        linear-gradient(60deg, rgba(30, 64, 175, 0.3), rgba(147, 51, 234, 0.3), rgba(16, 185, 129, 0.3), rgba(30, 64, 175, 0.3)),
+        url('background.jpg');
+      background-size: 600% 600%, cover;
+      background-position: center;
       background-repeat: no-repeat;
-      animation: backgroundMove 20s ease infinite;
+      animation: animatedPlasma 25s ease infinite;
+    }
+
+    @keyframes animatedPlasma {
+      0% { background-position: 0% 50%, center; }
+      50% { background-position: 100% 50%, center; }
+      100% { background-position: 0% 50%, center; }
     }
 
     @keyframes backgroundMove {
