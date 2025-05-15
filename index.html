@@ -8,12 +8,12 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     body {
+      margin: 0;
+      padding: 20px;
       font-family: 'Segoe UI', sans-serif;
       background: url('background.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #ffffff;
-      margin: 0;
-      padding: 20px;
       position: relative;
     }
 
@@ -26,22 +26,39 @@
     }
 
     .logo {
-      font-size: 26px;
+      font-size: 36px;
       font-weight: bold;
-    }
-
-    .header-controls {
+      text-align: center;
+      margin-bottom: 30px;
       display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 10px;
     }
 
-    .summary-box, .data-section {
-      background: rgba(255, 255, 255, 0.95);
-      color: #000;
-      margin: 20px auto;
+    .logo::before {
+      content: "💡";
+      font-size: 40px;
+    }
+
+    .header-controls {
       max-width: 1200px;
-      padding: 20px;
+      margin: 0 auto 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .summary-box, .data-section {
+      max-width: 1200px;
+      margin: 0 auto 30px;
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      color: #000;
     }
 
     .export-btn, .toggle-btn, .filter-btn {
@@ -54,14 +71,55 @@
       font-weight: bold;
     }
 
+    .summary-box h2::before {
+      content: "🛠️ ";
+    }
+
+    .summary-box h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .summary-table, .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .summary-table th, .summary-table td,
+    .data-table th, .data-table td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    .summary-table th,
+    .data-table th {
+      background: #f0f0f0;
+      text-align: center;
+    }
+
+    .summary-table .ok {
+      background: #A7F3D0;
+      color: #000;
+    }
+
+    .summary-table .ndf {
+      background: #FDE68A;
+      color: #000;
+    }
+
     .status-ok {
       background: #A7F3D0;
       color: #000;
+      font-weight: bold;
+      text-align: center;
     }
 
     .status-ndf {
       background: #FDE68A;
       color: #000;
+      font-weight: bold;
+      text-align: center;
     }
 
     .date {
@@ -71,18 +129,29 @@
       border-radius: 6px;
       font-weight: bold;
     }
+
+    .icon-tv::before {
+      content: "📺 ";
+    }
+
+    .icon-repair::before {
+      content: "🔧 ";
+    }
+
+    .icon-comment::before {
+      content: "💬 ";
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo">LCDR LIVE DATA</div>
-    <div class="header-controls">
-      <div id="today-date" class="date"></div>
-      <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
-      <button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button>
-      <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
-      <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
-    </div>
+  <div class="logo">LCDR LIVE DATA</div>
+
+  <div class="header-controls">
+    <div id="today-date" class="date"></div>
+    <button class="filter-btn" onclick="setDate('today')">Dzisiaj</button>
+    <button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button>
+    <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
+    <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
   </div>
 
   <div class="summary-box">
@@ -103,10 +172,10 @@
     <table class="data-table" id="data-table">
       <thead>
         <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
+          <th class="icon-tv">Status</th>
+          <th class="icon-repair">Serial Number</th>
           <th>Name</th>
-          <th>Comment</th>
+          <th class="icon-comment">Comment</th>
         </tr>
       </thead>
       <tbody></tbody>
