@@ -272,9 +272,9 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${n}</td>
-          <td class="ok">${okC[n]||0}</td>
-          <td class="ndf">${ndfC[n]||0}</td>
-          <td class="scrap-ttl">${scrC[n]||0}</td>`;
+          <td class="ok">✅ ${okC[n]||0}</td>
+          <td class="ndf">⚠️ ${ndfC[n]||0}</td>
+          <td class="scrap-ttl">🗑️ ${scrC[n]||0}</td>`;
         stb.appendChild(tr);
       });
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
