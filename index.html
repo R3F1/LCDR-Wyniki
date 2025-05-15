@@ -234,9 +234,9 @@
       <thead>
         <tr>
           <th>NAPRAWIACZ</th>
-          <th class="ok" id="head-ok">OK</th>
-          <th class="ndf" id="head-ndf">NDF</th>
-          <th class="scrap-ttl" id="head-scrap">SCRAP TTL</th>
+          <th class="ok">OK <span id="count-ok"></span></th>
+          <th class="ndf">NDF <span id="count-ndf"></span></th>
+          <th class="scrap-ttl">SCRAP TTL <span id="count-scrap"></span></th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -379,14 +379,6 @@
       document.getElementById('count-ndf').textContent = `(${sumNDF})`;
       document.getElementById('count-scrap').textContent = `(${sumSCR})`;
 
-
-      
-      const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
-      const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
-      const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
-      document.getElementById('head-ok').innerHTML = `OK (${sumOK})`;
-      document.getElementById('head-ndf').innerHTML = `NDF (${sumNDF})`;
-      document.getElementById('head-scrap').innerHTML = `SCRAP TTL (${sumSCR})`;
 
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
     }
