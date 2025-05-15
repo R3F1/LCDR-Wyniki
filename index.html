@@ -2,42 +2,33 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LCDR WYNIKI LIVE</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #121212;
-      color: #ffffff;
-      margin: 0;
+      color: #fff;
+      font-family: Arial, sans-serif;
       padding: 20px 40px;
     }
 
     h1 {
       color: #00e676;
-      font-size: 32px;
+      font-size: 28px;
       margin-bottom: 20px;
-      font-weight: 600;
-    }
-
-    #table-container {
-      overflow-x: auto;
-      background-color: #1e1e1e;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(0, 255, 135, 0.2);
-      padding: 10px;
-      max-width: 100%;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: #1e1e1e;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,255,135,0.15);
     }
 
     th, td {
       border: 1px solid #333;
-      padding: 12px;
+      padding: 10px;
       text-align: left;
       font-size: 14px;
     }
@@ -45,9 +36,6 @@
     th {
       background-color: #2c2c2c;
       color: #00e676;
-      position: sticky;
-      top: 0;
-      z-index: 1;
     }
 
     tr:nth-child(even) {
@@ -64,50 +52,39 @@
   <div id="table-container">Ładowanie danych...</div>
 
   <script>
-    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pubhtml?gid=1731536831&single=true';
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=1731536831&single=true&output=csv';
 
-    function fetchAndDisplayTable() {
-      fetch(SHEET_URL)
-        .then(response => response.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
+    async function loadCSVAndBuildTable() {
+      try {
+        const response = await fetch(CSV_URL);
+        const csvText = await response.text();
 
-          // Znajdujemy główną zawartość danych z tabelami przestawnymi
-          const pivotDivs = [...doc.querySelectorAll('div')]
-            .filter(div => div.innerText.includes('FI #') && div.querySelector('table'));
+        const rows = csvText.split('\n').map(row => row.split(','));
+        const container = document.getElementById('table-container');
 
-          if (pivotDivs.length > 0) {
-            const container = document.getElementById('table-container');
-            container.innerHTML = ''; // wyczyść
+        // Tworzymy tabelę
+        const table = document.createElement('table');
 
-            // Dodaj każdą sekcję z tabelą
-            pivotDivs.forEach(div => {
-              const table = div.querySelector('table');
-              if (table) {
-                // Usuń numeracje wierszy (jeśli są)
-                [...table.querySelectorAll('tr')].forEach(row => {
-                  const firstCell = row.querySelector('td, th');
-                  if (firstCell && /^\d+$/.test(firstCell.innerText.trim())) {
-                    firstCell.remove();
-                  }
-                });
-                container.appendChild(table);
-                container.appendChild(document.createElement('br'));
-              }
-            });
-          } else {
-            document.getElementById('table-container').innerText = 'Nie udało się załadować danych.';
-          }
-        })
-        .catch(err => {
-          console.error('Błąd ładowania danych:', err);
-          document.getElementById('table-container').innerText = 'Błąd podczas pobierania danych.';
+        rows.forEach((row, index) => {
+          const tr = document.createElement('tr');
+          row.forEach(cell => {
+            const td = document.createElement(index === 0 ? 'th' : 'td');
+            td.textContent = cell.trim();
+            tr.appendChild(td);
+          });
+          table.appendChild(tr);
         });
+
+        container.innerHTML = '';
+        container.appendChild(table);
+      } catch (err) {
+        console.error('Błąd ładowania CSV:', err);
+        document.getElementById('table-container').textContent = 'Błąd ładowania danych.';
+      }
     }
 
-    fetchAndDisplayTable();
-    setInterval(fetchAndDisplayTable, 2 * 60 * 1000); // Odśwież co 2 minuty
+    loadCSVAndBuildTable();
+    setInterval(loadCSVAndBuildTable, 2 * 60 * 1000); // Odśwież co 2 min
   </script>
 </body>
 </html>
