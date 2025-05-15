@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LCDR LIVE DATA</title>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -24,14 +24,14 @@
     }
     body.dark-mode { background-color: #0f172a; }
     body:not(.dark-mode)::before {
-      content:""; position:fixed; inset:0;
+      content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
     }
 
     .container {
-      max-width:1200px;
-      margin:0 auto;
-      padding:0 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
     }
 
     .logo { text-align:center; margin:20px auto 0; }
@@ -43,19 +43,19 @@
     }
     .filter-btn, .toggle-btn, .export-btn {
       padding:6px 14px;
-      background:var(--btn-bg);
-      color:#fff;
-      border:2px solid var(--btn-border);
-      border-radius:var(--btn-radius);
-      cursor:pointer;
-      font-weight:bold;
-      transition:background .2s,color .2s;
+      background: var(--btn-bg);
+      color: #fff;
+      border: 2px solid var(--btn-border);
+      border-radius: var(--btn-radius);
+      cursor: pointer;
+      font-weight: bold;
+      transition: background .2s, color .2s;
     }
     .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
       background: rgba(255,255,255,0.1);
     }
     .filter-btn.active {
-      background:#fff; color:#000;
+      background: #fff; color: #000;
     }
 
     .summary-box, .data-section {
@@ -63,14 +63,13 @@
       border-radius:10px;
       box-shadow:0 2px 10px rgba(0,0,0,0.4);
       color:#000;
-      transition:background .3s,color .3s;
+      transition: background .3s, color .3s;
       margin:0 auto 30px;
       padding:20px;
     }
     body.dark-mode .summary-box,
     body.dark-mode .data-section {
-      background:rgba(30,41,59,0.95);
-      color:#fff;
+      background:rgba(30,41,59,0.95); color:#fff;
     }
 
     .summary-header {
@@ -78,15 +77,14 @@
       align-items:center; margin-bottom:16px;
     }
     .summary-header h2 {
-      margin:0;
-      font-size:2.25rem;
+      margin:0; font-size:2.25rem;
       text-transform:uppercase;
       text-shadow:2px 2px 4px rgba(0,0,0,0.3);
     }
     .date-summary {
       padding:6px 12px; border-radius:8px;
-      background:rgba(0,0,0,0.1);
-      font-weight:bold; color:inherit;
+      background:rgba(0,0,0,0.1); font-weight:bold;
+      color:inherit;
     }
     body.dark-mode .date-summary {
       background:rgba(255,255,255,0.1);
@@ -99,12 +97,14 @@
       color:#000!important; font-weight:bold!important;
     }
 
-    /* Icons for columns */
+    /* New icons for Imię/Name columns */
     .summary-table th:nth-child(1)::before { content:"👤 "; }
     .data-table th:nth-child(3)::before    { content:"👤 "; }
-    .data-table th:nth-child(1)::before    { content:"📺 "; }
-    .data-table th:nth-child(2)::before    { content:"🔧 "; }
-    .data-table th:nth-child(4)::before    { content:"💬 "; }
+
+    /* Other header icons */
+    .data-table th:nth-child(1)::before { content:"📺 "; }
+    .data-table th:nth-child(2)::before { content:"🔧 "; }
+    .data-table th:nth-child(4)::before { content:"💬 "; }
 
     /* Equal width & styling for summary counts */
     .summary-table th.ok, .summary-table td.ok,
@@ -117,6 +117,7 @@
     .summary-table td.scrap-ttl {
       text-align:center; font-weight:bold;
     }
+
     .summary-table .ok       { background:var(--ok-bg);    color:var(--txt-dark); }
     .summary-table .ndf      { background:var(--ndf-bg);   color:var(--txt-dark); }
     .summary-table .scrap-ttl{ background:var(--scrap-bg); color:var(--txt-dark); }
@@ -183,12 +184,13 @@
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
+
     let latestData = [], currentDate = new Date();
 
     function parseCSV(text) {
       return text.trim().split('\n').map(row =>
         row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-           ?.map(cell=>cell.replace(/^"|"$/g,'').trim())||[]
+           ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
       );
     }
     function normalizeDate(s) {
@@ -200,74 +202,85 @@
       }
       return '';
     }
-    function formatDate(d){ return d.toISOString().split('T')[0]; }
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
     function highlightActive(type) {
-      document.querySelectorAll('.filter-btn').forEach(btn=>
-        btn.classList.toggle('active', btn.dataset.type===type)
+      document.querySelectorAll('.filter-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.type === type)
       );
     }
 
     async function loadData() {
       const tgt = formatDate(currentDate), all = [];
-      for(const url of urls) {
+      for (const url of urls) {
         try {
           const res  = await fetch(url);
-          if(!res.ok) throw new Error(res.status);
-          const txt = await res.text();
-          const rows = parseCSV(txt);
-          const hdr  = rows[0].map(h=>h.toUpperCase());
-          const iDate  = hdr.findIndex(h=>'DATE'||h==='DATA');
-          const iStatus= hdr.findIndex(h=>'STATUS');
-          const iName  = hdr.findIndex(h=>'NAME'||h==='IMIĘ'||h==='IMIE');
-          const iSN    = hdr.findIndex(h==='SERIAL NUMBER');
-          const iComm  = hdr.findIndex(h==='COMMENT');
-          const iScrap = hdr.findIndex(h=>'SCRAP TTL'||h==='SCRAP_TTL'||h==='SCRAP-TTL');
-          rows.slice(1).forEach(r=>{
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          const rows = parseCSV(text);
+          const hdr  = rows[0].map(h => h.toUpperCase());
+          const iDate  = hdr.findIndex(h => h==='DATE'||h==='DATA');
+          const iStatus= hdr.findIndex(h => h==='STATUS');
+          const iName  = hdr.findIndex(h => h==='NAME'||h==='IMIĘ'||h==='IMIE');
+          const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
+          const iComm  = hdr.findIndex(h => h==='COMMENT');
+          const iScrap = hdr.findIndex(h =>
+            h==='SCRAP TTL' || h==='SCRAP_TTL' || h==='SCRAP-TTL'
+          );
+
+          rows.slice(1).forEach(r => {
             const d  = normalizeDate(r[iDate]);
             const st = (r[iStatus]||'').toUpperCase();
-            if(d===tgt && (st==='OK'||st==='NDF')) {
-              const scrap = iScrap>=0 ? Number(r[iScrap])||0 : 0;
+            if (d===tgt && (st==='OK' || st==='NDF')) {
+              const scrapVal = iScrap >= 0 ? Number(r[iScrap])||0 : 0;
               all.push({
-                serial: r[iSN]||'–',
-                status: st,
-                name:   r[iName]?.trim()||'–',
-                comment:r[iComm]||'–',
-                scrap
+                serial:  r[iSN]   || '–',
+                status:  st,
+                name:    r[iName]?.trim() || '–',
+                comment: r[iComm] || '–',
+                scrap:   scrapVal
               });
             }
           });
-        }catch(e){
-          console.warn('⚠️ fetch error',url,e);
+        } catch (e) {
+          console.warn('⚠️ fetch error', url, e);
         }
       }
       return all;
     }
 
     function render(data) {
-      if(!data.length) return console.warn('Brak danych – poprzednie pozostają');
-      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+      if (!data.length) {
+        console.warn('Brak danych – pozostawiam poprzednie');
+        return;
+      }
+      latestData = data.sort((a,b) => a.name.localeCompare(b.name));
 
-      const dtb=document.createElement('tbody');
-      latestData.forEach(it=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
+      const dtb = document.createElement('tbody');
+      latestData.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
           <td class="status-${it.status.toLowerCase()}">${it.status}</td>
-          <td>${it.serial}</td><td>${it.name}</td><td>${it.comment}</td>`;
+          <td>${it.serial}</td>
+          <td>${it.name}</td>
+          <td>${it.comment}</td>`;
         dtb.appendChild(tr);
       });
       document.getElementById('data-table').tBodies[0].replaceWith(dtb);
 
       const okC={}, ndfC={}, scrapC={}, names=new Set();
-      latestData.forEach(it=>{
+      latestData.forEach(it => {
         names.add(it.name);
-        okC[it.name]    = (okC[it.name]||0)+(it.status==='OK'?1:0);
-        ndfC[it.name]   = (ndfC[it.name]||0)+(it.status==='NDF'?1:0);
-        scrapC[it.name] = (scrapC[it.name]||0)+it.scrap;
+        okC[it.name]    = (okC[it.name]  ||0) + (it.status==='OK'?1:0);
+        ndfC[it.name]   = (ndfC[it.name] ||0) + (it.status==='NDF'?1:0);
+        scrapC[it.name] = (scrapC[it.name]||0) + it.scrap;
       });
       const stb=document.createElement('tbody');
-      Array.from(names).sort().forEach(name=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`
+      Array.from(names).sort().forEach(name => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
           <td>${name}</td>
           <td class="ok">${okC[name]||0}</td>
           <td class="ndf">${ndfC[name]||0}</td>
@@ -278,35 +291,39 @@
     }
 
     function setDate(type) {
-      currentDate=new Date();
-      if(type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
-      document.getElementById('summary-date').textContent=formatDate(currentDate);
+      currentDate = new Date();
+      if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      document.getElementById('summary-date').textContent = formatDate(currentDate);
       highlightActive(type);
       loadData().then(render);
     }
-    function toggleTheme(){
+
+    function toggleTheme() {
       document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme',document.body.classList.contains('dark-mode')?'dark':'light');
-    }
-    function exportToExcel(){
-      const ws=XLSX.utils.json_to_sheet(
-        latestData.map(d=>({
-          STATUS:d.status,
-          'SERIAL NUMBER':d.serial,
-          NAME:d.name,
-          COMMENT:d.comment,
-          'SCRAP TTL':d.scrap
-        }))
-      );
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,'LCDR Data');
-      XLSX.writeFile(wb,`LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+      localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     }
 
-    if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark-mode');
+    function exportToExcel() {
+      const ws = XLSX.utils.json_to_sheet(
+        latestData.map(d => ({
+          STATUS: d.status,
+          'SERIAL NUMBER': d.serial,
+          NAME: d.name,
+          COMMENT: d.comment,
+          'SCRAP TTL': d.scrap
+        }))
+      );
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
+      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+    }
+
+    if (localStorage.getItem('theme')==='dark') {
+      document.body.classList.add('dark-mode');
+    }
     setDate('today');
     (function loop(){
-      setTimeout(()=>loadData().then(render).finally(loop),30000);
+      setTimeout(() => loadData().then(render).finally(loop), 30000);
     })();
   </script>
 </body>
