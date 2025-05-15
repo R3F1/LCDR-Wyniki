@@ -42,6 +42,7 @@
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: bold;
+      margin-top: 4px;
     }
 
     .grid {
@@ -79,16 +80,13 @@
     <div id="sum-ok"><span class="summary-title-ok">Podsumowanie OK:</span><br><i>ładowanie…</i></div>
     <div id="sum-ndf"><span class="summary-title-ndf">Podsumowanie NDF:</span><br><i>ładowanie…</i></div>
   </div>
-  <div id="grid" class="grid">
-    <!-- kafelki wczytane JS-em -->
-  </div>
+  <div id="grid" class="grid"></div>
 
   <script>
     const urls = [
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
-    const cols = ["DATE","HRS","SERIAL NUMBER","REPAIR","TYPE","STATUS","NameFI NAME","NAME","Comment"];
     function parseCSV(text) {
       return text.trim().split('\n').map(r =>
         r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(c => c.replace(/^"|"$/g,'').trim())
@@ -113,8 +111,6 @@
         const iStatus = hdr.indexOf('STATUS');
         const iName = hdr.indexOf('NAME');
         const iSN = hdr.indexOf('SERIAL NUMBER');
-        const iRep = hdr.indexOf('REPAIR');
-        const iType = hdr.indexOf('TYPE');
         const iComm = hdr.indexOf('COMMENT');
         rows.slice(1).forEach(r => {
           const d = normDate(r[iDate]);
@@ -122,8 +118,6 @@
           if (d===today && (st==='OK'||st==='NDF')) {
             all.push({
               serial: r[iSN]||'–',
-              repair: r[iRep]||'–',
-              type: r[iType]||'–',
               status: st,
               name: r[iName]?.trim()||null,
               comment: r[iComm]||'–'
@@ -139,41 +133,36 @@
       const okCnt={}, ndfCnt={};
 
       all.forEach(item => {
-        // podsumowanie
         if (item.name) {
           if (item.status==='OK') okCnt[item.name]=(okCnt[item.name]||0)+1;
           if (item.status==='NDF') ndfCnt[item.name]=(ndfCnt[item.name]||0)+1;
         }
-        // kafelek
         const c = document.createElement('div');
         c.className = 'card';
         c.innerHTML = `
           <h4>${item.status}</h4>
           <div class="field"><span class="label">SN:</span> ${item.serial}</div>
-          <div class="field"><span class="label">Repair:</span> ${item.repair}</div>
-          <div class="field"><span class="label">Type:</span> ${item.type}</div>
           <div class="field"><span class="label">Name:</span> ${item.name||'–'}</div>
           <div class="field"><span class="label">Comment:</span> ${item.comment}</div>
         `;
         grid.appendChild(c);
       });
 
-      // podsumowania
-      const sumOK = document.getElementById('sum-ok');
-      sumOK.innerHTML = `<span class="summary-title-ok">Podsumowanie OK:</span><br>` +
+      document.getElementById('sum-ok').innerHTML =
+        `<span class="summary-title-ok">Podsumowanie OK:</span><br>` +
         (Object.keys(okCnt).length
           ? Object.entries(okCnt).map(([n,c])=>`• ${n}: ${c}`).join('<br>')
           : '<i>brak</i>');
-      const sumNDF = document.getElementById('sum-ndf');
-      sumNDF.innerHTML = `<span class="summary-title-ndf">Podsumowanie NDF:</span><br>` +
+
+      document.getElementById('sum-ndf').innerHTML =
+        `<span class="summary-title-ndf">Podsumowanie NDF:</span><br>` +
         (Object.keys(ndfCnt).length
           ? Object.entries(ndfCnt).map(([n,c])=>`• ${n}: ${c}`).join('<br>')
           : '<i>brak</i>');
     }
 
-    // init
     loadData().then(render);
-    setInterval(()=>loadData().then(render), 180000);
+    setInterval(() => loadData().then(render), 180000);
   </script>
 </body>
 </html>
