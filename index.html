@@ -206,6 +206,13 @@
       font-weight: normal;
     }
 
+
+    .summary-table th .count-sub {
+      font-size: 0.85em;
+      font-weight: normal;
+      margin-top: 4px;
+    }
+
 </style>
 </head>
 <body>
@@ -371,14 +378,13 @@
       });
       
       // dodajemy sumaryczny wiersz
+      
       const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
       const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
       const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
-      
       document.getElementById('count-ok').textContent = `(${sumOK})`;
       document.getElementById('count-ndf').textContent = `(${sumNDF})`;
       document.getElementById('count-scrap').textContent = `(${sumSCR})`;
-
 
       document.getElementById('summary-table').tBodies[0].replaceWith(stb);
     }
