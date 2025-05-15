@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LCDR Wyniki - Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LCDR Wyniki – Dashboard</title>
   <style>
     :root {
       --bg: #121212;
@@ -14,7 +14,11 @@
       --ndf-bg: #FFEB3B;
       --ndf-fg: #000;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       background: var(--bg);
       color: var(--fg);
@@ -25,26 +29,42 @@
       text-align: center;
       margin-bottom: 20px;
     }
-    .summary {
-      max-width: 900px;
+
+    /* Podsumowanie */
+    .summary-box {
+      max-width: 700px;
       margin: 0 auto 30px;
-      padding: 20px;
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 20px;
     }
-    .summary div { margin-bottom: 10px; }
-    .summary-title-ok { color: var(--ok); font-weight: bold; }
-    .summary-title-ndf {
-      display: inline-block;
+    .summary-box h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .summary-table th, .summary-table td {
+      padding: 8px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .summary-table th {
+      background: #2c2c2c;
+    }
+    .summary-table .ok {
+      color: var(--ok);
+    }
+    .summary-table .ndf {
       background: var(--ndf-bg);
       color: var(--ndf-fg);
-      padding: 2px 6px;
-      border-radius: 4px;
       font-weight: bold;
-      margin-top: 4px;
     }
 
+    /* Kafelki */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -76,10 +96,21 @@
 </head>
 <body>
   <h1>LCDR Wyniki – Dashboard</h1>
-  <div id="summary" class="summary">
-    <div id="sum-ok"><span class="summary-title-ok">Podsumowanie OK:</span><br><i>ładowanie…</i></div>
-    <div id="sum-ndf"><span class="summary-title-ndf">Podsumowanie NDF:</span><br><i>ładowanie…</i></div>
+
+  <div class="summary-box">
+    <h2>Podsumowanie</h2>
+    <table class="summary-table" id="summary-table">
+      <thead>
+        <tr>
+          <th>Imię</th>
+          <th class="ok">OK</th>
+          <th class="ndf">NDF</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
+
   <div id="grid" class="grid"></div>
 
   <script>
@@ -87,78 +118,86 @@
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
+
     function parseCSV(text) {
-      return text.trim().split('\n').map(r =>
-        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g).map(c => c.replace(/^"|"$/g,'').trim())
+      return text.trim().split('\n').map(row =>
+        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)?.map(cell => cell.replace(/^"|"$/g, '').trim()) || []
       );
     }
-    function normDate(s) {
-      if (!s) return '';
-      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y]=s.split('/'); return `${y}-${m}-${d}`;
+
+    function normalizeDate(dateStr) {
+      if (!dateStr) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
+        const [d, m, y] = dateStr.split('/');
+        return `${y}-${m}-${d}`;
       }
       return '';
     }
+
     async function loadData() {
       const today = new Date().toISOString().split('T')[0];
       let all = [];
       for (let url of urls) {
-        const txt = await fetch(url).then(r=>r.text());
-        const rows = parseCSV(txt);
-        const hdr = rows[0].map(h=>h.toUpperCase());
-        const iDate = hdr.indexOf('DATE');
-        const iStatus = hdr.indexOf('STATUS');
-        const iName = hdr.indexOf('NAME');
-        const iSN = hdr.indexOf('SERIAL NUMBER');
-        const iComm = hdr.indexOf('COMMENT');
+        const text = await fetch(url).then(r => r.text());
+        const rows = parseCSV(text);
+        const header = rows[0].map(h => h.toUpperCase());
+        const iDate = header.indexOf('DATE');
+        const iStatus = header.indexOf('STATUS');
+        const iName = header.indexOf('NAME');
+        const iSN = header.indexOf('SERIAL NUMBER');
+        const iComm = header.indexOf('COMMENT');
         rows.slice(1).forEach(r => {
-          const d = normDate(r[iDate]);
+          const d = normalizeDate(r[iDate]);
           const st = r[iStatus]?.toUpperCase();
-          if (d===today && (st==='OK'||st==='NDF')) {
+          if (d === today && (st === 'OK' || st === 'NDF')) {
             all.push({
-              serial: r[iSN]||'–',
+              serial: r[iSN] || '–',
               status: st,
-              name: r[iName]?.trim()||null,
-              comment: r[iComm]||'–'
+              name: r[iName]?.trim() || null,
+              comment: r[iComm] || '–'
             });
           }
         });
       }
       return all;
     }
+
     function render(all) {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
-      const okCnt={}, ndfCnt={};
+      const okCount = {}, ndfCount = {}, names = new Set();
 
       all.forEach(item => {
         if (item.name) {
-          if (item.status==='OK') okCnt[item.name]=(okCnt[item.name]||0)+1;
-          if (item.status==='NDF') ndfCnt[item.name]=(ndfCnt[item.name]||0)+1;
+          names.add(item.name);
+          if (item.status === 'OK') okCount[item.name] = (okCount[item.name] || 0) + 1;
+          if (item.status === 'NDF') ndfCount[item.name] = (ndfCount[item.name] || 0) + 1;
         }
-        const c = document.createElement('div');
-        c.className = 'card';
-        c.innerHTML = `
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
           <h4>${item.status}</h4>
           <div class="field"><span class="label">SN:</span> ${item.serial}</div>
-          <div class="field"><span class="label">Name:</span> ${item.name||'–'}</div>
+          <div class="field"><span class="label">Name:</span> ${item.name || '–'}</div>
           <div class="field"><span class="label">Comment:</span> ${item.comment}</div>
         `;
-        grid.appendChild(c);
+        grid.appendChild(card);
       });
 
-      document.getElementById('sum-ok').innerHTML =
-        `<span class="summary-title-ok">Podsumowanie OK:</span><br>` +
-        (Object.keys(okCnt).length
-          ? Object.entries(okCnt).map(([n,c])=>`• ${n}: ${c}`).join('<br>')
-          : '<i>brak</i>');
+      const tbody = document.querySelector('#summary-table tbody');
+      tbody.innerHTML = '';
 
-      document.getElementById('sum-ndf').innerHTML =
-        `<span class="summary-title-ndf">Podsumowanie NDF:</span><br>` +
-        (Object.keys(ndfCnt).length
-          ? Object.entries(ndfCnt).map(([n,c])=>`• ${n}: ${c}`).join('<br>')
-          : '<i>brak</i>');
+      Array.from(names).sort().forEach(name => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${name}</td>
+          <td class="ok">${okCount[name] || 0}</td>
+          <td class="ndf">${ndfCount[name] || 0}</td>
+        `;
+        tbody.appendChild(row);
+      });
     }
 
     loadData().then(render);
