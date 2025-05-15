@@ -27,49 +27,45 @@
       content: ""; position:fixed; inset:0;
       background: rgba(0,0,0,0.75); z-index:-1;
     }
-
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
+      max-width:1200px;
+      margin:0 auto;
+      padding:0 16px;
     }
-
-    .logo { text-align:center; margin:20px auto 0; }
+    .logo { text-align:center; margin:20px 0; }
     .logo img { max-width:350px; width:80%; height:auto; }
-
     .header-controls {
       display:flex; flex-wrap:wrap; gap:10px;
       justify-content:center; align-items:center; margin:30px 0;
     }
     .filter-btn, .toggle-btn, .export-btn {
       padding:6px 14px;
-      background: var(--btn-bg);
-      color: #fff;
-      border: 2px solid var(--btn-border);
-      border-radius: var(--btn-radius);
-      cursor: pointer;
-      font-weight: bold;
-      transition: background .2s, color .2s;
+      background:var(--btn-bg);
+      color:#fff;
+      border:2px solid var(--btn-border);
+      border-radius:var(--btn-radius);
+      cursor:pointer;
+      font-weight:bold;
+      transition:background .2s,color .2s;
     }
     .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
       background: rgba(255,255,255,0.1);
     }
-    .filter-btn.active { background: #fff; color: #000; }
-
+    .filter-btn.active { background:#fff; color:#000; }
     .summary-box, .data-section {
       background:rgba(255,255,255,0.95);
       border-radius:10px;
       box-shadow:0 2px 10px rgba(0,0,0,0.4);
       color:#000;
-      transition: background .3s, color .3s;
+      transition:background .3s,color .3s;
       margin:0 auto 30px;
       padding:20px;
     }
     body.dark-mode .summary-box,
     body.dark-mode .data-section {
-      background:rgba(30,41,59,0.95); color:#fff;
+      background:rgba(30,41,59,0.95);
+      color:#fff;
     }
-
     .summary-header {
       display:flex; justify-content:space-between;
       align-items:center; margin-bottom:16px;
@@ -85,24 +81,19 @@
       color:inherit;
     }
     body.dark-mode .date-summary { background:rgba(255,255,255,0.1); }
-
     table { width:100%; border-collapse:collapse; }
     th, td { padding:10px; border:1px solid #ccc; }
     th {
       background:#f0f0f0; text-align:center;
       color:#000!important; font-weight:bold!important;
     }
-
-    /* New icons for Imię/Name columns */
+    /* icons */
     .summary-table th:nth-child(1)::before { content:"👤 "; }
     .data-table th:nth-child(3)::before    { content:"👤 "; }
-
-    /* Other header icons */
-    .data-table th:nth-child(1)::before { content:"📺 "; }
-    .data-table th:nth-child(2)::before { content:"🔧 "; }
-    .data-table th:nth-child(4)::before { content:"💬 "; }
-
-    /* Equal width & styling for summary counts */
+    .data-table th:nth-child(1)::before    { content:"📺 "; }
+    .data-table th:nth-child(2)::before    { content:"🔧 "; }
+    .data-table th:nth-child(4)::before    { content:"💬 "; }
+    /* summary columns */
     .summary-table th.ok, .summary-table td.ok,
     .summary-table th.ndf, .summary-table td.ndf,
     .summary-table th.scrap-ttl, .summary-table td.scrap-ttl {
@@ -113,15 +104,12 @@
     .summary-table td.scrap-ttl {
       text-align:center; font-weight:bold;
     }
-
     .summary-table .ok       { background:var(--ok-bg);    color:var(--txt-dark); }
     .summary-table .ndf      { background:var(--ndf-bg);   color:var(--txt-dark); }
     .summary-table .scrap-ttl{ background:var(--scrap-bg); color:var(--txt-dark); }
-
     .data-table td { font-size:14px; }
     .status-ok  { background:var(--ok-bg);  color:var(--txt-dark); font-weight:bold; text-align:center; }
     .status-ndf { background:var(--ndf-bg); color:var(--txt-dark); font-weight:bold; text-align:center; }
-
     @media(max-width:768px) {
       th, td { font-size:12px; padding:6px; }
       .header-controls, .summary-header {
@@ -132,9 +120,7 @@
 </head>
 <body>
   <div class="container">
-    <div class="logo">
-      <img src="logo.png" alt="LCDR LIVE DATA Logo">
-    </div>
+    <div class="logo"><img src="logo.png" alt="LCDR LIVE DATA Logo"></div>
     <div class="header-controls">
       <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
       <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
@@ -165,10 +151,7 @@
     <table class="data-table" id="data-table">
       <thead>
         <tr>
-          <th>Status</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
+          <th>Status</th><th>Serial Number</th><th>Name</th><th>Comment</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -180,154 +163,65 @@
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
     ];
-
     let latestData = [], currentDate = new Date();
 
-    function parseCSV(text) {
-      return text.trim().split('\n').map(row =>
-        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-           ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
+    function parseCSV(t) {
+      return t.trim().split('\n').map(r=>
+        r.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+         ?.map(c=>c.replace(/^"|"$/g,'').trim())||[]
       );
     }
-
     function normalizeDate(s) {
-      if (!s) return '';
-      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
-        const [d,m,y] = s.split('/');
-        return `${y}-${m}-${d}`;
+      if(!s) return '';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)){
+        const [d,m,y]=s.split('/'); return `${y}-${m}-${d}`;
       }
       return '';
     }
+    function formatDate(d){return d.toISOString().split('T')[0];}
 
-    function formatDate(date) {
-      return date.toISOString().split('T')[0];
+    function highlightActive(type){
+      document.querySelectorAll('.filter-btn')
+        .forEach(b=>b.classList.toggle('active',b.dataset.type===type));
     }
 
-    function highlightActive(type) {
-      document.querySelectorAll('.filter-btn').forEach(btn =>
-        btn.classList.toggle('active', btn.dataset.type === type)
-      );
-    }
-
-    async function loadData() {
-      const tgt = formatDate(currentDate), all = [];
-      for (const url of urls) {
-        try {
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const text = await res.text();
-          const rows = parseCSV(text);
-          const hdr  = rows[0].map(h => h.toUpperCase());
-          const iDate   = hdr.findIndex(h => h === 'DATE' || h === 'DATA');
-          const iStatus = hdr.findIndex(h => h === 'STATUS');
-          const iName   = hdr.findIndex(h => h === 'NAME' || h === 'IMIĘ' || h === 'IMIE');
-          const iSN     = hdr.findIndex(h => h === 'SERIAL NUMBER');
-          const iComm   = hdr.findIndex(h => h === 'COMMENT');
-          const iScrap  = hdr.findIndex(h =>
-            h === 'SCRAP TTL' || h === 'SCRAP_TTL' || h === 'SCRAP-TTL'
-          );
-
-          rows.slice(1).forEach(r => {
-            const d  = normalizeDate(r[iDate]);
-            const st = (r[iStatus] || '').toUpperCase();
-            if (d === tgt && (st === 'OK' || st === 'NDF')) {
-              const scrapVal = iScrap >= 0 ? Number(r[iScrap]) || 0 : 0;
+    async function loadData(){
+      const tgt=formatDate(currentDate), all=[];
+      for(const url of urls){
+        try{
+          const r=await fetch(url);
+          if(!r.ok) throw new Error(r.status);
+          const txt=await r.text(), rows=parseCSV(txt);
+          const hdr=rows[0].map(h=>h.toUpperCase());
+          const iDate  = hdr.findIndex(h=>h==='DATE'||h==='DATA');
+          const iStatus= hdr.findIndex(h=>h==='STATUS');
+          const iName  = hdr.findIndex(h=>h==='NAME'||h==='IMIĘ'||h==='IMIE');
+          const iSN    = hdr.findIndex(h=>h==='SERIAL NUMBER');
+          const iComm  = hdr.findIndex(h=>h==='COMMENT');
+          const iScrap = hdr.findIndex(h=>'SCRAP TTL'||h==='SCRAP_TTL'||h==='SCRAP-TTL');
+          rows.slice(1).forEach(rw=>{
+            const d=normalizeDate(rw[iDate]), st=(rw[iStatus]||'').toUpperCase();
+            if(d===tgt&&(st==='OK'||st==='NDF')){
               all.push({
-                serial:  r[iSN]   || '–',
-                status:  st,
-                name:    r[iName]?.trim() || '–',
-                comment: r[iComm] || '–',
-                scrap:   scrapVal
+                serial: rw[iSN]||'–',
+                status: st,
+                name:   rw[iName]?.trim()||'–',
+                comment:rw[iComm]||'–',
+                scrap: Number(rw[iScrap])||0
               });
             }
           });
-        } catch (e) {
-          console.warn('⚠️ fetch error', url, e);
-        }
+        }catch(e){console.warn('fetch error',e);}
       }
       return all;
     }
 
-    function render(data) {
-      if (!data.length) {
-        console.warn('Brak danych – pozostawiam poprzednie');
-        return;
-      }
-      latestData = data.sort((a,b) => a.name.localeCompare(b.name));
-
-      // Data table
-      const dtb = document.createElement('tbody');
-      latestData.forEach(it => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
-          <td>${it.serial}</td>
-          <td>${it.name}</td>
-          <td>${it.comment}</td>`;
-        dtb.appendChild(tr);
-      });
-      document.getElementById('data-table').tBodies[0].replaceWith(dtb);
-
-      // Summary table
-      const okC = {}, ndfC = {}, scrapC = {}, names = new Set();
-      latestData.forEach(it => {
-        names.add(it.name);
-        okC[it.name]    = (okC[it.name]    || 0) + (it.status === 'OK'  ? 1 : 0);
-        ndfC[it.name]   = (ndfC[it.name]   || 0) + (it.status === 'NDF' ? 1 : 0);
-        scrapC[it.name] = (scrapC[it.name] || 0) + it.scrap;
-      });
-      const stb = document.createElement('tbody');
-      Array.from(names).sort().forEach(name => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${name}</td>
-          <td class="ok">${okC[name] || 0}</td>
-          <td class="ndf">${ndfC[name] || 0}</td>
-          <td class="scrap-ttl">${scrapC[name] || 0}</td>`;
-        stb.appendChild(tr);
-      });
-      document.getElementById('summary-table').tBodies[0].replaceWith(stb);
-    }
-
-    function setDate(type) {
-      currentDate = new Date();
-      if (type === 'yesterday') currentDate.setDate(currentDate.getDate() - 1);
-      document.getElementById('summary-date').textContent = formatDate(currentDate);
-      highlightActive(type);
-      loadData().then(render);
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme',
-        document.body.classList.contains('dark-mode') ? 'dark' : 'light'
-      );
-    }
-
-    function exportToExcel() {
-      const ws = XLSX.utils.json_to_sheet(
-        latestData.map(d => ({
-          STATUS: d.status,
-          'SERIAL NUMBER': d.serial,
-          NAME: d.name,
-          COMMENT: d.comment,
-          'SCRAP TTL': d.scrap
-        }))
-      );
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
-      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
-    }
-
-    // Init
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark-mode');
-    }
-    setDate('today');
-    (function loop(){
-      setTimeout(() => loadData().then(render).finally(loop), 30000);
-    })();
-  </script>
-</body>
-</html>
+    function render(data){
+      if(!data.length) return;
+      latestData=data.sort((a,b)=>a.name.localeCompare(b.name));
+      // data table
+      const dtb=document.createElement('tbody');
+      latestData.forEach(it=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
