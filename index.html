@@ -702,6 +702,19 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
   cursor: pointer;
   user-select: none;
 }
+
+.data-table td.status-ok::before {
+  content: "✅ ";
+}
+.data-table td.status-ndf::before {
+  content: "⚠️ ";
+}
+.data-table td.status-scrap_ttl::before {
+  content: "❌ ";
+}
+.data-table tr:nth-child(even) {
+  background: linear-gradient(to right, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+}
 </style>
 </head>
 <body><div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"><div class="theme-switch">
@@ -764,7 +777,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 </thead>
 <tbody></tbody>
 </table>
-</div>
+<div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div></div>
 <script>
     const urls = [
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
@@ -841,6 +854,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
     }
 
     function render(data) {
+  document.getElementById('no-data-message').style.display = data.length ? 'none' : 'block';
       if (!data.length) return;
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
