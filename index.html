@@ -90,8 +90,8 @@ function updateBotPhrase() {
 
   const bubble = document.getElementById("chatbot-bubble");
   if (bubble) {
-    updateCharts(parseInt(ok)||0, parseInt(ndf)||0, parseInt(scrap)||0);
-    updateCharts(parseInt(ok)||0, parseInt(ndf)||0, parseInt(scrap)||0);
+    
+    
     bubble.innerHTML =
       `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>` +
       `Naprawiono <strong>${ok}</strong> OK,<br>` +
@@ -180,6 +180,13 @@ function updateCharts(ok, ndf, scrap) {
     }
   });
 }
+
+window.addEventListener("load", () => {
+  const ok = parseInt(document.getElementById('chat-ok')?.textContent) || 0;
+  const ndf = parseInt(document.getElementById('chat-ndf')?.textContent) || 0;
+  const scrap = parseInt(document.getElementById('chat-scrap')?.textContent) || 0;
+  updateCharts(ok, ndf, scrap);
+});
 </script>
 <style>
     :root {
