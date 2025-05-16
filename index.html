@@ -716,6 +716,15 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 .data-table tr:nth-child(even) {
   background: linear-gradient(to right, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
 }
+
+.header-controls {
+  justify-content: center !important;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 10px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
 </style>
 </head>
 <body><div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"><div class="theme-switch">
@@ -746,7 +755,6 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
 <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
 <span id="clock-inline" style="font-weight:bold; margin-left:auto; font-size: 2rem;"></span></div>
-
 </div>
 <div class="container summary-box">
 <div class="summary-header">
