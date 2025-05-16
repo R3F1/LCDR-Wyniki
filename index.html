@@ -795,7 +795,6 @@ function filterBySerial(value) {
     }
 
     function render(data) {
-  updateChatbotMessage();
       if (!data.length) return;
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
@@ -984,43 +983,6 @@ function switchDateMode() {
   const isToday = document.getElementById('dayToggle').checked;
   setDate(isToday ? 'today' : 'yesterday');
 }
-
-
-
-function updateChatbotMessage() {
-  const today = new Date();
-  const h = today.getHours();
-  let msg = "";
-
-  if (h < 9) msg = "☕ Poranna gotowość!";
-  else if (h < 15) msg = "🔧 Trwa analiza danych!";
-  else msg = "✅ Sprawdź podsumowanie!";
-
-  const bubble = document.getElementById("chatbot-bubble");
-  if (bubble) bubble.textContent = msg;
-}
-
-
-
-const chatbotMessages = [
-  "👋 Hej! Miłego dnia!",
-  "🛠️ Masz ochotę coś naprawić?",
-  "📊 Sprawdzam statusy...",
-  "🤖 Wszystko działa bez zarzutu!",
-  "☀️ Nie zapomnij się uśmiechnąć!",
-  "🔍 Monitoruję dane w tle...",
-];
-
-let chatbotIndex = 0;
-
-function cycleChatbotMessages() {
-  const el = document.getElementById("chatbot-bubble");
-  if (!el) return;
-  el.textContent = chatbotMessages[chatbotIndex];
-  chatbotIndex = (chatbotIndex + 1) % chatbotMessages.length;
-}
-
-setInterval(cycleChatbotMessages, 10000); // zmieniaj co 10 sekund
 </script>
 </body>
 </html>
