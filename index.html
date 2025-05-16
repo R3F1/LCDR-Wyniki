@@ -14,6 +14,28 @@ function filterBySerial(value) {
     row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
   });
 }
+
+
+function updateBotPhrase() {
+  const phrases = [
+    "👋 Hej! Miłego dnia!",
+    "🔧 Masz ochotę coś naprawić?",
+    "☕ Czas na przerwę?",
+    "📈 Sprawdzam dane...",
+    "✅ Wszystko działa dobrze!"
+  ];
+  const msg = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const ok = document.getElementById('chat-ok')?.textContent || '–';
+  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
+  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
+
+  document.getElementById('chatbot-bubble').innerHTML =
+    `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
+}
+
+setInterval(updateBotPhrase, 10000);
+updateBotPhrase();
 </script>
 <style>
     :root {
