@@ -745,7 +745,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 <a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
 <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
 <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
-</div>
+<span id="clock-inline" style="font-weight:bold; margin-left:auto;"></span></div>
 </div>
 <div class="container summary-box">
 <div class="summary-header">
@@ -1043,6 +1043,30 @@ function switchDateMode() {
   const isToday = document.getElementById('dayToggle').checked;
   setDate(isToday ? 'today' : 'yesterday');
 }
+
+
+let lastCheckedDate = new Date().toDateString();
+setInterval(() => {
+  const now = new Date().toDateString();
+  if (now !== lastCheckedDate) {
+    lastCheckedDate = now;
+    setDate('today');
+  }
+}, 300000); // co 5 minut
+
+
+function updateClockInline() {
+  const clk = document.getElementById('clock-inline');
+  if (clk) {
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    const s = now.getSeconds().toString().padStart(2,'0');
+    clk.textContent = `🕒 ${h}:${m}:${s}`;
+  }
+}
+setInterval(updateClockInline, 1000);
+updateClockInline();
 </script>
 </body>
 </html>
