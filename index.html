@@ -813,6 +813,11 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 
           // poprawne wyszukanie indeksów:
           const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
+          const requiredColumns = [iDate, iStatus, iName, iSN, iComm];
+          if (requiredColumns.some(i => i < 0)) {
+            console.warn('❗ Pominięto arkusz, brakuje wymaganych kolumn.');
+            continue;
+          }
           const iStatus= hdr.findIndex(h => h==='STATUS');
           const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
           const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
@@ -820,6 +825,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
           const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
 
           rows.slice(1).forEach(rw => {
+            if (!rw[iDate] || !rw[iStatus] || !rw[iName]) return;
             const d  = normalizeDate(rw[iDate]);
             const st = (rw[iStatus]||'').toUpperCase();
             if (d===tgt && (st==='OK' || st==='NDF' || st==='SCRAP_TTL')) {
