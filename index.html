@@ -91,6 +91,7 @@ function updateBotPhrase() {
   const bubble = document.getElementById("chatbot-bubble");
   if (bubble) {
     updateCharts(parseInt(ok)||0, parseInt(ndf)||0, parseInt(scrap)||0);
+    updateCharts(parseInt(ok)||0, parseInt(ndf)||0, parseInt(scrap)||0);
     bubble.innerHTML =
       `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>` +
       `Naprawiono <strong>${ok}</strong> OK,<br>` +
@@ -134,6 +135,44 @@ function updateCharts(ok, ndf, scrap) {
   });
 
   pieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: data,
+    options: {
+      responsive: true
+    }
+  });
+}
+
+
+
+function updateCharts(ok, ndf, scrap) {
+  const barCtx = document.getElementById('barChart')?.getContext('2d');
+  const pieCtx = document.getElementById('pieChart')?.getContext('2d');
+
+  if (!barCtx || !pieCtx) return;
+
+  const data = {
+    labels: ['OK', 'NDF', 'SCRAP TTL'],
+    datasets: [{
+      label: 'Liczba przypadków',
+      data: [ok, ndf, scrap],
+      backgroundColor: ['#10b981', '#fbbf24', '#ef4444']
+    }]
+  };
+
+  if (window.barChart) window.barChart.destroy();
+  if (window.pieChart) window.pieChart.destroy();
+
+  window.barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  window.pieChart = new Chart(pieCtx, {
     type: 'pie',
     data: data,
     options: {
