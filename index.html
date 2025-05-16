@@ -588,10 +588,59 @@ function filterBySerial(value) {
 .toggle-switch input:checked + label .labels::before {
   content: attr(data-off);
 }
+
+.theme-switch {
+  position: relative;
+  width: 120px;
+}
+.theme-switch input {
+  display: none;
+}
+.theme-switch label {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  position: relative;
+  height: 36px;
+  background: #1e293b;
+}
+.theme-switch .slider {
+  width: 50%;
+  height: 100%;
+  background: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.theme-switch input:checked + label .slider {
+  left: 50%;
+}
+.theme-switch .labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+.theme-switch .labels::before {
+  content: attr(data-on);
+}
+.theme-switch input:checked + label .labels::before {
+  content: attr(data-off);
+}
 </style>
 </head>
 <body>
-<button class="toggle-btn" id="toggle-bot" onclick="toggleBot()">🤖 Pokaż/Ukryj Bota</button>
+
 <div id="tv-icon">📺</div>
 <div id="chatbot-container">
 <img alt="Robot" id="chatbot-img" src="robotlcdr.png"/>
@@ -618,11 +667,17 @@ function filterBySerial(value) {
 </div>
 </div>
 <a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
-
-
 <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
 <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
 <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+
+<div class="theme-switch">
+<input checked="" id="themeToggle" onchange="toggleTheme()" type="checkbox"/>
+<label for="themeToggle">
+<span class="slider"></span>
+<span class="labels" data-off="☀️ Jasny" data-on="🌙 Ciemny"></span>
+</label>
+</div>
 </div>
 </div>
 <div class="container summary-box">
