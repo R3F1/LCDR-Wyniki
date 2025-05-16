@@ -999,6 +999,28 @@ function updateChatbotMessage() {
   const bubble = document.getElementById("chatbot-bubble");
   if (bubble) bubble.textContent = msg;
 }
+
+
+
+const chatbotMessages = [
+  "👋 Hej! Miłego dnia!",
+  "🛠️ Masz ochotę coś naprawić?",
+  "📊 Sprawdzam statusy...",
+  "🤖 Wszystko działa bez zarzutu!",
+  "☀️ Nie zapomnij się uśmiechnąć!",
+  "🔍 Monitoruję dane w tle...",
+];
+
+let chatbotIndex = 0;
+
+function cycleChatbotMessages() {
+  const el = document.getElementById("chatbot-bubble");
+  if (!el) return;
+  el.textContent = chatbotMessages[chatbotIndex];
+  chatbotIndex = (chatbotIndex + 1) % chatbotMessages.length;
+}
+
+setInterval(cycleChatbotMessages, 10000); // zmieniaj co 10 sekund
 </script>
 </body>
 </html>
