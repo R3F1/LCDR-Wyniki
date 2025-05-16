@@ -639,8 +639,13 @@ function filterBySerial(value) {
 }
 </style>
 </head>
-<body>
-
+<body><div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"><div class="theme-switch">
+<input checked="" id="themeToggle" onchange="toggleTheme()" type="checkbox"/>
+<label for="themeToggle">
+<span class="slider"></span>
+<span class="labels" data-off="☀️ Jasny" data-on="🌙 Ciemny"></span>
+</label>
+</div></div>
 <div id="tv-icon">📺</div>
 <div id="chatbot-container">
 <img alt="Robot" id="chatbot-img" src="robotlcdr.png"/>
@@ -671,13 +676,6 @@ function filterBySerial(value) {
 <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
 <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
 
-<div class="theme-switch">
-<input checked="" id="themeToggle" onchange="toggleTheme()" type="checkbox"/>
-<label for="themeToggle">
-<span class="slider"></span>
-<span class="labels" data-off="☀️ Jasny" data-on="🌙 Ciemny"></span>
-</label>
-</div>
 </div>
 </div>
 <div class="container summary-box">
