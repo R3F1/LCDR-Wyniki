@@ -659,14 +659,11 @@ function filterBySerial(value) {
 <div class="emoji-indicator" id="global-emoji-loading" style="display:none;">⏳</div>
 <div class="loader-overlay" id="loader" style="display:none;"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
 <div class="container">
-<div class="logo">
-<img alt="LCDR LIVE DATA Logo" src="logo.png"/>
-</div>
-<div class="header-controls"><button class="filter-btn" onclick="setDate('today')">Dzisiaj</button><button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button><input id="search-input" oninput="filterBySerial(this.value)" placeholder="🔍 Szukaj po SERIAL NUMBER lub NAME" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #ccc; width: 240px;" type="text"/><div style="display: flex; align-items: center; gap: 10px;">
+
+<div class="header-controls"><button class="filter-btn" onclick="setDate('today')">Dzisiaj</button><button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button><div style="display: flex; align-items: center; gap: 10px;">
 </div>
 <a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
 <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
-<button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
 <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
 </div>
 </div>
