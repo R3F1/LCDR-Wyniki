@@ -813,11 +813,6 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 
           // poprawne wyszukanie indeksów:
           const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
-          const requiredColumns = [iDate, iStatus, iName, iSN, iComm];
-          if (requiredColumns.some(i => i < 0)) {
-            console.warn('❗ Pominięto arkusz, brakuje wymaganych kolumn.');
-            return;
-          }
           const iStatus= hdr.findIndex(h => h==='STATUS');
           const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
           const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
