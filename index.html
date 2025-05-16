@@ -36,6 +36,25 @@ function updateBotPhrase() {
 
 setInterval(updateBotPhrase, 10000);
 updateBotPhrase();
+
+
+
+const botExtraReplies = [
+  "🧠 Pracuję nad nowym algorytmem!",
+  "🧰 Mam wszystkie narzędzia gotowe!",
+  "📡 Łączę się z bazą danych...",
+  "👀 Obserwuję wszystko uważnie!",
+  "💡 Pamiętaj: każdy błąd to okazja do nauki!"
+];
+
+document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
+  const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
+  const el = document.getElementById('chatbot-bubble');
+  if (el) {
+    el.innerHTML += `<br><em>${reply}</em>`;
+    setTimeout(() => updateBotPhrase(), 10000); // powrót do cyklicznych wiadomości po 10s
+  }
+});
 </script>
 <style>
     :root {
