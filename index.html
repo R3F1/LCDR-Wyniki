@@ -5,8 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>LCDR LIVE DATA</title>
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">
-function filterBySerial(value) {
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">function filterBySerial(value) {
   const query = value.trim().toLowerCase();
   document.querySelectorAll('#data-table tbody tr').forEach(row => {
     const serial = row.children[1].textContent.toLowerCase();
@@ -16,7 +15,6 @@ function filterBySerial(value) {
 }
 
 
-function updateBotPhrase() {
   const phrases = [
     "👋 Hej! Miłego dnia!",
     "🔧 Masz ochotę coś naprawić?",
@@ -75,6 +73,32 @@ setTimeout(() => {
     });
   }
 }, 1000);
+
+function updateBotPhrase() {
+  const phrases = [
+    "☀️ Hej! Miłego dnia!",
+    "🔧 Czy masz ochotę coś naprawić?",
+    "☕ Czekasz na przerwę?",
+    "💪 Mam ochotę coś naprawić!",
+    "📊 Przetwarzam dane z arkusza...",
+    "🧠 Uczę się na podstawie statystyk!"
+  ];
+
+  const msg = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const ok = document.getElementById('chat-ok')?.textContent || '–';
+  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
+  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
+
+  const bubble = document.getElementById("chatbot-bubble");
+  if (bubble) {
+    bubble.innerHTML =
+      `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>` +
+      `Naprawiono <strong>${ok}</strong> OK,<br>` +
+      `Wykryto <strong>${ndf}</strong> NDF,<br>` +
+      `SCRAP TTL: <strong>${scrap}</strong>`;
+  }
+}
 </script>
 <style>
     :root {
