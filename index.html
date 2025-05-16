@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LCDR LIVE DATA</title>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LCDR LIVE DATA</title>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">
 function updateClockInline() {
   const now = new Date();
   const h = String(now.getHours()).padStart(2, '0');
@@ -20,7 +21,7 @@ updateClockInline();
 
 function updateBotPhrase() {
   const phrases = [
-    "Hey! Miłego dnia! ☀️",
+    "Hey! Miłego dnia!☀️",
     "Czy masz ochotę coś naprawić? 🔧",
     "Czekasz na przerwę? ☕",
     "Mam ochotę coś naprawić! 💪"
@@ -69,8 +70,17 @@ async function updateCurrentDateLabels() {
   }
 }
 
+
+
+
+function filterBySerial(value) {
+  const filtered = latestData.filter(row =>
+    row.serial.toLowerCase().includes(value.trim().toLowerCase())
+  );
+  render(filtered);
+}
 </script>
-  <style>
+<style>
     :root {
       --ok-bg:    #A7F3D0;
       --ndf-bg:   #FDE68A;
@@ -597,74 +607,64 @@ async function updateCurrentDateLabels() {
 </style>
 </head>
 <body>
-<button id="toggle-bot" class="toggle-btn" onclick="toggleBot()">🤖 Pokaż/Ukryj Bota</button>
+<button class="toggle-btn" id="toggle-bot" onclick="toggleBot()">🤖 Pokaż/Ukryj Bota</button>
 <div id="tv-icon">📺</div>
-
 <div id="chatbot-container">
-  <img src="robotlcdr.png" alt="Robot" id="chatbot-img">
-  <div id="chatbot-bubble">
-    <strong>🤖 LCDR Bot mówi:</strong><br>
-    Naprawiono <span id="chat-ok">–</span> OK,<br>
-    Wykryto <span id="chat-ndf">–</span> NDF,<br>
+<img alt="Robot" id="chatbot-img" src="robotlcdr.png"/>
+<div id="chatbot-bubble">
+<strong>🤖 LCDR Bot mówi:</strong><br/>
+    Naprawiono <span id="chat-ok">–</span> OK,<br/>
+    Wykryto <span id="chat-ndf">–</span> NDF,<br/>
     I <span id="chat-scrap">–</span> przypadków SCRAP TTL.
   </div>
 </div>
-
-
-
-
-
-  <div id="global-emoji-loading" style="display:none;" class="emoji-indicator">⏳</div>
-  <div id="loader" style="display:none;" class="loader-overlay"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
-  <div class="container">
-    <div class="logo">
-      <img src="logo.png" alt="LCDR LIVE DATA Logo">
-    </div>
-    <div class="header-controls">
-  <a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
-  
-      <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
-      <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-      <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
-      <button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
-      <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
-    </div>
-  </div>
-
-  <div class="container summary-box">
-    <div class="summary-header">
-      <h2>PODSUMOWANIE</h2>
-      <div id="summary-date" class="date-summary"></div>
-    </div>
-    <table class="summary-table" id="summary-table">
-      <thead>
-        <tr>
-          <th>NAPRAWIACZ</th>
-          <th class="ok">OK <span id="count-ok"></span></th>
-          <th class="ndf">NDF <span id="count-ndf"></span></th>
-          <th class="scrap-ttl">SCRAP TTL <span id="count-scrap"></span></th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="container data-section">
-    <table class="data-table" id="data-table">
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Station</th>
-          <th>Serial Number</th>
-          <th>Name</th>
-          <th>Comment</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <script>
+<div class="emoji-indicator" id="global-emoji-loading" style="display:none;">⏳</div>
+<div class="loader-overlay" id="loader" style="display:none;"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
+<div class="container">
+<div class="logo">
+<img alt="LCDR LIVE DATA Logo" src="logo.png"/>
+</div>
+<div class="header-controls"><input id="search-input" oninput="filterBySerial(this.value)" placeholder="🔍 Szukaj po SERIAL NUMBER" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #ccc; width: 240px;" type="text"/>
+<a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
+<button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
+<button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
+<button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
+<button class="toggle-btn" onclick="toggleTheme()">🌓 Tryb</button>
+<button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+</div>
+</div>
+<div class="container summary-box">
+<div class="summary-header">
+<h2>PODSUMOWANIE</h2>
+<div class="date-summary" id="summary-date"></div>
+</div>
+<table class="summary-table" id="summary-table">
+<thead>
+<tr>
+<th>NAPRAWIACZ</th>
+<th class="ok">OK <span id="count-ok"></span></th>
+<th class="ndf">NDF <span id="count-ndf"></span></th>
+<th class="scrap-ttl">SCRAP TTL <span id="count-scrap"></span></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="container data-section">
+<table class="data-table" id="data-table">
+<thead>
+<tr>
+<th>Status</th>
+<th>Station</th>
+<th>Serial Number</th>
+<th>Name</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<script>
     const urls = [
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
       'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
