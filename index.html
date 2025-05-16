@@ -795,6 +795,7 @@ function filterBySerial(value) {
     }
 
     function render(data) {
+  updateChatbotMessage();
       if (!data.length) return;
       latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
 
@@ -982,6 +983,21 @@ async function updateCurrentDateLabels() {
 function switchDateMode() {
   const isToday = document.getElementById('dayToggle').checked;
   setDate(isToday ? 'today' : 'yesterday');
+}
+
+
+
+function updateChatbotMessage() {
+  const today = new Date();
+  const h = today.getHours();
+  let msg = "";
+
+  if (h < 9) msg = "☕ Poranna gotowość!";
+  else if (h < 15) msg = "🔧 Trwa analiza danych!";
+  else msg = "✅ Sprawdź podsumowanie!";
+
+  const bubble = document.getElementById("chatbot-bubble");
+  if (bubble) bubble.textContent = msg;
 }
 </script>
 </body>
