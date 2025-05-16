@@ -5,189 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>LCDR LIVE DATA</title>
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">function filterBySerial(value) {
-  const query = value.trim().toLowerCase();
-  document.querySelectorAll('#data-table tbody tr').forEach(row => {
-    const serial = row.children[1].textContent.toLowerCase();
-    const name = row.children[2].textContent.toLowerCase();
-    row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
-  });
-}
 
-
-  const phrases = [
-    "👋 Hej! Miłego dnia!",
-    "🔧 Masz ochotę coś naprawić?",
-    "☕ Czas na przerwę?",
-    "📈 Sprawdzam dane...",
-    "✅ Wszystko działa dobrze!"
-  ];
-  const msg = phrases[Math.floor(Math.random() * phrases.length)];
-
-  const ok = document.getElementById('chat-ok')?.textContent || '–';
-  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
-  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
-
-  document.getElementById('chatbot-bubble').innerHTML =
-    `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
-}
-
-
-
-
-const botExtraReplies = [
-  "🧠 Pracuję nad nowym algorytmem!",
-  "🧰 Mam wszystkie narzędzia gotowe!",
-  "📡 Łączę się z bazą danych...",
-  "👀 Obserwuję wszystko uważnie!",
-  "💡 Pamiętaj: każdy błąd to okazja do nauki!"
-];
-
-document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
-  const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
-  const el = document.getElementById('chatbot-bubble');
-  if (el) {
-    el.innerHTML += `<br><em>${reply}</em>`;
-    setTimeout(() => updateBotPhrase(), 10000); // powrót do cyklicznych wiadomości po 10s
-  }
-});
-
-
-
-setTimeout(() => {
-  const botExtraReplies = [
-    "🧠 Pracuję nad nowym algorytmem!",
-    "🧰 Mam wszystkie narzędzia gotowe!",
-    "📡 Łączę się z bazą danych...",
-    "👀 Obserwuję wszystko uważnie!",
-    "💡 Pamiętaj: każdy błąd to okazja do nauki!"
-  ];
-  const el = document.getElementById('chatbot-bubble');
-  if (el) {
-    el.addEventListener('click', () => {
-      const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
-      el.innerHTML += `<br><em>${reply}</em>`;
-      setTimeout(() => updateBotPhrase(), 10000);
-    });
-  }
-}, 1000);
-
-function updateBotPhrase() {
-  const phrases = [
-    "☀️ Hej! Miłego dnia!",
-    "🔧 Czy masz ochotę coś naprawić?",
-    "☕ Czekasz na przerwę?",
-    "💪 Mam ochotę coś naprawić!",
-    "📊 Przetwarzam dane z arkusza...",
-    "🧠 Uczę się na podstawie statystyk!"
-  ];
-
-  const msg = phrases[Math.floor(Math.random() * phrases.length)];
-
-  const ok = document.getElementById('chat-ok')?.textContent || '–';
-  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
-  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
-
-  const bubble = document.getElementById("chatbot-bubble");
-  if (bubble) {
-    
-    
-    bubble.innerHTML =
-      `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>` +
-      `Naprawiono <strong>${ok}</strong> OK,<br>` +
-      `Wykryto <strong>${ndf}</strong> NDF,<br>` +
-      `SCRAP TTL: <strong>${scrap}</strong>`;
-  }
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  updateBotPhrase();
-  setInterval(updateBotPhrase, 10000);
-});
-
-
-
-let barChart, pieChart;
-
-function updateCharts(ok, ndf, scrap) {
-  const barCtx = document.getElementById('barChart').getContext('2d');
-  const pieCtx = document.getElementById('pieChart').getContext('2d');
-
-  const data = {
-    labels: ['OK', 'NDF', 'SCRAP TTL'],
-    datasets: [{
-      label: 'Liczba przypadków',
-      data: [ok, ndf, scrap],
-      backgroundColor: ['#10b981', '#fbbf24', '#ef4444']
-    }]
-  };
-
-  if (barChart) barChart.destroy();
-  if (pieChart) pieChart.destroy();
-
-  barChart = new Chart(barCtx, {
-    type: 'bar',
-    data: data,
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  pieChart = new Chart(pieCtx, {
-    type: 'pie',
-    data: data,
-    options: {
-      responsive: true
-    }
-  });
-}
-
-
-
-function updateCharts(ok, ndf, scrap) {
-  const barCtx = document.getElementById('barChart')?.getContext('2d');
-  const pieCtx = document.getElementById('pieChart')?.getContext('2d');
-
-  if (!barCtx || !pieCtx) return;
-
-  const data = {
-    labels: ['OK', 'NDF', 'SCRAP TTL'],
-    datasets: [{
-      label: 'Liczba przypadków',
-      data: [ok, ndf, scrap],
-      backgroundColor: ['#10b981', '#fbbf24', '#ef4444']
-    }]
-  };
-
-  if (window.barChart) window.barChart.destroy();
-  if (window.pieChart) window.pieChart.destroy();
-
-  window.barChart = new Chart(barCtx, {
-    type: 'bar',
-    data: data,
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } }
-    }
-  });
-
-  window.pieChart = new Chart(pieCtx, {
-    type: 'pie',
-    data: data,
-    options: {
-      responsive: true
-    }
-  });
-}
-
-window.addEventListener("load", () => {
-  const ok = parseInt(document.getElementById('chat-ok')?.textContent) || 0;
-  const ndf = parseInt(document.getElementById('chat-ndf')?.textContent) || 0;
-  const scrap = parseInt(document.getElementById('chat-scrap')?.textContent) || 0;
-  updateCharts(ok, ndf, scrap);
-});
-</script>
 <style>
     :root {
       --ok-bg:    #A7F3D0;
@@ -844,7 +662,7 @@ window.addEventListener("load", () => {
   }
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head>
+</head>
 <body>
 <div class="container graph-section" style="max-width: 400px; float: left; margin: 20px;">
 <canvas height="200" id="barChart"></canvas>
@@ -1176,5 +994,187 @@ function switchDateMode() {
   setDate(isToday ? 'today' : 'yesterday');
 }
 </script>
-</body>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">function filterBySerial(value) {
+  const query = value.trim().toLowerCase();
+  document.querySelectorAll('#data-table tbody tr').forEach(row => {
+    const serial = row.children[1].textContent.toLowerCase();
+    const name = row.children[2].textContent.toLowerCase();
+    row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
+  });
+}
+
+
+  const phrases = [
+    "👋 Hej! Miłego dnia!",
+    "🔧 Masz ochotę coś naprawić?",
+    "☕ Czas na przerwę?",
+    "📈 Sprawdzam dane...",
+    "✅ Wszystko działa dobrze!"
+  ];
+  const msg = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const ok = document.getElementById('chat-ok')?.textContent || '–';
+  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
+  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
+
+  document.getElementById('chatbot-bubble').innerHTML =
+    `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
+}
+
+
+
+
+const botExtraReplies = [
+  "🧠 Pracuję nad nowym algorytmem!",
+  "🧰 Mam wszystkie narzędzia gotowe!",
+  "📡 Łączę się z bazą danych...",
+  "👀 Obserwuję wszystko uważnie!",
+  "💡 Pamiętaj: każdy błąd to okazja do nauki!"
+];
+
+document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
+  const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
+  const el = document.getElementById('chatbot-bubble');
+  if (el) {
+    el.innerHTML += `<br><em>${reply}</em>`;
+    setTimeout(() => updateBotPhrase(), 10000); // powrót do cyklicznych wiadomości po 10s
+  }
+});
+
+
+
+setTimeout(() => {
+  const botExtraReplies = [
+    "🧠 Pracuję nad nowym algorytmem!",
+    "🧰 Mam wszystkie narzędzia gotowe!",
+    "📡 Łączę się z bazą danych...",
+    "👀 Obserwuję wszystko uważnie!",
+    "💡 Pamiętaj: każdy błąd to okazja do nauki!"
+  ];
+  const el = document.getElementById('chatbot-bubble');
+  if (el) {
+    el.addEventListener('click', () => {
+      const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
+      el.innerHTML += `<br><em>${reply}</em>`;
+      setTimeout(() => updateBotPhrase(), 10000);
+    });
+  }
+}, 1000);
+
+function updateBotPhrase() {
+  const phrases = [
+    "☀️ Hej! Miłego dnia!",
+    "🔧 Czy masz ochotę coś naprawić?",
+    "☕ Czekasz na przerwę?",
+    "💪 Mam ochotę coś naprawić!",
+    "📊 Przetwarzam dane z arkusza...",
+    "🧠 Uczę się na podstawie statystyk!"
+  ];
+
+  const msg = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const ok = document.getElementById('chat-ok')?.textContent || '–';
+  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
+  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
+
+  const bubble = document.getElementById("chatbot-bubble");
+  if (bubble) {
+    
+    
+    bubble.innerHTML =
+      `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>` +
+      `Naprawiono <strong>${ok}</strong> OK,<br>` +
+      `Wykryto <strong>${ndf}</strong> NDF,<br>` +
+      `SCRAP TTL: <strong>${scrap}</strong>`;
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  updateBotPhrase();
+  setInterval(updateBotPhrase, 10000);
+});
+
+
+
+let barChart, pieChart;
+
+function updateCharts(ok, ndf, scrap) {
+  const barCtx = document.getElementById('barChart').getContext('2d');
+  const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+  const data = {
+    labels: ['OK', 'NDF', 'SCRAP TTL'],
+    datasets: [{
+      label: 'Liczba przypadków',
+      data: [ok, ndf, scrap],
+      backgroundColor: ['#10b981', '#fbbf24', '#ef4444']
+    }]
+  };
+
+  if (barChart) barChart.destroy();
+  if (pieChart) pieChart.destroy();
+
+  barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  pieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: data,
+    options: {
+      responsive: true
+    }
+  });
+}
+
+
+
+function updateCharts(ok, ndf, scrap) {
+  const barCtx = document.getElementById('barChart')?.getContext('2d');
+  const pieCtx = document.getElementById('pieChart')?.getContext('2d');
+
+  if (!barCtx || !pieCtx) return;
+
+  const data = {
+    labels: ['OK', 'NDF', 'SCRAP TTL'],
+    datasets: [{
+      label: 'Liczba przypadków',
+      data: [ok, ndf, scrap],
+      backgroundColor: ['#10b981', '#fbbf24', '#ef4444']
+    }]
+  };
+
+  if (window.barChart) window.barChart.destroy();
+  if (window.pieChart) window.pieChart.destroy();
+
+  window.barChart = new Chart(barCtx, {
+    type: 'bar',
+    data: data,
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  window.pieChart = new Chart(pieCtx, {
+    type: 'pie',
+    data: data,
+    options: {
+      responsive: true
+    }
+  });
+}
+
+window.addEventListener("load", () => {
+  const ok = parseInt(document.getElementById('chat-ok')?.textContent) || 0;
+  const ndf = parseInt(document.getElementById('chat-ndf')?.textContent) || 0;
+  const scrap = parseInt(document.getElementById('chat-scrap')?.textContent) || 0;
+  updateCharts(ok, ndf, scrap);
+});
+</script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script></body>
 </html>
