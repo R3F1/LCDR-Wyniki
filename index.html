@@ -32,8 +32,6 @@
     `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
 }
 
-setInterval(updateBotPhrase, 10000);
-updateBotPhrase();
 
 
 
@@ -99,6 +97,11 @@ function updateBotPhrase() {
       `SCRAP TTL: <strong>${scrap}</strong>`;
   }
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+  updateBotPhrase();
+  setInterval(updateBotPhrase, 10000);
+});
 </script>
 <style>
     :root {
