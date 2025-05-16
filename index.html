@@ -540,7 +540,7 @@ function filterBySerial(value) {
   }
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head>
+</head>
 <body>
 <button class="toggle-btn" id="toggle-bot" onclick="toggleBot()">🤖 Pokaż/Ukryj Bota</button>
 <div id="tv-icon">📺</div>
@@ -584,7 +584,7 @@ function filterBySerial(value) {
 </thead>
 <tbody></tbody>
 </table>
-<div style="max-width:400px;margin:20px auto;"><canvas id="summaryChart"></canvas></div></div>
+</div>
 <div class="container data-section">
 <table class="data-table" id="data-table">
 <thead>
@@ -857,42 +857,6 @@ async function updateCurrentDateLabels() {
   }
 }
 
-
-
-
-let chart;
-function updateChart(okCount, ndfCount, scrapCount) {
-  const ctx = document.getElementById('summaryChart').getContext('2d');
-  const data = {
-    labels: ['OK', 'NDF', 'SCRAP TTL'],
-    datasets: [{
-      label: 'Statusy',
-      data: [okCount, ndfCount, scrapCount],
-      backgroundColor: ['#34D399', '#FBBF24', '#EF4444'],
-      borderColor: ['#10B981', '#F59E0B', '#DC2626'],
-      borderWidth: 1
-    }]
-  };
-  const config = {
-    type: 'pie',
-    data: data,
-    options: {
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: document.body.classList.contains('dark-mode') ? '#fff' : '#000' }
-        }
-      }
-    }
-  };
-  if (chart) {
-    chart.data = data;
-    chart.options = config.options;
-    chart.update();
-  } else {
-    chart = new Chart(ctx, config);
-  }
-}
 </script>
 </body>
 </html>
