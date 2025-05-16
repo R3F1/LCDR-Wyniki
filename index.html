@@ -697,6 +697,11 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
   0%, 100% { transform: translateY(0px); opacity: 1; }
   50% { transform: translateY(-5px); opacity: 0.85; }
 }
+
+#chatbot-bubble {
+  cursor: pointer;
+  user-select: none;
+}
 </style>
 </head>
 <body><div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"><div class="theme-switch">
@@ -709,7 +714,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 <div id="tv-icon">📺</div>
 <div id="chatbot-container">
 <img alt="Robot" id="chatbot-img" src="robotlcdr.png"/>
-<div class="robot-bubble" id="chatbot-bubble">
+<div class="robot-bubble" id="chatbot-bubble" style="cursor: pointer;">
 <strong>🤖 LCDR Bot mówi:</strong><br/>
     Naprawiono <span id="chat-ok">–</span> OK,<br/>
     Wykryto <span id="chat-ndf">–</span> NDF,<br/>
