@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+<head>
+<script>
+  const pin = prompt("Podaj PIN dostępu:");
+  if (pin !== "6615") {
+    document.body.innerHTML = "⛔ Dostęp zabroniony!";
+    throw new Error("Nieprawidłowy PIN");
+  }
+</script>
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LCDR LIVE DATA</title>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">
+function filterBySerial(value) {
+  const query = value.trim().toLowerCase();
+  document.querySelectorAll('#data-table tbody tr').forEach(row => {
+    const serial = row.children[1].textContent.toLowerCase();
+    const name = row.children[2].textContent.toLowerCase();
+    row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
+  });
+}
+
+
+function updateBotPhrase() {
+  const phrases = [
+    "👋 Hej! Miłego dnia!",
+    "🔧 Masz ochotę coś naprawić?",
+    "☕ Czas na przerwę?",
+    "📈 Sprawdzam dane...",
+    "✅ Wszystko działa dobrze!"
+  ];
+  const msg = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const ok = document.getElementById('chat-ok')?.textContent || '–';
+  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
+  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
+
+  document.getElementById('chatbot-bubble').innerHTML =
+    `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
+}
+
+setInterval(updateBotPhrase, 10000);
+updateBotPhrase();
+
+
+
+const botExtraReplies = [
+  "🧠 Pracuję nad nowym algorytmem!",
+  "🧰 Mam wszystkie narzędzia gotowe!",
+  "📡 Łączę się z bazą danych...",
+  "👀 Obserwuję wszystko uważnie!",
+  "💡 Pamiętaj: każdy błąd to okazja do nauki!"
+];
+
+document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
+  const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
+  const el = document.getElementById('chatbot-bubble');
+  if (el) {
+    el.innerHTML += `<br><em>${reply}</em>`;
+    setTimeout(() => updateBotPhrase(), 10000); // powrót do cyklicznych wiadomości po 10s
+  }
+});
+</script>
+<style>
+    :root {
+      --ok-bg:    #A7F3D0;
+      --ndf-bg:   #FDE68A;
+      --scrap-bg: #F87171;
+      --txt-dark: #000;
+      --btn-border: #fff;
+      --btn-bg: transparent;
+      --btn-radius: 20px;
+    }
+    html, body { margin:0; padding:0; height:100%; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('background.jpg') center/cover no-repeat #000;
+      color: #fff;
+      transition: background-color .3s, color .3s;
+    }
+    body.dark-mode { background-color: #0f172a; }
+    body:not(.dark-mode)::before {
+      content: ""; position:fixed; inset:0;
+      background: rgba(0,0,0,0.75); z-index:-1;
+    }
+
+    /* kontener centrujący */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .logo { text-align: center; margin: 20px 0; }
+    .logo img { max-width: 350px; width: 80%; height: auto; display: inline-block; }
+
+    .header-controls {
+  justify-content: center !important;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; align-items: center; margin: 30px 0;
+    }
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center; align-items: center; margin: 30px 0;
+    }
+    .filter-btn, .toggle-btn, .export-btn {
+      padding: 6px 14px; background: var(--btn-bg);
+      color: #fff; border: 2px solid var(--btn-border);
+      border-radius: var(--btn-radius); cursor: pointer;
+      font-weight: bold; transition: background .2s, color .2s;
+    }
+    .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .filter-btn.active { background: #fff; color: #000; }
+
+    .summary-box, .data-section {
+      background: rgba(255,255,255,0.95); color: #000;
+      border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+      transition: background .3s, color .3s;
+      margin: 0 auto 30px; padding: 20px;
+    }
+    body.dark-mode .summary-box,
+    body.dark-mode .data-section {
+      background: rgba(30,41,59,0.95); color: #fff;
+    }
+
+    .summary-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 16px;
+    }
+    .summary-header h2 {
+      margin: 0; font-size: 2.25rem;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .date-summary {
+      padding: 6px 12px; border-radius: 8px;
+      background: rgba(0,0,0,0.1); font-weight: bold;
+      color: inherit;
+    }
+    body.dark-mode .date-summary {
+      background: rgba(255,255,255,0.1);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border: 1px solid #ccc; }
+    th {
+      background: #f0f0f0; text-align: center;
+      color: #000!important; font-weight: bold!important;
+    }
+
+    /* ikony w nagłówkach */
+    .summary-table th:nth-child(1)::before { content: "👤 "; }
+    .data-table th:nth-child(1)::before    { content: "📺 "; }
+    .data-table th:nth-child(2)::before    { content: "🔧 "; }
+    .data-table th:nth-child(3)::before    { content: "👤 "; }
+    .data-table th:nth-child(4)::before    { content: "💬 "; }
+
+    /* kolumny OK/NDF/SCRAP TTL jednolite */
+    .summary-table th.ok, .summary-table td.ok,
+    .summary-table th.ndf, .summary-table td.ndf,
+    .summary-table th.scrap-ttl, .summary-table td.scrap-ttl {
+      width: 120px;
+    }
+    .summary-table td.ok,
+    .summary-table td.ndf,
+    .summary-table td.scrap-ttl {
+      text-align: center; font-weight: bold;
+    }
+    .summary-table .ok        { background: var(--ok-bg);    color: var(--txt-dark); }
+    .summary-table .ndf       { background: var(--ndf-bg);   color: var(--txt-dark); }
+    .summary-table .scrap-ttl { background: var(--scrap-bg); color: var(--txt-dark); }
+
+    .data-table td { font-size: 14px; }
+    .status-ok  { background: var(--ok-bg);  color: var(--txt-dark); font-weight:bold; text-align:center; }
+    .status-ndf { background: var(--ndf-bg); color: var(--txt-dark); font-weight:bold; text-align:center; }
+
+    @media(max-width:768px) {
+      th, td { font-size:12px; padding:6px; }
+      .header-controls, .summary-header {
+        flex-direction:column; align-items:flex-start; gap:8px;
+      }
+    }
+  
+    .status-scrap_ttl {
+      background: var(--scrap-bg);
+      color: var(--txt-dark);
+      font-weight: bold;
+      text-align: center;
+    }
+
+
+    .loader-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3B82F6;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+
+    .filter-btn, .toggle-btn, .export-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+    .filter-btn:hover, .toggle-btn:hover, .export-btn:hover {
+      background: linear-gradient(135deg, #2563eb, #60a5fa);
+      transform: translateY(-2px);
+    }
+    .filter-btn.active {
+      background: #fff;
+      color: #1e3a8a;
+      font-weight: bold;
+    }
+    .oled-btn {
+      background: linear-gradient(135deg, #7c3aed, #c084fc);
+      color: #fff;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 4px 10px rgba(124, 58, 237, 0.4);
+    }
+    .oled-btn:hover {
+      background: linear-gradient(135deg, #8b5cf6, #d8b4fe);
+      transform: translateY(-2px);
+    }
+
+
+    .loader-text {
+      margin-top: 16px;
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+
+    .summary-table th span {
+      white-space: nowrap;
+      margin-left: 4px;
+      font-weight: normal;
+    }
+
+
+    .summary-table th .count-sub {
+      font-size: 0.85em;
+      font-weight: normal;
+      margin-top: 4px;
+    }
+
+
+    .summary-table td {
+      background-color: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px;
+      font-weight: 500;
+      color: #111827;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .summary-table td:first-child {
+      text-align: left;
+      padding-left: 16px;
+      font-weight: bold;
+    }
+    body.dark-mode .summary-table td {
+      background-color: rgba(255,255,255,0.04);
+      color: #e5e7eb;
+    }
+
+
+    .date-label {
+      font-size: 20px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      color: #fff;
+    }
+    body.light-mode .date-label {
+      background: rgba(0, 0, 0, 0.05);
+      color: #111;
+    }
+
+
+    body {
+      background:
+        linear-gradient(60deg, rgba(30, 64, 175, 0.3), rgba(147, 51, 234, 0.3), rgba(16, 185, 129, 0.3), rgba(30, 64, 175, 0.3)),
+        url('background.jpg');
+      background-size: 600% 600%, cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      animation: animatedPlasma 25s ease infinite;
+    }
+
+    @keyframes animatedPlasma {
+      0% { background-position: 0% 50%, center; }
+      50% { background-position: 100% 50%, center; }
+      100% { background-position: 0% 50%, center; }
+    }
+
+    @keyframes backgroundMove {
+      0% { background-position: 0% 50%, center; }
+      50% { background-position: 100% 50%, center; }
+      100% { background-position: 0% 50%, center; }
+    }
+
+    @keyframes backgroundMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+
+    .logo img {
+      animation: fadeIn 1.5s ease-in-out forwards, pulse 3s ease-in-out infinite;
+      opacity: 0;
+      transform-origin: center;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+
+    #emoji-loading {
+      animation: spinEmoji 1s linear infinite;
+      display: inline-block;
+      margin-left: 5px;
+    }
+
+    @keyframes spinEmoji {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+
+    .emoji-indicator {
+      position: absolute;
+      top: 18px;
+      right: 24px;
+      font-size: 28px;
+      animation: spinEmoji 1.2s linear infinite;
+      z-index: 1001;
+    }
+
+
+    /* Hover effect on summary rows */
+    .summary-table tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+      transition: background 0.3s ease;
+    }
+
+    /* Blur effect behind the date */
+    .date-label {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* Clock in the corner */
+    
+
+    /* Disable scrolling when loading */
+    body.loading {
+      overflow: hidden;
+    }
+
+
+    .summary-table td.ok.flash,
+    .summary-table td.ndf.flash,
+    .summary-table td.scrap-ttl.flash {
+      animation: flashStatus 1.2s ease-in-out;
+    }
+
+    @keyframes flashStatus {
+      0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+      50% { box-shadow: 0 0 12px rgba(255,255,255,0.7); }
+      100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+    }
+
+    /* Chatbot okienko */
+    #chatbot {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px 12px 12px 0;
+      font-size: 14px;
+      max-width: 240px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1003;
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1.4em;
+    }
+
+
+  #chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1003;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: robotTalk 3s ease-in-out infinite;
+    flex-direction: row;
+  }
+
+  @keyframes robotTalk {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  #chatbot-img {
+    width: 192px;
+    height: auto;
+  }
+
+  
+#chatbot-bubble {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 240px;
+  font-size: 13.5px;
+  line-height: 1.4em;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  order: -1;
+}
+    
+
+  body.light-mode 
+#chatbot-bubble {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 240px;
+  font-size: 13.5px;
+  line-height: 1.4em;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  order: -1;
+}
+    
+
+
+  #clock-inline {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #ccc;
+    font-family: monospace;
+    text-align: right;
+  }
+
+  body.light-mode #clock-inline {
+    color: #555;
+  }
+
+
+  
+
+
+  #tv-icon {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    font-size: 36px;
+    z-index: 1001;
+    filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.4));
+    transition: transform 0.3s ease;
+  }
+
+  #tv-icon:hover {
+    transform: scale(1.1);
+  }
+
+  body.light-mode #tv-icon {
+    color: #111;
+  }
+
+
+  @media (max-width: 768px) {
+    #chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1003;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: robotTalk 3s ease-in-out infinite;
+    flex-direction: row;
+  }
+
+    #tv-icon {
+      font-size: 24px;
+      top: 10px;
+      left: 10px;
+    }
+
+    .filter-btn, .toggle-btn, .mode-btn {
+      font-size: 12px !important;
+      padding: 6px 10px !important;
+      margin-bottom: 6px;
+    }
+
+    
+#chatbot-bubble {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 240px;
+  font-size: 13.5px;
+  line-height: 1.4em;
+  font-family: 'Segoe UI', sans-serif;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  order: -1;
+}
+    
+
+    .summary-table td {
+      font-size: 12px;
+      padding: 4px 6px;
+    }
+
+    h1, h2, h3 {
+      font-size: 1.2em;
+    }
+  }
+
+
+  #toggle-bot {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 1004;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    background: #1f2937;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  #toggle-bot:hover {
+    background: #374151;
+  }
+
+  body.light-mode #toggle-bot {
+    background: #e5e7eb;
+    color: #111;
+  }
+
+
+.toggle-switch {
+  position: relative;
+  width: 100px;
+}
+.toggle-switch input {
+  display: none;
+}
+.toggle-switch label {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  position: relative;
+  height: 36px;
+  background: #1e3a8a;
+}
+.toggle-switch .slider {
+  width: 50%;
+  height: 100%;
+  background: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.toggle-switch input:checked + label .slider {
+  left: 50%;
+}
+.toggle-switch .labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+.toggle-switch .labels::before {
+  content: attr(data-on);
+}
+.toggle-switch input:checked + label .labels::before {
+  content: attr(data-off);
+}
+
+.theme-switch {
+  position: relative;
+  width: 120px;
+}
+.theme-switch input {
+  display: none;
+}
+.theme-switch label {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  position: relative;
+  height: 36px;
+  background: #1e293b;
+}
+.theme-switch .slider {
+  width: 50%;
+  height: 100%;
+  background: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+.theme-switch input:checked + label .slider {
+  left: 50%;
+}
+.theme-switch .labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+.theme-switch .labels::before {
+  content: attr(data-on);
+}
+.theme-switch input:checked + label .labels::before {
+  content: attr(data-off);
+}
+
+
+/* Animacja dymka robota */
+.robot-bubble {
+  display: inline-block;
+  padding: 10px 16px;
+  background: #1e293b;
+  color: white;
+  border-radius: 12px;
+  font-size: 14px;
+  max-width: 250px;
+  animation: bubbleFloat 3s infinite ease-in-out;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+@keyframes bubbleFloat {
+  0%, 100% { transform: translateY(0px); opacity: 1; }
+  50% { transform: translateY(-5px); opacity: 0.85; }
+}
+
+#chatbot-bubble {
+  cursor: pointer;
+  user-select: none;
+}
+
+.data-table td.status-ok::before {
+  content: "✅ ";
+}
+.data-table td.status-ndf::before {
+  content: "⚠️ ";
+}
+.data-table td.status-scrap_ttl::before {
+  content: "❌ ";
+}
+.data-table tr:nth-child(even) {
+  background: linear-gradient(to right, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+}
+
+.header-controls {
+  justify-content: center !important;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 10px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.controls-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.header-controls {
+  padding: 12px 40px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.07);
+}
+</style>
+</head>
+<body><div style="position: fixed; top: 20px; right: 20px; z-index: 9999;"><div class="theme-switch">
+<input checked="" id="themeToggle" onchange="toggleTheme()" type="checkbox"/>
+<label for="themeToggle">
+<span class="slider"></span>
+<span class="labels" data-off="☀️ Jasny" data-on="🌙 Ciemny"></span>
+</label>
+</div></div>
+<div id="tv-icon">📺</div>
+<div id="chatbot-container">
+<img alt="Robot" id="chatbot-img" src="robotlcdr.png"/>
+<div class="robot-bubble" id="chatbot-bubble" style="cursor: pointer;">
+<strong>🤖 LCDR Bot mówi:</strong><br/>
+    Naprawiono <span id="chat-ok">–</span> OK,<br/>
+    Wykryto <span id="chat-ndf">–</span> NDF,<br/>
+    I <span id="chat-scrap">–</span> przypadków SCRAP TTL.
+  </div>
+</div>
+<div class="emoji-indicator" id="global-emoji-loading" style="display:none;">⏳</div>
+<div class="loader-overlay" id="loader" style="display:none;"><div class="loader"></div><div class="loader-text">Trwa ładowanie danych...</div></div>
+<div class="container">
+<div class="logo">
+<img alt="LCDR LIVE DATA Logo" src="logo.png"/>
+</div><div class="controls-wrapper"><div class="header-controls"><button class="filter-btn" onclick="setDate('today')">Dzisiaj</button><button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button><div style="display: flex; align-items: center; gap: 10px;">
+</div>
+<a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
+<button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
+<button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
+<span id="clock-inline" style="font-weight:bold; margin-left:auto; font-size: 2rem;; position: relative; top: -5px;"></span></div></div>
+</div>
+<div class="container summary-box">
+<div class="summary-header">
+<h2>PODSUMOWANIE</h2>
+<div class="date-summary" id="summary-date"></div>
+</div>
+<table class="summary-table" id="summary-table">
+<thead>
+<tr>
+<th>NAPRAWIACZ</th>
+<th class="ok">OK <span id="count-ok"></span></th>
+<th class="ndf">NDF <span id="count-ndf"></span></th>
+<th class="scrap-ttl">SCRAP TTL <span id="count-scrap"></span></th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="container data-section">
+<table class="data-table" id="data-table">
+<thead>
+<tr>
+<th>Status</th>
+<th>Station</th>
+<th>Serial Number</th>
+<th>Name</th>
+<th>Comment</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div></div>
+<script>
+    const urls = [
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
+      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
+    ];
+
+    let latestData = [], currentDate = new Date();
+
+    function parseCSV(text) {
+      return text.trim().split('\n').map(row =>
+        row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+           ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
+      );
+    }
+    function normalizeDate(s) {
+      if (!s) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+        const [d,m,y] = s.split('/');
+        return `${y}-${m}-${d}`;
+      }
+      return '';
+    }
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function highlightActive(type) {
+      document.querySelectorAll('.filter-btn').forEach(btn =>
+        btn.classList.toggle('active', btn.dataset.type === type)
+      );
+    }
+
+    async function loadData() {
+      const tgt = formatDate(currentDate);
+      const all = [];
+      for (let idx = 0; idx < urls.length; idx++) {
+    const url = urls[idx];
+    const stationName = idx === 0 ? "KOVALCHYK" : "ULANOVYCH";
+        try {
+          const res  = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          const rows = parseCSV(text);
+          const hdr  = rows[0].map(h => h.toUpperCase());
+
+          // poprawne wyszukanie indeksów:
+          const iDate  = hdr.findIndex(h => ['DATE','DATA'].includes(h));
+          const iStatus= hdr.findIndex(h => h==='STATUS');
+          const iName  = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
+          const iSN    = hdr.findIndex(h => h==='SERIAL NUMBER');
+          const iComm  = hdr.findIndex(h => h==='COMMENT');
+          const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
+
+          rows.slice(1).forEach(rw => {
+            const d  = normalizeDate(rw[iDate]);
+            const st = (rw[iStatus]||'').toUpperCase();
+            if (d===tgt && (st==='OK' || st==='NDF' || st==='SCRAP_TTL')) {
+              all.push({
+                serial:  rw[iSN]   || '–',
+                status:  st,
+                name:    rw[iName]?.trim() || '–',
+                comment: rw[iComm] || '–',
+                station: stationName,
+                scrap:   st === 'SCRAP_TTL' ? 1 : 0
+              });
+            }
+          });
+        } catch (e) {
+          console.warn('⚠️ fetch error', url, e);
+        }
+      }
+      return all;
+    }
+
+    function render(data) {
+  document.getElementById('no-data-message').style.display = data.length ? 'none' : 'block';
+      if (!data.length) return;
+      latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+
+      // data table
+      const dtb = document.createElement('tbody');
+      latestData.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="status-${it.status.toLowerCase()}">${it.status}</td>
+          <td>${it.station}</td>
+          <td>${it.serial}</td>
+          <td>${it.name}</td>
+          <td>${it.comment}</td>`;
+        dtb.appendChild(tr);
+      });
+      document.getElementById('data-table').tBodies[0].replaceWith(dtb);
+
+      // summary
+      const okC={}, ndfC={}, scrC={}, names=new Set();
+      latestData.forEach(it=>{
+        names.add(it.name);
+        okC[it.name]  = (okC[it.name]||0) + (it.status==='OK'?1:0);
+        ndfC[it.name] = (ndfC[it.name]||0)+(it.status==='NDF'?1:0);
+        scrC[it.name] = (scrC[it.name]||0)+it.scrap;
+      });
+      const stb = document.createElement('tbody');
+      Array.from(names).sort().forEach(n=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${n}</td>
+          <td class="ok">✅ ${okC[n]||0}</td>
+          <td class="ndf">⚠️ ${ndfC[n]||0}</td>
+          <td class="scrap-ttl">🗑️ ${scrC[n]||0}</td>`;
+        stb.appendChild(tr);
+      });
+      
+      // dodajemy sumaryczny wiersz
+      
+      
+      const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
+      const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
+      const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
+
+      document.getElementById('count-ok').textContent = `(${sumOK})`;
+      document.getElementById('count-ndf').textContent = `(${sumNDF})`;
+      document.getElementById('count-scrap').textContent = `(${sumSCR})`;
+
+      document.getElementById('chat-ok').textContent = sumOK;
+      document.getElementById('chat-ndf').textContent = sumNDF;
+      document.getElementById('chat-scrap').textContent = sumSCR;
+
+      document.querySelectorAll('.summary-table td.ok').forEach(td => td.classList.add('flash'));
+      document.querySelectorAll('.summary-table td.ndf').forEach(td => td.classList.add('flash'));
+      document.querySelectorAll('.summary-table td.scrap-ttl').forEach(td => td.classList.add('flash'));
+
+      setTimeout(() => {
+        document.querySelectorAll('.flash').forEach(td => td.classList.remove('flash'));
+      }, 1500);
+
+      document.getElementById('summary-table').tBodies[0].replaceWith(stb);
+    }
+
+    function setDate(type) {
+      currentDate = new Date();
+      if (type==='yesterday') currentDate.setDate(currentDate.getDate()-1);
+      document.getElementById('summary-date').textContent = formatDate(currentDate);
+      highlightActive(type);
+      
+      document.getElementById('loader').style.display = 'flex';
+      loadData().then(render).finally(() => {
+        document.getElementById('loader').style.display = 'none';
+      updateCurrentDateLabels();
+      });
+
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme',
+        document.body.classList.contains('dark-mode')?'dark':'light'
+      );
+    }
+
+    function exportToExcel() {
+      const ws = XLSX.utils.json_to_sheet(
+        latestData.map(d=>({
+          STATUS: d.status,
+          'SERIAL NUMBER': d.serial,
+          NAME: d.name,
+          COMMENT: d.comment,
+          'SCRAP TTL': d.scrap
+        }))
+      );
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'LCDR Data');
+      XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
+    }
+
+    
+function manualLoad() {
+  
+      document.getElementById('loader').style.display = 'flex';
+      loadData().then(render).finally(() => {
+        document.getElementById('loader').style.display = 'none';
+      updateCurrentDateLabels();
+      });
+
+}
+
+
+    // init
+    if (localStorage.getItem('theme')==='dark')
+      document.body.classList.add('dark-mode');
+    setDate('today');
+    (function loop(){
+      setTimeout(()=>loadData().then(render).finally(loop),30000);
+    })();
+  
+function updateClockInline() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock-inline').textContent = `🕒 ${h}:${m}:${s}`;
+}
+setInterval(updateClockInline, 1000);
+updateClockInline();
+
+
+
+
+function updateBotPhrase() {
+  const phrases = [
+    "Hey! Miłego dnia! ☀️",
+    "Czy masz ochotę coś naprawić? 🔧",
+    "Czekasz na przerwę? ☕",
+    "Mam ochotę coś naprawić! 💪"
+  ];
+
+  const randomGreeting = phrases[Math.floor(Math.random() * phrases.length)];
+
+  const summary = document.getElementById('chatbot-text').innerHTML.split('<br><br>')[1] || '';
+  document.getElementById('chatbot-text').innerHTML =
+    `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${summary}`;
+}
+
+updateBotPhrase();
+setInterval(updateBotPhrase, 10000);
+
+
+function toggleBot() {
+  const bot = document.getElementById('chatbot-container');
+  if (bot.style.display === 'none') {
+    bot.style.display = 'flex';
+  } else {
+    bot.style.display = 'none';
+  }
+}
+
+
+async function updateCurrentDateLabels() {
+  try {
+    const res = await fetch('https://worldtimeapi.org/api/ip');
+    const data = await res.json();
+    const now = new Date(data.datetime);
+    const today = now.toISOString().split('T')[0];
+    const yesterdayDate = new Date(now);
+    yesterdayDate.setDate(now.getDate() - 1);
+    const yesterday = yesterdayDate.toISOString().split('T')[0];
+
+    const dateTodayEl = document.getElementById('date-today');
+    const dateYesterdayEl = document.getElementById('date-yesterday');
+
+    if (dateTodayEl) dateTodayEl.textContent = today;
+    todayDateStr = today;
+    if (dateYesterdayEl) dateYesterdayEl.textContent = yesterday;
+    yesterdayDateStr = yesterday;
+  } catch (err) {
+    console.error("Błąd pobierania daty:", err);
+  }
+}
+
+
+
+function switchDateMode() {
+  const isToday = document.getElementById('dayToggle').checked;
+  setDate(isToday ? 'today' : 'yesterday');
+}
+
+
+let lastCheckedDate = new Date().toDateString();
+setInterval(() => {
+  const now = new Date().toDateString();
+  if (now !== lastCheckedDate) {
+    lastCheckedDate = now;
+    setDate('today');
+  }
+}, 300000); // co 5 minut
+
+
+function updateClockInline() {
+  const clk = document.getElementById('clock-inline');
+  if (clk) {
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    const s = now.getSeconds().toString().padStart(2,'0');
+    clk.textContent = `🕒 ${h}:${m}:${s}`;
+  }
+}
+setInterval(updateClockInline, 1000);
+updateClockInline();
+</script>
+</body>
+</html>
