@@ -11,57 +11,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>LCDR LIVE DATA</title>
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js">
-function filterBySerial(value) {
-  const query = value.trim().toLowerCase();
-  document.querySelectorAll('#data-table tbody tr').forEach(row => {
-    const serial = row.children[1].textContent.toLowerCase();
-    const name = row.children[2].textContent.toLowerCase();
-    row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
-  });
-}
-
-
-function updateBotPhrase() {
-  const phrases = [
-    "👋 Hej! Miłego dnia!",
-    "🔧 Masz ochotę coś naprawić?",
-    "☕ Czas na przerwę?",
-    "📈 Sprawdzam dane...",
-    "✅ Wszystko działa dobrze!"
-  ];
-  const msg = phrases[Math.floor(Math.random() * phrases.length)];
-
-  const ok = document.getElementById('chat-ok')?.textContent || '–';
-  const ndf = document.getElementById('chat-ndf')?.textContent || '–';
-  const scrap = document.getElementById('chat-scrap')?.textContent || '–';
-
-  document.getElementById('chatbot-bubble').innerHTML =
-    `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
-}
-
-setInterval(updateBotPhrase, 10000);
-updateBotPhrase();
-
-
-
-const botExtraReplies = [
-  "🧠 Pracuję nad nowym algorytmem!",
-  "🧰 Mam wszystkie narzędzia gotowe!",
-  "📡 Łączę się z bazą danych...",
-  "👀 Obserwuję wszystko uważnie!",
-  "💡 Pamiętaj: każdy błąd to okazja do nauki!"
-];
-
-document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
-  const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
-  const el = document.getElementById('chatbot-bubble');
-  if (el) {
-    el.innerHTML += `<br><em>${reply}</em>`;
-    setTimeout(() => updateBotPhrase(), 10000); // powrót do cyklicznych wiadomości po 10s
-  }
-});
-</script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <style>
     :root {
       --ok-bg:    #A7F3D0;
@@ -767,7 +717,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 <div class="container">
 <div class="logo">
 <img alt="LCDR LIVE DATA Logo" src="logo.png"/>
-</div><div class="controls-wrapper"><div class="header-controls"><button class="filter-btn" onclick="setDate('today')">Dzisiaj</button><button class="filter-btn" onclick="setDate('yesterday')">Wczoraj</button><div style="display: flex; align-items: center; gap: 10px;">
+</div><div class="controls-wrapper"><div class="header-controls"><button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button><button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button><div style="display: flex; align-items: center; gap: 10px;">
 </div>
 <a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
 <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
@@ -807,9 +757,9 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 <div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div></div>
 <script>
     const urls = [
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=0&single=true&output=csv',
-      'https://docs.google.com/spreadsheets/d/e/2PACX-1vTXdlq02wklbShCqO4st2FuEURvqcXpMQPmhFx_bB3C4efqANIbPKCYOMA9BNzdn5ceQz3wasIJXw05/pub?gid=193025884&single=true&output=csv'
-    ];
+  'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
+  'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=193025884'
+];
 
     let latestData = [], currentDate = new Date();
 
@@ -819,9 +769,19 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
            ?.map(cell => cell.replace(/^"|"$/g,'').trim()) || []
       );
     }
-    function normalizeDate(s) {
-      if (!s) return '';
-      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    
+function normalizeDate(s) {
+  if (!s) return '';
+  s = String(s).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  let m = s.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})$/);
+  if (m) return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (m) return `${m[3]}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}`;
+  const t = Date.parse(s);
+  return isNaN(t) ? '' : new Date(t).toISOString().slice(0,10);
+}
+-\d{2}-\d{2}$/.test(s)) return s;
       if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
         const [d,m,y] = s.split('/');
         return `${y}-${m}-${d}`;
@@ -845,7 +805,7 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
     const url = urls[idx];
     const stationName = idx === 0 ? "KOVALCHYK" : "ULANOVYCH";
         try {
-          const res  = await fetch(url);
+          const res  = await fetch(url, { cache: 'no-store' });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const text = await res.text();
           const rows = parseCSV(text);
@@ -953,7 +913,6 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
       document.getElementById('loader').style.display = 'flex';
       loadData().then(render).finally(() => {
         document.getElementById('loader').style.display = 'none';
-      updateCurrentDateLabels();
       });
 
     }
@@ -986,7 +945,6 @@ function manualLoad() {
       document.getElementById('loader').style.display = 'flex';
       loadData().then(render).finally(() => {
         document.getElementById('loader').style.display = 'none';
-      updateCurrentDateLabels();
       });
 
 }
@@ -1013,25 +971,6 @@ updateClockInline();
 
 
 
-function updateBotPhrase() {
-  const phrases = [
-    "Hey! Miłego dnia! ☀️",
-    "Czy masz ochotę coś naprawić? 🔧",
-    "Czekasz na przerwę? ☕",
-    "Mam ochotę coś naprawić! 💪"
-  ];
-
-  const randomGreeting = phrases[Math.floor(Math.random() * phrases.length)];
-
-  const summary = document.getElementById('chatbot-text').innerHTML.split('<br><br>')[1] || '';
-  document.getElementById('chatbot-text').innerHTML =
-    `<strong>🤖 LCDR Bot mówi:</strong><br>${randomGreeting}<br><br>${summary}`;
-}
-
-updateBotPhrase();
-setInterval(updateBotPhrase, 10000);
-
-
 function toggleBot() {
   const bot = document.getElementById('chatbot-container');
   if (bot.style.display === 'none') {
@@ -1042,24 +981,7 @@ function toggleBot() {
 }
 
 
-async function updateCurrentDateLabels() {
-  try {
-    const res = await fetch('https://worldtimeapi.org/api/ip');
-    const data = await res.json();
-    const now = new Date(data.datetime);
-    const today = now.toISOString().split('T')[0];
-    const yesterdayDate = new Date(now);
-    yesterdayDate.setDate(now.getDate() - 1);
-    const yesterday = yesterdayDate.toISOString().split('T')[0];
-
-    const dateTodayEl = document.getElementById('date-today');
-    const dateYesterdayEl = document.getElementById('date-yesterday');
-
-    if (dateTodayEl) dateTodayEl.textContent = today;
-    todayDateStr = today;
-    if (dateYesterdayEl) dateYesterdayEl.textContent = yesterday;
-    yesterdayDateStr = yesterday;
-  } catch (err) {
+catch (err) {
     console.error("Błąd pobierania daty:", err);
   }
 }
