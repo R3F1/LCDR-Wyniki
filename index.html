@@ -808,7 +808,8 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
 <script>
     const urls = [
   'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
-  'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=193025884'
+  'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=193025884',
+  'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=661466938'
 ];
 
     let latestData = [], currentDate = new Date();
@@ -843,7 +844,10 @@ document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
       const all = [];
       for (let idx = 0; idx < urls.length; idx++) {
     const url = urls[idx];
-    const stationName = idx === 0 ? "KOVALCHYK" : "ULANOVYCH";
+    let stationName;
+    if (idx === 0) stationName = "KOVALCHYK";
+    else if (idx === 1) stationName = "ULANOVYCH";
+    else if (idx === 2) stationName = "OLED REPAIR";
         try {
           const res  = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
