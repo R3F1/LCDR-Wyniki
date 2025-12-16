@@ -95,6 +95,56 @@
              margin-top: 40px; 
         }
 
+        /* NOWY: Układ dla sekcji podsumowania (summary-box) */
+        .summary-content-wrapper {
+            display: flex;
+            gap: 30px; /* Odstęp między nowymi elementami */
+            align-items: flex-start; /* Upewnij się, że zaczynają się u góry */
+        }
+
+        /* NOWY: Panel z kluczowymi wskaźnikami (KPI) */
+        .kpi-panel {
+            flex-basis: 30%; /* Zajmie około 30% szerokości */
+            min-width: 250px;
+            padding: 20px;
+            border-radius: var(--general-radius);
+            background: rgba(59, 130, 246, 0.15); /* Półprzezroczyste tło akcentujące */
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); /* Silny neonowy blask */
+            border: 1px solid var(--primary-color);
+            position: sticky; /* Przyklejamy go */
+            top: 30px; 
+        }
+
+        .kpi-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .kpi-item h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-align: center;
+            color: #fff;
+            /* Ten blask jest dynamicznie zmieniany przez JS */
+            text-shadow: 0 0 15px var(--ok-bg), 0 0 25px var(--ok-bg); 
+            animation: kpiPulse 2s infinite alternate;
+        }
+
+        @keyframes kpiPulse {
+            from { transform: scale(1); opacity: 0.9; }
+            to { transform: scale(1.02); opacity: 1; }
+        }
+
         /* KONTROLKI I PRZYCISKI */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
         .header-controls {
@@ -133,6 +183,8 @@
             border-spacing: 0;
             border-radius: var(--general-radius); 
             margin-top: 10px; /* Margines po nagłówku sekcji */
+            flex-basis: 70%; /* DODAĆ TO, ABY DZIAŁAŁO Z KPI */
+            margin-top: 0;
         }
         
         /* NAGŁÓWKI TABEL - WOW EFFECT & ZAOKRĄGLENIE */
@@ -258,6 +310,21 @@
         }
         
         /* Media Queries */
+        @media(max-width: 992px) {
+            .summary-content-wrapper {
+                flex-direction: column;
+            }
+            .kpi-panel {
+                flex-basis: auto;
+                min-width: unset;
+                width: 100%; /* Rozciągamy na całą szerokość */
+                position: static; /* Usuwamy sticky */
+                margin-bottom: 20px;
+            }
+            .summary-table {
+                flex-basis: auto;
+            }
+        }
         @media(max-width:768px) {
             .header-controls { flex-direction: column; align-items: stretch; }
             #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; box-sizing: border-box; }
@@ -320,18 +387,33 @@
         <h2 style="margin: 0;">PODSUMOWANIE</h2>
         <div class="date-summary" id="summary-date"></div>
     </div>
-    <table class="summary-table" id="summary-table">
-        <thead>
-            <tr>
-                <th>NAPRAWIACZ</th>
-                <th class="ok">OK</th>
-                <th class="ndf">NDF</th>
-                <th class="scrap-ttl">SCRAP TTL</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
+    
+    <div class="summary-content-wrapper"> 
+        <div class="kpi-panel">
+            <div class="kpi-item">
+                <h3><i class="fas fa-chart-line"></i> Wskaźnik Sukcesu (OK)</h3>
+                <div id="kpi-success-rate" class="kpi-value">--%</div>
+            </div>
+            <div class="kpi-item">
+                <h3><i class="fas fa-times-circle"></i> Udział NDF/Scrap</h3>
+                <div id="kpi-ndf-scrap-share" class="kpi-value">--%</div>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 20px; color: #aaa;">Statystyki z ostatnich 24h lub wybranego dnia.</p>
+        </div>
+        
+        <table class="summary-table" id="summary-table">
+            <thead>
+                <tr>
+                    <th>NAPRAWIACZ</th>
+                    <th class="ok">OK</th>
+                    <th class="ndf">NDF</th>
+                    <th class="scrap-ttl">SCRAP TTL</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div> 
+    </div>
 
 <div class="container data-section">
     <h2 style="margin-bottom: 15px; margin-top: 0; font-size: 1.8rem; border-left: none !important; padding-left: 0 !important; color: #fff; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);">SZCZEGÓŁY</h2>
@@ -459,6 +541,42 @@
             row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
         });
     }
+    
+    // --- FUNKCJE KPI ---
+    function updateKPIs(ok, ndf, scrap) {
+        const total = ok + ndf + scrap;
+        const successRateEl = document.getElementById('kpi-success-rate');
+        const ndfScrapShareEl = document.getElementById('kpi-ndf-scrap-share');
+
+        if (total === 0) {
+            successRateEl.textContent = 'N/A';
+            ndfScrapShareEl.textContent = 'N/A';
+            // Reset stylów przy braku danych
+            successRateEl.style.textShadow = ''; 
+            successRateEl.style.color = '#fff';
+            return;
+        }
+
+        // Wskaźnik Sukcesu: (OK / (OK + NDF + SCRAP)) * 100
+        const successRate = (ok / total) * 100;
+        successRateEl.textContent = `${successRate.toFixed(1)}%`;
+        
+        // Udział NDF/Scrap: ((NDF + SCRAP) / Total) * 100
+        const ndfScrapShare = ((ndf + scrap) / total) * 100;
+        ndfScrapShareEl.textContent = `${ndfScrapShare.toFixed(1)}%`;
+        
+        // Logika do zmiany koloru blasku w zależności od Wskaźnika Sukcesu
+        if (successRateEl) {
+            const glowColor = successRate >= 90 ? 'var(--ok-bg)' : 
+                              successRate >= 70 ? 'var(--ndf-bg)' : 
+                              'var(--scrap-bg)';
+            // Zmiana blasku
+            successRateEl.style.textShadow = `0 0 15px ${glowColor}, 0 0 25px ${glowColor}`;
+            // Zmiana koloru tekstu
+            successRateEl.style.color = successRate >= 70 ? '#fff' : 'var(--scrap-bg)';
+        }
+    }
+
 
     function render(data) {
         latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
@@ -517,6 +635,9 @@
 
         // Aktualizacja Chatbota
         updateBotPhrase(sumOK, sumNDF, sumSCR);
+        
+        // NOWE: Aktualizacja KPI
+        updateKPIs(sumOK, sumNDF, sumSCR);
     }
 
     window.setDate = function(type) {
