@@ -42,6 +42,42 @@
         }
         body.dark-mode { background-color: #0f172a; }
 
+        /* ********************************************** */
+        /* EFEKT WESOŁYCH ŚWIĄT */
+        /* ********************************************** */
+        #holiday-container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 998; /* Pod śniegiem, ale nad treścią */
+        }
+        
+        .holiday-text {
+            position: absolute;
+            font-size: 3.5vw; /* Skalowalny rozmiar */
+            font-weight: 900;
+            text-transform: uppercase;
+            white-space: nowrap;
+            opacity: 0;
+            user-select: none;
+            
+            /* Losowy kolor Neon */
+            color: #fff;
+            text-shadow: 
+                0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; 
+            
+            animation: 
+                holidayFade 6s ease-out forwards;
+        }
+        
+        @keyframes holidayFade {
+            0% { opacity: 0; transform: scale(0.5); }
+            10% { opacity: 1; transform: scale(1); }
+            90% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+
+
         /* Efekt Śniegu */
         .snow-container {
             position: fixed;
@@ -83,7 +119,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
-            overflow: hidden; /* ZMIENIONE: Zabezpiecza przed wychodzeniem elementów poza krawędzie */
+            overflow: hidden; 
         }
         .summary-box:hover, .data-section:hover {
             transform: translateY(-3px);
@@ -269,7 +305,6 @@
             box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
             border: none; 
             padding: 15px 10px;
-            /* ZMIENIONE: Usunięto position: sticky i z-index */
             /* Usunięcie górnego zaokrąglenia, aby ładnie łączyło się z poprzednim wierszem */
             border-top-left-radius: 0 !important;
             border-top-right-radius: 0 !important;
@@ -332,7 +367,7 @@
         }
 
         /* ********************************************** */
-        /* WSKAŹNIK ŁADOWANIA (LOADER) - Krok 4 */
+        /* WSKAŹNIK ŁADOWANIA (LOADER) */
         /* ********************************************** */
         .loader-overlay {
             position: fixed;
@@ -398,6 +433,9 @@
             .summary-table {
                 flex-basis: auto;
             }
+            .holiday-text {
+                font-size: 8vw; /* Skalowalny rozmiar na mniejsze ekrany */
+            }
         }
         @media(max-width:768px) {
             .header-controls { flex-direction: column; align-items: stretch; }
@@ -408,6 +446,8 @@
     </style>
 </head>
 <body>
+<div id="holiday-container"></div>
+
 <div class="snow-container" id="snow-container"></div>
 
 <div class="theme-switch-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
@@ -568,7 +608,6 @@
                 const iName = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
                 const iSN = hdr.findIndex(h => h === 'SERIAL NUMBER');
                 const iComm = hdr.findIndex(h => h === 'COMMENT');
-                // const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h)); // Scrap jest liczony ze statusu
 
                 rows.slice(1).forEach(rw => {
                     const d = normalizeDate(rw[iDate]);
@@ -631,17 +670,18 @@
         }
     }
 
+    // WIZUALNE POTWIERDZENIE AKTYWNEGO PRZYCISKU
     function highlightActive(type) {
         document.querySelectorAll('.filter-btn').forEach(btn => {
             if (btn.dataset.type) {
-                btn.classList.toggle('active', btn.dataset.type === type);
+                btn.classList.remove('active');
             }
         });
         
-        // Obsługa wyboru daty niestandardowej
-        if (type === 'custom' && datePicker.value) {
-             document.querySelector('.filter-btn[data-type="today"]').classList.remove('active');
-             document.querySelector('.filter-btn[data-type="yesterday"]').classList.remove('active');
+        if (type === 'today' || type === 'yesterday') {
+            document.querySelector(`.filter-btn[data-type="${type}"]`)?.classList.add('active');
+        } else if (type === 'custom' && datePicker.value) {
+            // Używamy `custom` do oznaczenia, że to data z kalendarza, choć nie ma dedykowanego przycisku
         }
     }
 
@@ -939,6 +979,53 @@
         }
     }
     
+    // --- Efekt Wesołych Świąt JavaScript ---
+    const HOLIDAY_PHRASES = ["Wesołych Świąt!", "Ho Ho Ho!", "Merry Xmas!"];
+    const NEON_COLORS = [
+        '0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0',
+        '0 0 8px #fff, 0 0 12px #4ade80',
+        '0 0 10px #f87171, 0 0 20px #ff00ff'
+    ];
+
+    function createHolidayText() {
+        const container = document.getElementById('holiday-container');
+        if (!container) return;
+
+        const textEl = document.createElement('div');
+        textEl.classList.add('holiday-text');
+        
+        // Losowy tekst
+        const phrase = HOLIDAY_PHRASES[Math.floor(Math.random() * HOLIDAY_PHRASES.length)];
+        textEl.textContent = phrase;
+
+        // Losowa pozycja (0% do 90% szerokości/wysokości)
+        const left = Math.random() * 85;
+        const top = Math.random() * 85;
+        
+        // Losowy kąt obrotu
+        const rotation = Math.random() * 40 - 20; // od -20 deg do 20 deg
+        
+        // Losowy kolor blasku
+        const randomNeon = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
+        
+        textEl.style.left = `${left}vw`;
+        textEl.style.top = `${top}vh`;
+        textEl.style.transform = `rotate(${rotation}deg)`;
+        textEl.style.textShadow = randomNeon;
+        
+        container.appendChild(textEl);
+
+        // Używamy eventu animationend do usunięcia elementu po zakończeniu animacji
+        textEl.addEventListener('animationend', () => {
+            textEl.remove();
+        });
+    }
+
+    function startHolidayEffect() {
+        // Generowanie nowego tekstu co 2.5 sekundy (mniej niż czas trwania animacji, aby były widoczne nakładające się teksty)
+        setInterval(createHolidayText, 2500);
+    }
+
     // --- Inicjalizacja ---
     
     function init() {
@@ -956,6 +1043,9 @@
 
         // Generowanie 50 płatków śniegu
         generateSnow(50);
+        
+        // Rozpoczęcie efektu świątecznego
+        startHolidayEffect();
 
         // Ustawienie daty na "Dzisiaj" i ładowanie danych
         setDate('today');
