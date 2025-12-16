@@ -9,20 +9,12 @@
 
     <style>
         :root {
-            --primary-color: #3b82f6; /* Niebieski Akcent */
-            --ok-bg: #4ade80; /* Zieleń Neon */
-            --ndf-bg: #facc15; /* Żółć Neon */
-            --scrap-bg: #f87171; /* Czerwień Neon */
+            --primary-color: #3b82f6; 
+            --ok-bg: #4ade80; 
+            --ndf-bg: #facc15; 
+            --scrap-bg: #f87171; 
             --txt-dark: #1F2937;
-            --card-bg-dark: rgba(15, 23, 42, 0.9);
-            --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
-            --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
-            --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
-            
-            /* NOWE: Efekt blasku dla sumy dziennej */
             --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
-
-            /* NOWE: Ogólne zaokrąglenie rogów elementów w kontenerach */
             --general-radius: 12px;
         }
 
@@ -71,23 +63,19 @@
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* KARTY (Glassmorphism) - ZMIANA PADDINGÓW */
+        /* KARTY (Glassmorphism) */
         .summary-box, .data-section {
             background: rgba(255, 255, 255, 0.08); 
             border-radius: var(--general-radius); 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             margin: 0 auto 30px; 
-            padding: 15px; /* Zmniejszony padding wewnętrzny karty */
+            padding: 15px; 
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
             overflow: hidden; 
-        }
-        .summary-box:hover, .data-section:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
         
         /* PRZERWA POMIĘDZY TABELAMI */
@@ -126,24 +114,51 @@
             box-shadow: 0 0 5px var(--primary-color);
         }
         
-        /* TABELA */
+        /* ZEGAR - WYRÓWNANIE */
+        #clock-inline {
+            font-size: 2rem;
+            text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color);
+            color: #fff;
+            animation: pulseClock 4s infinite ease-in-out;
+            margin-left: auto;
+            /* KLUCZOWA ZMIANA WYRÓWNANIA */
+            height: 100%; 
+            display: flex;
+            align-items: center;
+        }
+        @keyframes pulseClock {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        /* NAGŁÓWKI SEKCJI (PODSUMOWANIE i SZCZEGÓŁY) */
+        .container .summary-header h2,
+        .container .data-section h2 {
+            margin: 0;
+            margin-bottom: 15px; 
+            margin-top: 15px; 
+            font-size: 1.8rem; 
+            border-left: none !important; 
+            padding-left: 0 !important; 
+            color: #fff; 
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        /* TABELA I WIZUALIZACJA */
         .summary-table { 
             width: 100%; 
             border-collapse: separate; 
             border-spacing: 0;
             border-radius: var(--general-radius); 
-            margin-top: 10px; /* Margines po nagłówku sekcji */
+            margin-top: 10px; 
         }
         
-        /* NAGŁÓWKI TABEL - WOW EFFECT & ZAOKRĄGLENIE */
+        /* NAGŁÓWKI TABEL */
         .summary-table th { 
-            padding: 12px; 
-            color: #fff; 
-            font-weight: 700;
+            padding: 12px; color: #fff; font-weight: 700;
             background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
-            border: none;
-            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            border: none; border-right: 1px solid rgba(255, 255, 255, 0.1); 
         }
         .summary-table th:last-child { border-right: none; }
         .summary-table thead tr:first-child th:first-child { border-top-left-radius: var(--general-radius); }
@@ -174,100 +189,155 @@
             box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
             border: none; 
             padding: 15px 10px;
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
-            /* Usunięcie górnego zaokrąglenia, aby ładnie łączyło się z poprzednim wierszem */
+            position: sticky; bottom: 0; z-index: 5;
             border-top-left-radius: 0 !important;
             border-top-right-radius: 0 !important;
         }
         
-        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy (dolne rogi) */
+        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy */
         .summary-table tr.total-row td:first-child {
             border-bottom-left-radius: var(--general-radius);
-            text-align: left; 
-            padding-left: 20px;
+            text-align: left; padding-left: 20px;
         }
         .summary-table tr.total-row td:last-child {
             border-bottom-right-radius: var(--general-radius);
         }
 
-        /* Nagłówek Sekcji Szczegóły - USUNIĘCIE NIEBIESKIEGO PASKA */
-        .container.data-section h2 {
-            margin-top: 15px; /* Dodatkowa przestrzeń nad tekstem */
-            padding: 0; 
-            background: none; 
-            border-radius: 0;
-            box-shadow: none;
-            
-            /* Usuwamy pasek z lewej */
-            border-left: none !important;
-            padding-left: 0 !important; 
-            
-            /* Utrzymanie estetyki */
-            color: #fff;
-            font-size: 1.8rem;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Subtelny blask */
+        /* Zaokrąglenie rogów tabeli detali na dole */
+        .data-table tbody tr:last-child td:first-child { border-bottom-left-radius: var(--general-radius); border-bottom: none; }
+        .data-table tbody tr:last-child td:last-child { border-bottom-right-radius: var(--general-radius); border-bottom: none; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+
+        /* --- CHOINKA CSS --- */
+        #christmas-tree-container {
+            position: fixed;
+            top: 50%;
+            left: 5px; 
+            transform: translateY(-50%);
+            width: 150px;
+            height: 250px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0.8;
+            transition: all 0.5s;
+        }
+
+        /* Pień Choinki */
+        #tree-trunk {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 30px;
+            background: #6f4e37;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        /* Liście Choinki (Trójkąty CSS) */
+        #tree-leaves {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .leaf {
+            width: 0;
+            height: 0;
+            border-left: 50px solid transparent;
+            border-right: 50px solid transparent;
+            border-bottom: 100px solid #28a745; 
+            position: relative;
+            margin-top: -30px;
+            filter: drop-shadow(0 0 3px rgba(40, 167, 69, 0.5));
+        }
+        .leaf:nth-child(2) { transform: translateY(-50px) scale(0.8); z-index: 1; }
+        .leaf:nth-child(3) { transform: translateY(-100px) scale(0.6); z-index: 2; }
+        
+        /* DEKORACJE - Domyślnie ukryte */
+        .decoration, #tree-star {
+            opacity: 0;
+            transition: opacity 1s, transform 0.5s;
+        }
+
+        /* L1: LAMPKI (Subtelny blask na liściach) */
+        .level-1 .leaf {
+            box-shadow: 0 0 5px #fff, inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* L2: DODANO 50% BOMBKI */
+        .level-2 .decoration:nth-child(2n) { opacity: 1; }
+
+        /* L3: DODANO 100% BOMBKI */
+        .level-3 .decoration { opacity: 1; }
+
+        /* L4: DODANO ŁAŃCUCHY (Subtelny gradient/cień na liściach) */
+        .level-4 .leaf {
+            filter: drop-shadow(0 0 5px rgba(40, 167, 69, 0.5)) drop-shadow(0 0 10px #ff00ff);
         }
         
-        /* TABELA DETALI - Zapewnienie, że wiersze detali też mają zaokrąglenia na dole */
-        .data-table tbody tr:last-child td:first-child {
-             border-bottom-left-radius: var(--general-radius);
-             border-bottom: none; /* Usuwamy dolną krawędź ostatniego wiersza */
+        /* L5: GWIAZDA */
+        .level-5 #tree-star { opacity: 1; transform: translateY(0) translateX(-50%) scale(1.2); }
+
+
+        /* BOMBKI POZYCJONOWANIE */
+        .decoration {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #fff;
         }
-        .data-table tbody tr:last-child td:last-child {
-             border-bottom-right-radius: var(--general-radius);
-             border-bottom: none;
-        }
-        .data-table tbody tr:last-child td {
-             border-bottom: none; /* Usuwamy dolną krawędź ostatniego wiersza */
+        #tree-leaves .decoration:nth-child(4) { background: red; top: -10px; left: -40px; }
+        #tree-leaves .decoration:nth-child(5) { background: yellow; top: -50px; left: -20px; }
+        #tree-leaves .decoration:nth-child(6) { background: blue; top: -90px; left: 10px; }
+        #tree-leaves .decoration:nth-child(7) { background: red; top: -140px; left: -30px; }
+        #tree-leaves .decoration:nth-child(8) { background: yellow; top: -180px; left: 0px; }
+
+
+        /* GWIAZDA */
+        #tree-star {
+            position: absolute;
+            top: -190px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: gold;
+            font-size: 2.2em;
+            text-shadow: 0 0 10px yellow, 0 0 20px gold;
+            z-index: 5;
         }
 
 
-        /* ZEGAR */
-        #clock-inline {
-            font-size: 2rem;
-            text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color);
-            color: #fff;
-            animation: pulseClock 4s infinite ease-in-out;
-            margin-left: auto;
-        }
-        @keyframes pulseClock {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
-        }
-
-        /* CHATBOT ROBOCIK */
-        #chatbot-container {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1003;
-            display: flex; align-items: flex-end; gap: 8px;
-            animation: robotTalk 3s ease-in-out infinite;
-        }
-        @keyframes robotTalk { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        #chatbot-img { 
-            width: 192px; height: auto; 
-            filter: drop-shadow(0 0 8px var(--primary-color));
-        }
-        #chatbot-bubble {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(50, 50, 50, 0.9));
-            color: white; padding: 12px 16px; border-radius: 16px 16px 0 16px;
-            max-width: 240px; font-size: 14px; line-height: 1.4em;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            cursor: pointer; user-select: none;
-            order: -1;
-        }
-        
         /* Media Queries */
-        @media(max-width:768px) {
-            .header-controls { flex-direction: column; align-items: stretch; }
-            #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; box-sizing: border-box; }
-            #chatbot-img { width: 120px; }
-            #clock-inline { font-size: 1.5rem; }
+        @media(max-width: 1024px) {
+            #christmas-tree-container {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
 <div class="snow-container" id="snow-container"></div>
+
+<div id="christmas-tree-container">
+    <div id="tree-leaves">
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        <div class="decoration"></div>
+        
+    </div>
+    <div id="tree-trunk"></div>
+    <div id="tree-star"><i class="fas fa-star"></i></div>
+</div>
+
 
 <div class="theme-switch-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
     <button id="themeToggle" onclick="toggleTheme()" style="padding: 8px 12px; border-radius: 8px; background: #1f2937; color: #fff; border: none; cursor: pointer;">
@@ -317,7 +387,7 @@
 
 <div class="container summary-box">
     <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2 style="margin: 0;">PODSUMOWANIE</h2>
+        <h2 style="margin-bottom: 0; margin-top: 0; font-size: 1.8rem; border-left: none !important; padding-left: 0 !important; color: #fff; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);">PODSUMOWANIE</h2>
         <div class="date-summary" id="summary-date"></div>
     </div>
     <table class="summary-table" id="summary-table">
@@ -515,9 +585,31 @@
         document.getElementById('summary-table').tBodies[0]?.remove();
         document.getElementById('summary-table').appendChild(stb);
 
-        // Aktualizacja Chatbota
+        // Aktualizacja Chatbota i Choinki
         updateBotPhrase(sumOK, sumNDF, sumSCR);
+        updateChristmasTree(sumOK);
     }
+
+    // --- LOGIKA CHOINKI (5 POZIOMÓW, CEL 70 OK) ---
+    function updateChristmasTree(okCount) {
+        const treeContainer = document.getElementById('christmas-tree-container');
+        if (!treeContainer) return;
+        
+        treeContainer.className = ''; // Reset klas
+
+        if (okCount >= 70) {
+            treeContainer.classList.add('level-5');
+        } else if (okCount >= 56) {
+            treeContainer.classList.add('level-4');
+        } else if (okCount >= 42) {
+            treeContainer.classList.add('level-3');
+        } else if (okCount >= 28) {
+            treeContainer.classList.add('level-2');
+        } else if (okCount >= 14) {
+            treeContainer.classList.add('level-1');
+        }
+    }
+
 
     window.setDate = function(type) {
         loader.style.display = 'flex';
@@ -592,10 +684,12 @@
             icon.classList.remove('fa-moon');
             icon.classList.add('fa-sun');
             text.innerHTML = '<i class="fas fa-sun"></i> Jasny Tryb';
+            document.querySelector('.theme-switch-container button').style.background = '#0f172a';
         } else {
             icon.classList.remove('fa-sun');
             icon.classList.add('fa-moon');
             text.innerHTML = '<i class="fas fa-moon"></i> Ciemny Tryb';
+            document.querySelector('.theme-switch-container button').style.background = '#1f2937';
         }
     }
 
@@ -618,13 +712,11 @@
         ];
         const msg = phrases[Math.floor(Math.random() * phrases.length)];
 
-        // Pobieranie statystyk z render() lub z atrybutów danych
         const el = document.getElementById('chatbot-bubble');
         const ok = okCount !== undefined ? okCount : (el.dataset.ok || '–');
         const ndf = ndfCount !== undefined ? ndfCount : (el.dataset.ndf || '–');
         const scrap = scrapCount !== undefined ? scrapCount : (el.dataset.scrap || '–');
 
-        // Zapisanie danych w dymku
         el.dataset.ok = ok;
         el.dataset.ndf = ndf;
         el.dataset.scrap = scrap;
@@ -656,8 +748,8 @@
         const snowflake = document.createElement('div');
         snowflake.classList.add('snow');
         
-        const size = Math.random() * 5 + 2; // 2px do 7px
-        const duration = Math.random() * 15 + 10; // 10s do 25s
+        const size = Math.random() * 5 + 2; 
+        const duration = Math.random() * 15 + 10; 
         
         snowflake.style.width = `${size}px`;
         snowflake.style.height = `${size}px`;
@@ -667,10 +759,9 @@
         
         snowContainer.appendChild(snowflake);
         
-        // Usunięcie płatków śniegu po zakończeniu animacji, aby nie obciążały DOM
         snowflake.addEventListener('animationend', () => {
             snowflake.remove();
-            createSnowflake(); // Tworzenie nowego płatka
+            createSnowflake(); 
         });
     }
 
@@ -683,7 +774,6 @@
     // --- Inicjalizacja ---
     
     function init() {
-        // Ustawienie motywu na podstawie localStorage
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
             const icon = document.querySelector('#themeToggle i');
@@ -698,18 +788,15 @@
         // Generowanie 50 płatków śniegu
         generateSnow(50);
 
-        // Ustawienie daty na "Dzisiaj" i ładowanie danych
+        // Ładowanie danych i renderowanie elementów (w tym choinki i bota)
         setDate('today');
         
-        // Zegar
+        // Pętle czasowe
         setInterval(updateClockInline, 1000);
         updateClockInline();
 
-        // Bot
-        updateBotPhrase();
         setInterval(() => updateBotPhrase(), 10000);
 
-        // Sprawdzenie zmiany dnia (co 5 minut)
         let lastCheckedDate = new Date().toDateString();
         setInterval(() => {
             const now = new Date().toDateString();
@@ -719,7 +806,6 @@
             }
         }, 300000); 
         
-        // Automatyczne odświeżanie danych co 30 sekund
         (function loop(){
             setTimeout(()=>loadData().then(render).finally(loop),30000);
         })();
