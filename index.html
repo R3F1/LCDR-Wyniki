@@ -991,10 +991,19 @@
         '0 0 8px #fff, 0 0 12px #4ade80',
         '0 0 10px #f87171, 0 0 20px #ff00ff'
     ];
+    
+    // STAŁY LIMIT ZYCZEŃ NA EKRANIE
+    const HOLIDAY_LIMIT = 4; 
 
     function createHolidayText() {
         const container = document.getElementById('holiday-container');
         if (!container) return;
+        
+        // SPRAWDZENIE LIMITU
+        if (container.children.length >= HOLIDAY_LIMIT) {
+             // Jeżeli limit osiągnięty, nie twórz nowego elementu
+             return;
+        }
 
         const textEl = document.createElement('div');
         textEl.classList.add('holiday-text');
@@ -1027,7 +1036,7 @@
     }
 
     function startHolidayEffect() {
-        // ZMIANA 3: Generowanie nowego tekstu co 4 sekundy (wolniej)
+        // Generowanie nowego tekstu co 4 sekundy
         setInterval(createHolidayText, 4000); 
     }
 
