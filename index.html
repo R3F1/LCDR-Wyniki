@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -43,7 +43,7 @@
         body.dark-mode { background-color: #0f172a; }
 
         /* ********************************************** */
-        /* EFEKT WESOŁYCH ŚWIĄT - ZMODYFIKOWANY */
+        /* EFEKT WESOŁYCH ŚWIĄT */
         /* ********************************************** */
         #holiday-container {
             position: fixed;
@@ -54,7 +54,6 @@
         
         .holiday-text {
             position: absolute;
-            /* ZMIANA 1: Zmniejszenie rozmiaru o 50% */
             font-size: 1.75vw; 
             font-weight: 900;
             text-transform: uppercase;
@@ -67,7 +66,6 @@
             text-shadow: 
                 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; 
             
-            /* ZMIANA 2: Zwiększenie czasu trwania animacji (wolniejsze pojawianie/znikanie) */
             animation: 
                 holidayFade 10s ease-out forwards; 
         }
@@ -362,17 +360,20 @@
         }
 
 
-        /* ZEGAR */
+        /* ZEGAR - ULEPSZENIA WIZUALNE */
         #clock-inline {
-            font-size: 2rem;
-            text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color);
+            font-size: 2.2rem; /* Większa czcionka */
+            font-weight: 800 !important;
+            text-shadow: 0 0 15px #fff, 0 0 30px var(--primary-color);
             color: #fff;
-            animation: pulseClock 4s infinite ease-in-out;
-            margin-left: auto;
+            animation: pulseClock 3s infinite ease-in-out;
+            margin: 0; /* Usuń auto margin z poprzedniej wersji */
+            flex-grow: 1; /* Pozwala mu się rozciągnąć i być wyśrodkowanym w header-controls */
+            text-align: center; /* Wyśrodkowanie tekstu zegara */
         }
         @keyframes pulseClock {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
+            50% { opacity: 0.8; }
         }
 
         /* ********************************************** */
@@ -445,6 +446,10 @@
             .holiday-text {
                 font-size: 4vw; /* Skalowalny rozmiar na mniejsze ekrany (proporcjonalnie do 1.75vw) */
             }
+            #clock-inline {
+                font-size: 1.8rem;
+                text-align: left; /* W trybie kolumnowym lepiej w lewo */
+            }
         }
         @media(max-width:768px) {
             .header-controls { flex-direction: column; align-items: stretch; }
@@ -455,6 +460,8 @@
     </style>
 </head>
 <body>
+<audio id="lunchAlarm" src="lunch_alarm.mp3" preload="auto"></audio>
+
 <div id="holiday-container"></div>
 
 <div class="snow-container" id="snow-container"></div>
@@ -500,7 +507,7 @@
             <a class="filter-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank" style="background: #7c3aed;"><i class="fas fa-tv"></i> OLED LIVE DATA</a>
             <button class="filter-btn" onclick="manualLoad()"><i class="fas fa-sync-alt"></i> ŁADUJ DANE </button>
             <button class="export-btn" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
-            <span id="clock-inline" style="font-weight:bold;"></span>
+            <span id="clock-inline"></span>
         </div>
     </div>
 </div>
@@ -573,6 +580,8 @@
     let currentDate = new Date();
     const datePicker = document.getElementById('date-picker-input');
     const loader = document.getElementById('loader');
+    const lunchAlarm = document.getElementById('lunchAlarm'); // Dźwięk alarmu
+    let lunchAlarmTriggered = false; // Flaga zapobiegająca wielokrotnemu odtwarzaniu
 
     function parseCSV(text) {
         return text.trim().split('\n').map(row =>
@@ -875,14 +884,30 @@
     }
 
     // --- ZEGAR I MOTYW ---
+    let lastCheckedHour = -1; // Używane do alarmu obiadowego
+
     window.updateClockInline = function() {
         const clk = document.getElementById('clock-inline');
         if (clk) {
             const now = new Date();
-            const h = now.getHours().toString().padStart(2,'0');
+            const h = now.getHours();
             const m = now.getMinutes().toString().padStart(2,'0');
             const s = now.getSeconds().toString().padStart(2,'0');
-            clk.innerHTML = `🕒 ${h}:${m}:${s}`;
+            
+            clk.innerHTML = `🕒 ${h.toString().padStart(2,'0')}:${m}:${s}`;
+            
+            // Logika Alarmu Obiadowego
+            if (h === 12 && m === '00' && s === '00' && !lunchAlarmTriggered) {
+                 if(lunchAlarm) {
+                    lunchAlarm.play().catch(e => console.error("Błąd odtwarzania alarmu obiadowego:", e));
+                    lunchAlarmTriggered = true; // Ustaw flagę
+                 }
+            }
+            
+            // Reset flagi po 12:00 (np. po 13:00)
+            if (h > 12) {
+                 lunchAlarmTriggered = false;
+            }
         }
     }
     
@@ -1023,6 +1048,7 @@
     // NOWA FUNKCJA: Oblicza zakazane strefy na podstawie elementów DOM (w jednostkach VW/VH)
     function getExclusionZones() {
         const zones = [];
+        // Celujemy w główne kontenery danych i kontrolki
         const targets = document.querySelectorAll('.summary-box, .data-section, .container'); 
         
         const vw = window.innerWidth;
