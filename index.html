@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR CHRISTMAS Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -83,8 +83,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
-            /* ZMIANA 1: USUNIĘCIE OVERFLOW HIDDEN, ABY TŁO ROZCIĄGAŁO SIĘ PRAWIDŁOWO */
-            overflow: visible; 
+            overflow: hidden; /* ZMIENIONY: Zabezpiecza przed wychodzeniem elementów poza krawędzie */
         }
         .summary-box:hover, .data-section:hover {
             transform: translateY(-3px);
@@ -100,7 +99,8 @@
         .summary-content-wrapper {
             display: flex;
             gap: 30px; /* Odstęp między nowymi elementami */
-            align-items: flex-start; /* Upewnij się, że zaczynają się u góry */
+            /* ZMIANA: ZASTĄPIONE 'stretch' na 'flex-start' dla lepszego wyrównania KPI */
+            align-items: flex-start; 
         }
 
         /* NOWY: Panel z kluczowymi wskaźnikami (KPI) */
@@ -112,10 +112,12 @@
             background: rgba(59, 130, 246, 0.15); /* Półprzezroczyste tło akcentujące */
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); /* Silny neonowy blask */
             border: 1px solid var(--primary-color);
-            position: sticky; /* Przyklejamy go */
-            top: 30px; 
             
-            /* ZMIANA 2: Umożliwia wyśrodkowanie elementów wewnątrz */
+            /* ZMIANA: Ustawienie sticky i fit-content dla wyrównania */
+            position: sticky; 
+            top: 30px; 
+            height: fit-content; 
+            
             display: flex;
             flex-direction: column;
             align-items: center; 
@@ -128,7 +130,13 @@
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.4);
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-            width: 100%; /* Zapewnia, że kpi-item się rozciągnie, ale wartość pozostaje wyśrodkowana */
+            width: 100%; 
+        }
+        
+        /* DODANO: Wyrównanie dolnego tekstu KPI */
+        .kpi-panel p {
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .kpi-item h3 {
@@ -242,9 +250,11 @@
             box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
             border: none; 
             padding: 15px 10px;
-            position: sticky;
+            /* ZMIENIONE: Usunięto position: sticky i z-index */
+            /* position: sticky; 
             bottom: 0;
-            z-index: 5;
+            z-index: 5; */
+            
             /* Usunięcie górnego zaokrąglenia, aby ładnie łączyło się z poprzednim wierszem */
             border-top-left-radius: 0 !important;
             border-top-right-radius: 0 !important;
@@ -335,7 +345,7 @@
                 flex-basis: auto;
                 min-width: unset;
                 width: 100%; /* Rozciągamy na całą szerokość */
-                position: static; /* Usuwamy sticky */
+                position: static; /* Usuwamy sticky, gdy jest w trybie kolumnowym */
                 margin-bottom: 20px;
             }
             .summary-table {
