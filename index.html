@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR CHRISTMAS Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -138,6 +138,18 @@
             margin-bottom: 0;
             padding-bottom: 0;
         }
+        
+        /* WSKAŹNIKI TRENDU */
+        .kpi-trend {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+        .trend-up { color: var(--ok-bg); }
+        .trend-down { color: var(--scrap-bg); }
+        .trend-neutral { color: #aaa; }
+
 
         .kpi-item h3 {
             margin: 0 0 8px 0;
@@ -189,6 +201,13 @@
             transition: all 0.3s ease;
             color: #fff;
             background: rgba(59, 130, 246, 0.4);
+        }
+        
+        /* WIZUALNE POTWIERDZENIE AKTYWNEGO PRZYCISKU */
+        .filter-btn.active {
+            background: var(--primary-color);
+            box-shadow: 0 0 10px var(--primary-color), inset 0 0 5px #fff;
+            transform: scale(1.05);
         }
         
         /* POPRAWA STYLU INPUTÓW */
@@ -251,10 +270,6 @@
             border: none; 
             padding: 15px 10px;
             /* ZMIENIONE: Usunięto position: sticky i z-index */
-            /* position: sticky; 
-            bottom: 0;
-            z-index: 5; */
-            
             /* Usunięcie górnego zaokrąglenia, aby ładnie łączyło się z poprzednim wierszem */
             border-top-left-radius: 0 !important;
             border-top-right-radius: 0 !important;
@@ -315,6 +330,38 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.85; }
         }
+
+        /* ********************************************** */
+        /* WSKAŹNIK ŁADOWANIA (LOADER) - Krok 4 */
+        /* ********************************************** */
+        .loader-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85); /* Ciemne, blokujące tło */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            font-size: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .loader {
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid var(--primary-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
 
         /* CHATBOT ROBOCIK */
         #chatbot-container {
@@ -465,7 +512,7 @@
 
 <script>
     // **********************************************
-    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS (NIEZMIENIONA)
+    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS
     // **********************************************
     const urls = [
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
@@ -498,26 +545,13 @@
     function formatDate(date) {
         return date.toISOString().split('T')[0];
     }
-
-    function setDatePickerValue(date) {
-        if (datePicker) {
-            datePicker.value = formatDate(date);
-        }
-    }
-
-    function highlightActive(type) {
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            if (btn.dataset.type) {
-                btn.classList.toggle('active', btn.dataset.type === type);
-            }
-        });
-    }
-
-    async function loadData() {
-        const tgt = formatDate(currentDate);
+    
+    // NOWA FUNKCJA: Pobieranie i agregowanie danych
+    async function fetchAndAggregateData(targetDate) {
         const all = [];
         const stationNames = ["KOVALCHYK", "ULANOVYCH", "OLED REPAIR"];
-
+        const tgt = formatDate(targetDate);
+        
         for (let idx = 0; idx < urls.length; idx++) {
             const url = urls[idx];
             let stationName = stationNames[idx];
@@ -534,7 +568,7 @@
                 const iName = hdr.findIndex(h => ['NAME','IMIĘ','IMIE'].includes(h));
                 const iSN = hdr.findIndex(h => h === 'SERIAL NUMBER');
                 const iComm = hdr.findIndex(h => h === 'COMMENT');
-                const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h));
+                // const iScrap = hdr.findIndex(h => ['SCRAP TTL','SCRAP_TTL','SCRAP-TTL'].includes(h)); // Scrap jest liczony ze statusu
 
                 rows.slice(1).forEach(rw => {
                     const d = normalizeDate(rw[iDate]);
@@ -555,72 +589,133 @@
                 console.warn('⚠️ fetch error', url, e);
             }
         }
-        return all;
+        
+        // Agregacja KPI
+        const ok = all.filter(d => d.status === 'OK').length;
+        const ndf = all.filter(d => d.status === 'NDF').length;
+        const scrap = all.filter(d => d.status === 'SCRAP_TTL').length;
+        const total = ok + ndf + scrap;
+        
+        return {
+            details: all,
+            kpi: {
+                ok, ndf, scrap, total,
+                successRate: total > 0 ? (ok / total) * 100 : 0,
+                ndfShare: total > 0 ? (ndf / total) * 100 : 0,
+                scrapShare: total > 0 ? (scrap / total) * 100 : 0,
+            }
+        };
+    }
+    
+    // ZMODYFIKOWANA FUNKCJA loadData - teraz pobiera dane dla bieżącego i poprzedniego dnia
+    async function loadData() {
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const currentDayData = await fetchAndAggregateData(currentDate);
+        const prevDayData = await fetchAndAggregateData(yesterday);
+        
+        return { 
+            current: currentDayData.details,
+            currentKpi: currentDayData.kpi,
+            prevKpi: prevDayData.kpi
+        };
     }
     // **********************************************
     // KONIEC LOGIKI GOOGLE SHEETS
     // **********************************************
 
-    // --- FUNKCJE RENDERUJĄCE I UX ---
-
-    // Filtrowanie detali
-    window.filterData = function(value) {
-        const query = value.trim().toLowerCase();
-        document.querySelectorAll('#data-table tbody tr').forEach(row => {
-            const serial = row.children[2]?.textContent.toLowerCase() || '';
-            const name = row.children[3]?.textContent.toLowerCase() || '';
-            row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
-        });
+    function setDatePickerValue(date) {
+        if (datePicker) {
+            datePicker.value = formatDate(date);
+        }
     }
-    
+
+    function highlightActive(type) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            if (btn.dataset.type) {
+                btn.classList.toggle('active', btn.dataset.type === type);
+            }
+        });
+        
+        // Obsługa wyboru daty niestandardowej
+        if (type === 'custom' && datePicker.value) {
+             document.querySelector('.filter-btn[data-type="today"]').classList.remove('active');
+             document.querySelector('.filter-btn[data-type="yesterday"]').classList.remove('active');
+        }
+    }
+
     // --- FUNKCJE KPI ---
-    function updateKPIs(ok, ndf, scrap) {
-        const total = ok + ndf + scrap;
+    function updateKPIs(currentKpi, prevKpi) {
+        const total = currentKpi.total;
         const successRateEl = document.getElementById('kpi-success-rate');
-        // ZMIANA 3: Nowe elementy KPI
         const ndfShareEl = document.getElementById('kpi-ndf-share');
         const scrapShareEl = document.getElementById('kpi-scrap-share');
 
         if (total === 0) {
-            successRateEl.textContent = 'N/A';
-            ndfShareEl.textContent = 'N/A';
-            scrapShareEl.textContent = 'N/A';
-            // Reset stylów przy braku danych
+            successRateEl.innerHTML = 'N/A';
+            ndfShareEl.innerHTML = 'N/A';
+            scrapShareEl.innerHTML = 'N/A';
             successRateEl.style.textShadow = ''; 
             successRateEl.style.color = '#fff';
             return;
         }
 
-        // Wskaźnik Sukcesu: (OK / Total) * 100
-        const successRate = (ok / total) * 100;
-        successRateEl.textContent = `${successRate.toFixed(1)}%`;
+        // FUNKCJA OBLICZAJĄCA TREND I ZWRACAJĄCA HTML
+        function getTrendHTML(currentValue, prevValue, betterIsHigher) {
+            if (prevKpi.total === 0) {
+                return '<span class="kpi-trend trend-neutral">(Brak danych wczoraj)</span>';
+            }
+            
+            const diff = currentValue - prevValue;
+            const diffAbs = Math.abs(diff);
+            const isUp = diff > 0;
+            const isDown = diff < 0;
+
+            let colorClass = 'trend-neutral';
+            let icon = '<i class="fas fa-circle-dot"></i>';
+            
+            if (diff !== 0) {
+                if ((isUp && betterIsHigher) || (isDown && !betterIsHigher)) {
+                    colorClass = 'trend-up';
+                    icon = '<i class="fas fa-arrow-up"></i>';
+                } else if ((isDown && betterIsHigher) || (isUp && !betterIsHigher)) {
+                    colorClass = 'trend-down';
+                    icon = '<i class="fas fa-arrow-down"></i>';
+                }
+            }
+
+            const diffText = diffAbs.toFixed(1);
+            return `<span class="kpi-trend ${colorClass}">${icon} ${diffText}% vs Wczoraj</span>`;
+        }
+
+
+        // Wskaźnik Sukcesu (OK)
+        const successRate = currentKpi.successRate;
+        successRateEl.innerHTML = `${successRate.toFixed(1)}% ${getTrendHTML(successRate, prevKpi.successRate, true)}`;
         
-        // Udział NDF: (NDF / Total) * 100
-        const ndfShare = (ndf / total) * 100;
-        ndfShareEl.textContent = `${ndfShare.toFixed(1)}%`;
+        // Udział NDF (No Defect Found)
+        const ndfShare = currentKpi.ndfShare;
+        ndfShareEl.innerHTML = `${ndfShare.toFixed(1)}% ${getTrendHTML(ndfShare, prevKpi.ndfShare, false)}`; // Niższy jest lepszy
         
-        // Udział SCRAP: (SCRAP / Total) * 100
-        const scrapShare = (scrap / total) * 100;
-        scrapShareEl.textContent = `${scrapShare.toFixed(1)}%`;
+        // Udział SCRAP (Złom)
+        const scrapShare = currentKpi.scrapShare;
+        scrapShareEl.innerHTML = `${scrapShare.toFixed(1)}% ${getTrendHTML(scrapShare, prevKpi.scrapShare, false)}`; // Niższy jest lepszy
         
         // **********************************************
-        // ZMODYFIKOWANA LOGIKA BLASKU DLA WSKAŹNIKA SUKCESU (OK)
-        // Blask jest ZAWSZE ZIELONY zgodnie z życzeniem użytkownika
+        // LOGIKA BLASKU DLA WSKAŹNIKA SUKCESU (OK) - ZAWSZE ZIELONY
         // **********************************************
         if (successRateEl) {
-            const glowColor = 'var(--ok-bg)'; // STAŁY ZIELONY BLASK
-            // Zmiana blasku
+            const glowColor = 'var(--ok-bg)'; 
             successRateEl.style.textShadow = `0 0 15px ${glowColor}, 0 0 25px ${glowColor}`;
-            // Zmiana koloru tekstu (zachowana stara logika, chyba że życzysz sobie stały biały)
             successRateEl.style.color = successRate >= 70 ? '#fff' : 'var(--scrap-bg)';
         }
-        // **********************************************
     }
 
 
     function render(data) {
-        latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
-        document.getElementById('no-data-message').style.display = data.length ? 'none' : 'block';
+        latestData = data.current.sort((a,b)=>a.name.localeCompare(b.name));
+        document.getElementById('no-data-message').style.display = data.current.length ? 'none' : 'block';
 
         // 1. Data Table
         const dtb = document.createElement('tbody');
@@ -657,9 +752,9 @@
         });
 
         // Wiersz SUMA DZIENNA
-        const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
-        const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
-        const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
+        const sumOK = data.currentKpi.ok;
+        const sumNDF = data.currentKpi.ndf;
+        const sumSCR = data.currentKpi.scrap;
         
         const totalRow = document.createElement('tr');
         totalRow.classList.add('total-row');
@@ -676,8 +771,8 @@
         // Aktualizacja Chatbota
         updateBotPhrase(sumOK, sumNDF, sumSCR);
         
-        // NOWE: Aktualizacja KPI
-        updateKPIs(sumOK, sumNDF, sumSCR);
+        // NOWE: Aktualizacja KPI (z trendem)
+        updateKPIs(data.currentKpi, data.prevKpi);
     }
 
     window.setDate = function(type) {
@@ -696,8 +791,10 @@
             const dateValue = datePicker.value;
             if (dateValue) {
                 currentDate = new Date(dateValue.replace(/-/g, '/')); 
+                highlightActive('custom');
+            } else {
+                 highlightActive(null);
             }
-            highlightActive(null);
         }
 
         document.getElementById('summary-date').textContent = formatDate(currentDate);
