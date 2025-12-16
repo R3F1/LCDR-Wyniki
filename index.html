@@ -3,299 +3,257 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR New Analytics Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         :root {
-            --primary-color: #007BFF;
-            --secondary-color: #28A745;
-            --danger-color: #DC3545;
-            --warning-color: #FFC107;
-            --ok-color: #28A745;
-            --ndf-color: #FFC107;
-            --scrap-color: #DC3545;
-            --bg-light: #F8F9FA;
-            --bg-dark: #343A40;
-            --text-light: #F8F9FA;
-            --text-dark: #212529;
+            --primary-color: #3b82f6; /* Niebieski Akcent */
+            --ok-bg: #4ade80; /* Zieleń Neon */
+            --ndf-bg: #facc15; /* Żółć Neon */
+            --scrap-bg: #f87171; /* Czerwień Neon */
+            --txt-dark: #1F2937;
+            --card-bg-dark: rgba(15, 23, 42, 0.9);
+            --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
+            --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
+            --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
         }
 
-        /* Ogólny Reset i Ciało */
-        html, body { 
-            margin: 0; 
-            padding: 0; 
-            min-height: 100vh;
-        }
+        /* TŁO I ANIMACJE */
+        html, body { margin:0; padding:0; min-height:100vh; }
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            transition: all 0.3s;
+            font-family: 'Segoe UI', sans-serif;
+            color: #fff;
+            /* Dynamiczne tło plazmowe + wgrany background.jpg */
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+                linear-gradient(60deg, rgba(30, 64, 175, 0.5), rgba(147, 51, 234, 0.5), rgba(16, 185, 129, 0.5), rgba(30, 64, 175, 0.5)), 
+                url('background.jpg');
+            background-size: 100% 100%, 600% 600%, cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: animatedPlasma 25s ease infinite;
+            transition: background-color .3s, color .3s;
         }
-        body.dark-mode {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+        body.dark-mode { background-color: #0f172a; }
+
+        @keyframes animatedPlasma {
+            0% { background-position: 0% 50%, 0% 50%, center; }
+            50% { background-position: 100% 50%, 100% 50%, center; }
+            100% { background-position: 0% 50%, 0% 50%, center; }
+        }
+        
+        /* LOGO */
+        .logo { text-align: center; margin: 20px 0; }
+        .logo img { 
+            max-width: 350px; width: 80%; height: auto; display: inline-block; 
+            filter: drop-shadow(0 0 10px var(--primary-color));
+            animation: fadeIn 1.5s ease-in-out forwards, pulse 3s ease-in-out infinite;
+            opacity: 0;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+        /* KARTY (Glassmorphism) */
+        .summary-box, .data-section {
+            background: rgba(255, 255, 255, 0.1); /* Jasne szkło */
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 5px rgba(255, 255, 255, 0.5);
+            margin: 0 auto 30px; padding: 25px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            color: #fff;
+            transition: transform 0.3s;
+        }
+        .summary-box:hover, .data-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
 
-        /* Kontener i Nagłówek */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+        /* KONTROLKI I PRZYCISKI */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+        .header-controls {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: center; align-items: center; margin: 30px 0;
+            padding: 15px 40px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15); /* Półprzezroczysty pasek */
         }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 3px solid var(--primary-color);
-            margin-bottom: 25px;
-        }
-        header h1 {
-            font-size: 2.5rem;
-            margin: 0;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-        header h1 i {
-            margin-right: 10px;
-        }
-        #current-date-info {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        /* Kontrolki */
-        .controls-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .controls-panel button, .controls-panel input, .controls-panel a {
+        .filter-btn, .export-btn, #date-picker-input, #serial-filter {
             padding: 10px 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.2s;
-            background-color: #fff;
-            color: var(--text-dark);
-        }
-        .controls-panel button:hover, .controls-panel a:hover {
-            background-color: var(--primary-color);
-            color: #fff;
-            border-color: var(--primary-color);
-        }
-        .controls-panel button.active {
-            background-color: var(--primary-color);
-            color: #fff;
-            border-color: var(--primary-color);
-        }
-        .controls-panel input[type="date"], .controls-panel input[type="text"] {
-            width: 180px;
-            background-color: #fff;
-        }
-        .dark-mode .controls-panel button, .dark-mode .controls-panel input, .dark-mode .controls-panel a {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            border-color: #6c757d;
-        }
-        .dark-mode .controls-panel button:hover, .dark-mode .controls-panel a:hover {
-            background-color: var(--primary-color);
-        }
-
-        /* Sekcje tabel */
-        .dashboard-section {
-            margin-bottom: 40px;
-        }
-        .dashboard-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            border-left: 5px solid var(--primary-color);
-            padding-left: 10px;
+            font-size: 14px;
             font-weight: 600;
-        }
-
-        /* Tabela Ogólna (Summary) */
-        .summary-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-            background-color: #fff;
-        }
-        .dark-mode .summary-table {
-            background-color: #495057;
-        }
-        .summary-table th, .summary-table td {
-            padding: 12px 15px;
-            text-align: center;
-            border: none;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .dark-mode .summary-table th, .dark-mode .summary-table td {
-            border-bottom: 1px solid #6c757d;
-        }
-
-        .summary-table th {
-            background-color: var(--primary-color);
+            transition: all 0.3s ease;
             color: #fff;
-            font-weight: 700;
-            text-transform: uppercase;
+            background: rgba(59, 130, 246, 0.4);
         }
-        .summary-table tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
+        .filter-btn:hover, .export-btn:hover {
+            background: var(--primary-color);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
         }
-        .dark-mode .summary-table tbody tr:nth-child(even) {
-            background-color: #3e444a;
+        #date-picker-input, #serial-filter {
+            width: 180px;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--txt-dark);
         }
-        .summary-table tbody tr:hover {
-            background-color: #e9ecef;
-        }
-        .dark-mode .summary-table tbody tr:hover {
-            background-color: #5a6268;
-        }
-        
-        /* Kolumny statusów w podsumowaniu */
-        .summary-table td.ok { background-color: var(--ok-color); color: #fff; font-weight: bold; }
-        .summary-table td.ndf { background-color: var(--warning-color); color: var(--text-dark); font-weight: bold; }
-        .summary-table td.scrap-ttl { background-color: var(--danger-color); color: #fff; font-weight: bold; }
 
-        /* Wiersz SUMA DZIENNA */
+        /* TABELA PODSUMOWANIA (Neon) */
+        .summary-table { width: 100%; border-collapse: collapse; }
+        .summary-table th { background: var(--primary-color); color: #fff; padding: 12px; }
+        .summary-table td { 
+            padding: 10px; text-align: center; font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Neonowe Wyróżnienie Statusów */
+        .summary-table td:first-child { text-align: left; font-weight: bold; }
+        .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
+        .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
+        .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
+        
+        /* Wiersz SUMARYCZNY */
         .summary-table tr.total-row td {
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            font-weight: 800;
-            font-size: 1.2rem;
-            border-top: 3px solid var(--primary-color);
-        }
-        .dark-mode .summary-table tr.total-row td {
-            background-color: #212529;
-        }
-        .summary-table tr.total-row td:first-child {
-            text-align: left;
+            font-size: 1.2em;
+            background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
+            color: #e5e7eb;
+            text-shadow: 0 0 8px #fff;
+            box-shadow: 0 0 15px #fff, 0 -5px 20px var(--primary-color);
         }
 
-        /* Tabela Detali */
-        .data-table th, .data-table td {
-            text-align: left;
+        /* ZEGAR */
+        #clock-inline {
+            font-size: 2rem;
+            text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color);
+            color: #fff;
+            animation: pulseClock 4s infinite ease-in-out;
+            margin-left: auto;
         }
-        .data-table td:nth-child(1), .data-table td:nth-child(2) {
-            text-align: center;
+        @keyframes pulseClock {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
         }
-        .data-table td i {
-            margin-right: 5px;
+
+        /* CHATBOT ROBOCIK */
+        #chatbot-container {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1003;
+            display: flex; align-items: flex-end; gap: 8px;
+            animation: robotTalk 3s ease-in-out infinite;
+        }
+        @keyframes robotTalk { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        #chatbot-img { 
+            width: 192px; height: auto; 
+            filter: drop-shadow(0 0 8px var(--primary-color));
+        }
+        #chatbot-bubble {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(50, 50, 50, 0.9));
+            color: white; padding: 12px 16px; border-radius: 16px 16px 0 16px;
+            max-width: 240px; font-size: 14px; line-height: 1.4em;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            cursor: pointer; user-select: none;
+            order: -1;
         }
         
-        /* Loader */
-        .loader-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.6); display: flex;
-            flex-direction: column; justify-content: center; align-items: center;
-            z-index: 1000; color: #fff; font-size: 1.5rem;
-        }
-        .loader {
-            border: 6px solid #f3f3f3; border-top: 6px solid var(--primary-color);
-            border-radius: 50%; width: 50px; height: 50px;
-            animation: spin 1s linear infinite; margin-bottom: 15px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Przełącznik Motywu */
-        .theme-switch-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
+        /* Media Queries */
+        @media(max-width:768px) {
+            .header-controls { flex-direction: column; align-items: stretch; }
+            #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; box-sizing: border-box; }
+            #chatbot-img { width: 120px; }
+            #clock-inline { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="theme-switch-container">
-    <button id="themeToggle" onclick="toggleTheme()">
+<div class="theme-switch-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+    <button id="themeToggle" onclick="toggleTheme()" style="padding: 8px 12px; border-radius: 8px; background: #1f2937; color: #fff; border: none; cursor: pointer;">
         <i class="fas fa-moon"></i> Ciemny Tryb
     </button>
 </div>
 
+<div id="chatbot-container">
+    <img alt="Robot" id="chatbot-img" src="robotlcdr.png"/> 
+    <div id="chatbot-bubble" style="cursor: pointer;">
+        Ładowanie bota...
+    </div>
+</div>
+
 <div class="loader-overlay" id="loader" style="display:none;">
     <div class="loader"></div>
-    <div>Ładowanie danych...</div>
+    <div style="margin-top: 16px;">Trwa ładowanie danych...</div>
 </div>
 
 <div class="container">
-    <header>
-        <h1><i class="fas fa-chart-line"></i> LCDR Analytics Dashboard</h1>
-        <div id="current-date-info">Data: <span id="summary-date">Ładowanie...</span></div>
-    </header>
-
-    <div class="controls-panel">
-        <button id="btn-today" data-type="today" onclick="setDate('today')"><i class="fas fa-calendar-day"></i> Dzisiaj</button>
-        <button id="btn-yesterday" data-type="yesterday" onclick="setDate('yesterday')"><i class="fas fa-calendar-minus"></i> Wczoraj</button>
-        
-        <input type="date" id="date-picker-input" onchange="setDate('custom')" title="Wybierz datę">
-
-        <input
-            type="text"
-            id="serial-filter"
-            placeholder="🔎 Szukaj SN lub Nazwy..."
-            oninput="filterData(this.value)"
-            title="Wyszukaj po numerze seryjnym lub nazwisku"
-        />
-
-        <button onclick="manualLoad()"><i class="fas fa-sync-alt"></i> ŁADUJ DANE</button>
-        <button onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Eksportuj do Excela</button>
-        <a href="https://r3f1.github.io/OLED-REPAIR/" target="_blank" style="background-color: #6C757D; color: #fff;"><i class="fas fa-tv"></i> OLED LIVE DATA</a>
+    <div class="logo">
+        <img alt="LCDR LIVE DATA Logo" src="logo.png"/>
     </div>
+    
+    <div class="controls-wrapper">
+        <div class="header-controls">
+            <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
+            <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
+            
+            <input type="date" id="date-picker-input" onchange="setDate('custom')" title="Wybierz datę">
 
-    <div class="dashboard-section">
-        <h2><i class="fas fa-table"></i> Podsumowanie Napraw</h2>
-        <table class="summary-table" id="summary-table">
-            <thead>
-                <tr>
-                    <th>NAPRAWIACZ</th>
-                    <th class="ok">OK</th>
-                    <th class="ndf">NDF</th>
-                    <th class="scrap-ttl">SCRAP TTL</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+            <input
+                type="text"
+                id="serial-filter"
+                placeholder="🔎 Szukaj SN lub Nazwy..."
+                oninput="filterData(this.value)"
+                title="Wyszukaj po numerze seryjnym lub nazwisku"
+            />
 
-    <div class="dashboard-section">
-        <h2><i class="fas fa-list"></i> Szczegóły Transakcji</h2>
-        <table class="summary-table data-table" id="data-table">
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Station</th>
-                    <th>Serial Number</th>
-                    <th>Name</th>
-                    <th>Comment</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div>
+            <a class="filter-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank" style="background: #7c3aed;"><i class="fas fa-tv"></i> OLED LIVE DATA</a>
+            <button class="filter-btn" onclick="manualLoad()"><i class="fas fa-sync-alt"></i> ŁADUJ DANE </button>
+            <button class="export-btn" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+            <span id="clock-inline" style="font-weight:bold;"></span>
+        </div>
     </div>
+</div>
+
+<div class="container summary-box">
+    <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="margin: 0;">PODSUMOWANIE</h2>
+        <div class="date-summary" id="summary-date"></div>
+    </div>
+    <table class="summary-table" id="summary-table">
+        <thead>
+            <tr>
+                <th>NAPRAWIACZ</th>
+                <th class="ok">OK</th>
+                <th class="ndf">NDF</th>
+                <th class="scrap-ttl">SCRAP TTL</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<div class="container data-section">
+    <h2 style="border-left: 5px solid var(--primary-color); padding-left: 10px;">SZCZEGÓŁY</h2>
+    <table class="summary-table data-table" id="data-table">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Station</th>
+                <th>Serial Number</th>
+                <th>Name</th>
+                <th>Comment</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div>
 </div>
 
 <script>
     // **********************************************
-    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS (PRZEJĘTA BEZ ZMIAN)
+    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS (NIEZMIENIONA)
     // **********************************************
     const urls = [
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
@@ -336,7 +294,7 @@
     }
 
     function highlightActive(type) {
-        document.querySelectorAll('.controls-panel button').forEach(btn => {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
             if (btn.dataset.type) {
                 btn.classList.toggle('active', btn.dataset.type === type);
             }
@@ -391,10 +349,9 @@
     // KONIEC LOGIKI GOOGLE SHEETS
     // **********************************************
 
-
     // --- FUNKCJE RENDERUJĄCE I UX ---
 
-    // Funkcja do filtrowania detali (nowa)
+    // Filtrowanie detali
     window.filterData = function(value) {
         const query = value.trim().toLowerCase();
         document.querySelectorAll('#data-table tbody tr').forEach(row => {
@@ -411,10 +368,9 @@
         // 1. Data Table
         const dtb = document.createElement('tbody');
         latestData.forEach(it => {
-            const statusIcon = it.status === 'OK' ? 'fa-check-circle' : (it.status === 'NDF' ? 'fa-exclamation-triangle' : 'fa-times-circle');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="status-${it.status.toLowerCase()}"><i class="fas ${statusIcon}"></i> ${it.status}</td>
+                <td class="status-${it.status.toLowerCase()}">${it.status}</td>
                 <td>${it.station}</td>
                 <td>${it.serial}</td>
                 <td>${it.name}</td>
@@ -459,6 +415,9 @@
         
         document.getElementById('summary-table').tBodies[0]?.remove();
         document.getElementById('summary-table').appendChild(stb);
+
+        // Aktualizacja Chatbota
+        updateBotPhrase(sumOK, sumNDF, sumSCR);
     }
 
     window.setDate = function(type) {
@@ -491,7 +450,7 @@
     }
 
     window.manualLoad = function() {
-        setDate('custom'); // Działa jako przeładowanie aktualnie wybranej daty
+        setDate('custom'); 
     }
 
     window.exportToExcel = function() {
@@ -509,6 +468,18 @@
         XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
+    // --- ZEGAR I MOTYW ---
+    window.updateClockInline = function() {
+        const clk = document.getElementById('clock-inline');
+        if (clk) {
+            const now = new Date();
+            const h = now.getHours().toString().padStart(2,'0');
+            const m = now.getMinutes().toString().padStart(2,'0');
+            const s = now.getSeconds().toString().padStart(2,'0');
+            clk.innerHTML = `🕒 ${h}:${m}:${s}`;
+        }
+    }
+    
     window.toggleTheme = function() {
         const body = document.body;
         body.classList.toggle('dark-mode');
@@ -529,17 +500,94 @@
         }
     }
 
+    // --- CHATBOT ROBOCIK LOGIC ---
+    const botExtraReplies = [
+        "🧠 Pracuję nad nowym algorytmem!",
+        "🧰 Mam wszystkie narzędzia gotowe!",
+        "📡 Łączę się z bazą danych...",
+        "👀 Obserwuję wszystko uważnie!",
+        "💡 Pamiętaj: każdy błąd to okazja do nauki!"
+    ];
+
+    function updateBotPhrase(okCount, ndfCount, scrapCount) {
+        const phrases = [
+            "👋 Hej! Miłego dnia!",
+            "🔧 Masz ochotę coś naprawić?",
+            "☕ Czas na przerwę?",
+            "📈 Sprawdzam dane...",
+            "✅ Wszystko działa dobrze!"
+        ];
+        const msg = phrases[Math.floor(Math.random() * phrases.length)];
+
+        const ok = okCount !== undefined ? okCount : (document.getElementById('chatbot-bubble').dataset.ok || '–');
+        const ndf = ndfCount !== undefined ? ndfCount : (document.getElementById('chatbot-bubble').dataset.ndf || '–');
+        const scrap = scrapCount !== undefined ? scrapCount : (document.getElementById('chatbot-bubble').dataset.scrap || '–');
+
+        // Zapisanie danych w dymku, aby click listener mógł je odczytać
+        document.getElementById('chatbot-bubble').dataset.ok = ok;
+        document.getElementById('chatbot-bubble').dataset.ndf = ndf;
+        document.getElementById('chatbot-bubble').dataset.scrap = scrap;
+
+        document.getElementById('chatbot-bubble').innerHTML =
+            `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
+    }
+    
+    document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
+        const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
+        const el = document.getElementById('chatbot-bubble');
+        if (el) {
+            const ok = el.dataset.ok || '–';
+            const ndf = el.dataset.ndf || '–';
+            const scrap = el.dataset.scrap || '–';
+
+            el.innerHTML =
+                `<strong>🤖 LCDR Bot:</strong><br><em>${reply}</em><br><br>Statystyki:<br>OK: <strong>${ok}</strong>, NDF: <strong>${ndf}</strong>, SCRAP: <strong>${scrap}</strong>.`;
+
+            setTimeout(() => updateBotPhrase(), 8000); 
+        }
+    });
+
     // --- Inicjalizacja ---
     
     function init() {
         // Ustawienie motywu na podstawie localStorage
         if (localStorage.getItem('theme') === 'dark') {
+            // Wymuś dark mode bez wywoływania toggle, aby nie zmieniać tekstu przycisku na starcie
             document.body.classList.add('dark-mode');
-            toggleTheme(); // Wymuś aktualizację tekstu/ikony przycisku
+            const icon = document.querySelector('#themeToggle i');
+            const text = document.querySelector('#themeToggle');
+            if (icon && text) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                text.innerHTML = '<i class="fas fa-sun"></i> Jasny Tryb';
+            }
         }
 
         // Ustawienie daty na "Dzisiaj" i ładowanie danych
         setDate('today');
+        
+        // Zegar
+        setInterval(updateClockInline, 1000);
+        updateClockInline();
+
+        // Bot
+        updateBotPhrase();
+        setInterval(() => updateBotPhrase(), 10000);
+
+        // Sprawdzenie zmiany dnia (co 5 minut)
+        let lastCheckedDate = new Date().toDateString();
+        setInterval(() => {
+            const now = new Date().toDateString();
+            if (now !== lastCheckedDate) {
+                lastCheckedDate = now;
+                setDate('today');
+            }
+        }, 300000); 
+        
+        // Automatyczne odświeżanie danych co 30 sekund
+        (function loop(){
+            setTimeout(()=>loadData().then(render).finally(loop),30000);
+        })();
     }
     
     init();
