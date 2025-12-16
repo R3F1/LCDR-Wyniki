@@ -49,7 +49,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             pointer-events: none;
-            z-index: 998; /* Pod śniegiem, ale nad treścią */
+            z-index: 998; /* Pod śniegiem i pod tabelami */
         }
         
         .holiday-text {
@@ -83,7 +83,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             pointer-events: none;
-            z-index: 999; 
+            z-index: 999; /* Nad tekstem, ale pod tabelami */
         }
         .snow {
             position: absolute;
@@ -120,6 +120,10 @@
             color: #fff;
             transition: transform 0.3s;
             overflow: hidden; 
+            
+            /* ZMIANA Z-INDEX: Zapewnia, że te elementy są NAD napisem "Wesołych Świąt" */
+            position: relative; 
+            z-index: 1000; 
         }
         .summary-box:hover, .data-section:hover {
             transform: translateY(-3px);
@@ -135,7 +139,6 @@
         .summary-content-wrapper {
             display: flex;
             gap: 30px; /* Odstęp między nowymi elementami */
-            /* ZMIANA: ZASTĄPIONE 'stretch' na 'flex-start' dla lepszego wyrównania KPI */
             align-items: flex-start; 
         }
 
