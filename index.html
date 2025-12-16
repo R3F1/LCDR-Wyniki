@@ -18,6 +18,9 @@
             --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
             --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
             --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
+            
+            /* NOWE: Efekt blasku dla sumy dziennej */
+            --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
         }
 
         /* TŁO I ANIMACJE */
@@ -108,16 +111,31 @@
             color: var(--txt-dark);
         }
 
-        /* TABELA PODSUMOWANIA (Neon) */
+        /* TABELA */
         .summary-table { 
             width: 100%; 
-            border-collapse: separate; /* Wymagane dla border-radius na komórkach */
+            border-collapse: separate; 
             border-spacing: 0;
+            overflow: hidden; /* Wymagane, żeby zaokrąglenie rogów działało na całej karcie */
         }
-        .summary-table th { background: var(--primary-color); color: #fff; padding: 12px; }
+        
+        /* NAGŁÓWKI TABEL - WOW EFFECT */
+        .summary-table th { 
+            padding: 12px; 
+            color: #fff; 
+            font-weight: 700;
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); /* Głęboki gradient */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Duży cień */
+            border: none;
+        }
+        .summary-table thead tr:first-child th:first-child { border-top-left-radius: 12px; }
+        .summary-table thead tr:first-child th:last-child { border-top-right-radius: 12px; }
+        
+        /* KOMÓRKI W TABELI */
         .summary-table td { 
             padding: 10px; text-align: center; font-weight: bold;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05); /* Półprzezroczyste tło */
         }
 
         /* Neonowe Wyróżnienie Statusów */
@@ -126,18 +144,25 @@
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
         
-        /* Wiersz SUMARYCZNY */
+        /* Wiersz SUMARYCZNY - EXTENDED GLOW */
         .summary-table tr.total-row td {
             font-size: 1.2em;
             background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
             color: #e5e7eb;
             text-shadow: 0 0 8px #fff;
-            box-shadow: 0 0 15px #fff, 0 -5px 20px var(--primary-color);
-            border: none; /* Usuwamy standardowe obramowanie komórek */
-            padding: 15px 10px; /* Dodajemy większy padding, żeby było widoczne */
+            
+            /* ZMIANA 1: Extended Glow - cień puszczony pod spód */
+            box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
+            
+            border: none; 
+            padding: 15px 10px;
+            /* Zapewnienie, że wiersz sumaryczny jest zawsze na spodzie tabeli */
+            position: sticky;
+            bottom: 0;
+            z-index: 5;
         }
         
-        /* ZAOKRĄGLENIE WŁAŚCIWE */
+        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy */
         .summary-table tr.total-row td:first-child {
             border-top-left-radius: 12px;
             border-bottom-left-radius: 12px;
@@ -148,7 +173,16 @@
             border-top-right-radius: 12px;
             border-bottom-right-radius: 12px;
         }
-        /* KONIEC ZAOKRĄGLENIA */
+
+        /* Nagłówek Sekcji Szczegóły - Ujednolicenie z resztą */
+        .container.data-section h2 {
+            margin-top: 0;
+            padding: 12px 10px;
+            background: linear-gradient(90deg, #1e3a8a, var(--primary-color));
+            border-radius: 12px 12px 0 0; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            border-left: none !important;
+        }
 
         /* ZEGAR */
         #clock-inline {
