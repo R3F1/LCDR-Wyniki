@@ -71,6 +71,11 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
+        
+        /* ZMIANA TUTAJ: Dodajemy przerwę nad sekcją detali */
+        .container.data-section {
+             margin-top: 40px; 
+        }
 
         /* KONTROLKI I PRZYCISKI */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
@@ -519,16 +524,18 @@
         ];
         const msg = phrases[Math.floor(Math.random() * phrases.length)];
 
-        const ok = okCount !== undefined ? okCount : (document.getElementById('chatbot-bubble').dataset.ok || '–');
-        const ndf = ndfCount !== undefined ? ndfCount : (document.getElementById('chatbot-bubble').dataset.ndf || '–');
-        const scrap = scrapCount !== undefined ? scrapCount : (document.getElementById('chatbot-bubble').dataset.scrap || '–');
+        // Pobieranie statystyk z render() lub z atrybutów danych
+        const el = document.getElementById('chatbot-bubble');
+        const ok = okCount !== undefined ? okCount : (el.dataset.ok || '–');
+        const ndf = ndfCount !== undefined ? ndfCount : (el.dataset.ndf || '–');
+        const scrap = scrapCount !== undefined ? scrapCount : (el.dataset.scrap || '–');
 
-        // Zapisanie danych w dymku, aby click listener mógł je odczytać
-        document.getElementById('chatbot-bubble').dataset.ok = ok;
-        document.getElementById('chatbot-bubble').dataset.ndf = ndf;
-        document.getElementById('chatbot-bubble').dataset.scrap = scrap;
+        // Zapisanie danych w dymku
+        el.dataset.ok = ok;
+        el.dataset.ndf = ndf;
+        el.dataset.scrap = scrap;
 
-        document.getElementById('chatbot-bubble').innerHTML =
+        el.innerHTML =
             `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
     }
     
@@ -552,7 +559,6 @@
     function init() {
         // Ustawienie motywu na podstawie localStorage
         if (localStorage.getItem('theme') === 'dark') {
-            // Wymuś dark mode bez wywoływania toggle, aby nie zmieniać tekstu przycisku na starcie
             document.body.classList.add('dark-mode');
             const icon = document.querySelector('#themeToggle i');
             const text = document.querySelector('#themeToggle');
