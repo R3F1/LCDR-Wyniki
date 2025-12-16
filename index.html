@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR HYBRID WOW Dashboard</title>
+    <title>LCDR CHRISTMAS Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -83,7 +83,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
-            overflow: hidden; /* ZMIENIONY: Zabezpiecza przed wychodzeniem elementów poza krawędzie */
+            overflow: hidden; /* ZMIENIONE: Zabezpiecza przed wychodzeniem elementów poza krawędzie */
         }
         .summary-box:hover, .data-section:hover {
             transform: translateY(-3px);
@@ -603,16 +603,18 @@
         const scrapShare = (scrap / total) * 100;
         scrapShareEl.textContent = `${scrapShare.toFixed(1)}%`;
         
-        // Logika do zmiany koloru blasku Wskaźnika Sukcesu
+        // **********************************************
+        // ZMODYFIKOWANA LOGIKA BLASKU DLA WSKAŹNIKA SUKCESU (OK)
+        // Blask jest ZAWSZE ZIELONY zgodnie z życzeniem użytkownika
+        // **********************************************
         if (successRateEl) {
-            const glowColor = successRate >= 90 ? 'var(--ok-bg)' : 
-                              successRate >= 70 ? 'var(--ndf-bg)' : 
-                              'var(--scrap-bg)';
+            const glowColor = 'var(--ok-bg)'; // STAŁY ZIELONY BLASK
             // Zmiana blasku
             successRateEl.style.textShadow = `0 0 15px ${glowColor}, 0 0 25px ${glowColor}`;
-            // Zmiana koloru tekstu
+            // Zmiana koloru tekstu (aby nadal ostrzegać wizualnie, jeśli wskaźnik jest niski)
             successRateEl.style.color = successRate >= 70 ? '#fff' : 'var(--scrap-bg)';
         }
+        // **********************************************
     }
 
 
