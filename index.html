@@ -131,6 +131,19 @@
             50% { opacity: 0.85; }
         }
 
+        /* NAGŁÓWKI SEKCJI (PODSUMOWANIE i SZCZEGÓŁY) */
+        .container .summary-header h2,
+        .container .data-section h2 {
+            margin: 0;
+            margin-bottom: 15px; 
+            margin-top: 15px; 
+            font-size: 1.8rem; 
+            border-left: none !important; 
+            padding-left: 0 !important; 
+            color: #fff; 
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
         /* TABELA I WIZUALIZACJA */
         .summary-table { 
             width: 100%; 
@@ -188,13 +201,6 @@
         }
         .summary-table tr.total-row td:last-child {
             border-bottom-right-radius: var(--general-radius);
-        }
-
-        /* Nagłówek Sekcji Szczegóły - Bez niebieskiego paska pionowego */
-        .container.data-section h2 {
-            margin-bottom: 15px; margin-top: 0; font-size: 1.8rem; 
-            border-left: none !important; padding-left: 0 !important; 
-            color: #fff; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
 
         /* Zaokrąglenie rogów tabeli detali na dole */
@@ -381,7 +387,7 @@
 
 <div class="container summary-box">
     <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2 style="margin: 0;">PODSUMOWANIE</h2>
+        <h2 style="margin-bottom: 0; margin-top: 0; font-size: 1.8rem; border-left: none !important; padding-left: 0 !important; color: #fff; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);">PODSUMOWANIE</h2>
         <div class="date-summary" id="summary-date"></div>
     </div>
     <table class="summary-table" id="summary-table">
@@ -704,13 +710,11 @@
         ];
         const msg = phrases[Math.floor(Math.random() * phrases.length)];
 
-        // Pobieranie statystyk z render() lub z atrybutów danych
         const el = document.getElementById('chatbot-bubble');
         const ok = okCount !== undefined ? okCount : (el.dataset.ok || '–');
         const ndf = ndfCount !== undefined ? ndfCount : (el.dataset.ndf || '–');
         const scrap = scrapCount !== undefined ? scrapCount : (el.dataset.scrap || '–');
 
-        // Zapisanie danych w dymku
         el.dataset.ok = ok;
         el.dataset.ndf = ndf;
         el.dataset.scrap = scrap;
@@ -779,13 +783,16 @@
             }
         }
 
+        // --- INICJALIZACJA ELEMENTÓW DYNAMICZNYCH ---
         generateSnow(50);
+        
+        // Ładowanie danych i renderowanie elementów (w tym choinki i bota)
         setDate('today');
         
+        // Pętle czasowe
         setInterval(updateClockInline, 1000);
         updateClockInline();
 
-        updateBotPhrase();
         setInterval(() => updateBotPhrase(), 10000);
 
         let lastCheckedDate = new Date().toDateString();
