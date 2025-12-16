@@ -71,12 +71,13 @@
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* KARTY (Glassmorphism) */
+        /* KARTY (Glassmorphism) - ZMIANA PADDINGÓW */
         .summary-box, .data-section {
             background: rgba(255, 255, 255, 0.08); 
             border-radius: var(--general-radius); 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            margin: 0 auto 30px; padding: 25px;
+            margin: 0 auto 30px; 
+            padding: 15px; /* Zmniejszony padding wewnętrzny karty */
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -131,6 +132,7 @@
             border-collapse: separate; 
             border-spacing: 0;
             border-radius: var(--general-radius); 
+            margin-top: 10px; /* Margines po nagłówku sekcji */
         }
         
         /* NAGŁÓWKI TABEL - WOW EFFECT & ZAOKRĄGLENIE */
@@ -163,24 +165,24 @@
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
         
-        /* Wiersz SUMARYCZNY - KLUCZOWA POPRAWKA A */
+        /* Wiersz SUMARYCZNY */
         .summary-table tr.total-row td {
             font-size: 1.2em;
             background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
             color: #e5e7eb;
             text-shadow: 0 0 8px #fff;
-            
-            /* Extended Glow */
             box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
-            
             border: none; 
             padding: 15px 10px;
             position: sticky;
             bottom: 0;
             z-index: 5;
+            /* Usunięcie górnego zaokrąglenia, aby ładnie łączyło się z poprzednim wierszem */
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
         }
         
-        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy */
+        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy (dolne rogi) */
         .summary-table tr.total-row td:first-child {
             border-bottom-left-radius: var(--general-radius);
             text-align: left; 
@@ -190,31 +192,37 @@
             border-bottom-right-radius: var(--general-radius);
         }
 
-        /* Nagłówek Sekcji Szczegóły - WAŻNA ZMIANA */
+        /* Nagłówek Sekcji Szczegóły - USUNIĘCIE NIEBIESKIEGO PASKA */
         .container.data-section h2 {
-            margin-top: 0;
-            padding: 0 0 10px 0; /* Mniejsze paddingi */
-            
-            /* USUNIĘTO NIEBIESKI GRADIENT */
+            margin-top: 15px; /* Dodatkowa przestrzeń nad tekstem */
+            padding: 0; 
             background: none; 
             border-radius: 0;
             box-shadow: none;
             
-            /* Utrzymanie subtelnego podkreślenia/paska z boku */
-            border-left: 5px solid var(--primary-color);
-            padding-left: 10px; 
-            border-bottom: none; /* Usuwamy dolną linię */
-            margin-bottom: 10px; /* Dodajemy margines, żeby oddzielić się od tabeli */
+            /* Usuwamy pasek z lewej */
+            border-left: none !important;
+            padding-left: 0 !important; 
+            
+            /* Utrzymanie estetyki */
+            color: #fff;
             font-size: 1.8rem;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Subtelny blask */
         }
-
-        /* KLUCZOWA POPRAWKA B: Zaokrąglenie rogów tabeli detali na dole */
+        
+        /* TABELA DETALI - Zapewnienie, że wiersze detali też mają zaokrąglenia na dole */
         .data-table tbody tr:last-child td:first-child {
              border-bottom-left-radius: var(--general-radius);
+             border-bottom: none; /* Usuwamy dolną krawędź ostatniego wiersza */
         }
         .data-table tbody tr:last-child td:last-child {
              border-bottom-right-radius: var(--general-radius);
+             border-bottom: none;
         }
+        .data-table tbody tr:last-child td {
+             border-bottom: none; /* Usuwamy dolną krawędź ostatniego wiersza */
+        }
+
 
         /* ZEGAR */
         #clock-inline {
@@ -326,7 +334,7 @@
 </div>
 
 <div class="container data-section">
-    <h2 style="border-left: 5px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px; margin-top: 0; font-size: 1.8rem;">SZCZEGÓŁY</h2>
+    <h2 style="margin-bottom: 15px; margin-top: 0; font-size: 1.8rem; border-left: none !important; padding-left: 0 !important; color: #fff; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);">SZCZEGÓŁY</h2>
     <table class="summary-table data-table" id="data-table">
         <thead>
             <tr>
