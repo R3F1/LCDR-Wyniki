@@ -223,7 +223,11 @@
         }
 
         /* KONTROLKI I PRZYCISKI */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; 
+             /* ZMIANA Z-INDEX: Zabezpieczenie logo i kontrolek NAD wszystkimi efektami */
+             position: relative; 
+             z-index: 1001; 
+        }
         .header-controls {
             display: flex; flex-wrap: wrap; gap: 10px;
             justify-content: center; align-items: center; margin: 30px 0;
@@ -992,38 +996,124 @@
         '0 0 10px #f87171, 0 0 20px #ff00ff'
     ];
     
-    // STAŁY LIMIT ZYCZEŃ NA EKRANIE
     const HOLIDAY_LIMIT = 4; 
+    const MIN_DISTANCE_VW = 20; // Minimalna odległość między napisami (vw)
+    const MARGIN_PX = 40;       // Margines bezpieczeństwa wokół kontenerów danych (px)
+
+    // Funkcja obliczająca odległość Euklidesową (w przybliżeniu)
+    function checkCollision(currentPos, existingElements) {
+        for (let i = 0; i < existingElements.length; i++) {
+            const el = existingElements[i];
+            
+            const existingLeft = parseFloat(el.style.left);
+            const existingTop = parseFloat(el.style.top);
+            
+            const distanceX = currentPos.left - existingLeft;
+            const distanceY = currentPos.top - existingTop;
+            
+            const distanceSq = distanceX * distanceX + distanceY * distanceY;
+            
+            if (distanceSq < MIN_DISTANCE_VW * MIN_DISTANCE_VW) {
+                return true; 
+            }
+        }
+        return false; 
+    }
+    
+    // NOWA FUNKCJA: Oblicza zakazane strefy na podstawie elementów DOM (w jednostkach VW/VH)
+    function getExclusionZones() {
+        const zones = [];
+        const targets = document.querySelectorAll('.summary-box, .data-section, .container'); 
+        
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        targets.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            
+            // Konwersja pixel na vw/vh
+            const leftVW = (rect.left - MARGIN_PX) / vw * 100;
+            const topVH = (rect.top - MARGIN_PX) / vh * 100;
+            const widthVW = (rect.width + 2 * MARGIN_PX) / vw * 100;
+            const heightVH = (rect.height + 2 * MARGIN_PX) / vh * 100;
+
+            zones.push({
+                left: leftVW,
+                top: topVH,
+                right: leftVW + widthVW,
+                bottom: topVH + heightVH
+            });
+        });
+        return zones;
+    }
+    
+    // NOWA FUNKCJA: Sprawdza, czy pozycja koliduje z którąkolwiek zakazaną strefą
+    function checkZoneCollision(pos, zones) {
+        const textWidthVW = 10; // Przybliżona szerokość napisu Wesołych Świąt
+        const textHeightVH = 5; // Przybliżona wysokość napisu Wesołych Świąt
+
+        for (const zone of zones) {
+            // Sprawdzenie, czy nowy napis (pos) zachodzi na zakazaną strefę (zone)
+            if (pos.left < zone.right &&
+                pos.left + textWidthVW > zone.left &&
+                pos.top < zone.bottom &&
+                pos.top + textHeightVH > zone.top) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     function createHolidayText() {
         const container = document.getElementById('holiday-container');
         if (!container) return;
         
-        // SPRAWDZENIE LIMITU
-        if (container.children.length >= HOLIDAY_LIMIT) {
-             // Jeżeli limit osiągnięty, nie twórz nowego elementu
-             return;
+        const existingElements = Array.from(container.children);
+        const exclusionZones = getExclusionZones();
+        
+        // SPRAWDZENIE LIMITU LICZBY ELEMENTÓW
+        if (existingElements.length >= HOLIDAY_LIMIT) {
+             return; 
         }
+
+        let newPos = {};
+        let attempts = 0;
+        const maxAttempts = 20; // Zwiększona liczba prób
+
+        let isColliding = true;
+
+        // Pętla do szukania wolnej pozycji
+        while (isColliding && attempts < maxAttempts) {
+            // Generowanie losowej pozycji (środek tekstu)
+            newPos.left = Math.random() * 85;
+            newPos.top = Math.random() * 85;
+            
+            // 1. Sprawdzenie kolizji z innymi napisami
+            isColliding = checkCollision(newPos, existingElements);
+            
+            // 2. Sprawdzenie kolizji z zakazanymi strefami (tabelami/logo)
+            if (!isColliding) {
+                isColliding = checkZoneCollision(newPos, exclusionZones);
+            }
+            
+            attempts++;
+        }
+        
+        // Jeśli nie znaleziono wolnej pozycji po max próbach
+        if (isColliding) return; 
+
 
         const textEl = document.createElement('div');
         textEl.classList.add('holiday-text');
         
-        // Losowy tekst
+        // Reszta logiki stylizowania
         const phrase = HOLIDAY_PHRASES[Math.floor(Math.random() * HOLIDAY_PHRASES.length)];
         textEl.textContent = phrase;
-
-        // Losowa pozycja (0% do 90% szerokości/wysokości)
-        const left = Math.random() * 85;
-        const top = Math.random() * 85;
-        
-        // Losowy kąt obrotu
         const rotation = Math.random() * 40 - 20; // od -20 deg do 20 deg
-        
-        // Losowy kolor blasku
         const randomNeon = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
         
-        textEl.style.left = `${left}vw`;
-        textEl.style.top = `${top}vh`;
+        textEl.style.left = `${newPos.left}vw`;
+        textEl.style.top = `${newPos.top}vh`;
         textEl.style.transform = `rotate(${rotation}deg)`;
         textEl.style.textShadow = randomNeon;
         
