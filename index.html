@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR HYBRID WOW Dashboard</title>
+    <title>LCDR Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -43,7 +43,7 @@
         body.dark-mode { background-color: #0f172a; }
 
         /* ********************************************** */
-        /* EFEKT WESOŁYCH ŚWIĄT */
+        /* EFEKT WESOŁYCH ŚWIĄT - ZMODYFIKOWANY */
         /* ********************************************** */
         #holiday-container {
             position: fixed;
@@ -54,7 +54,8 @@
         
         .holiday-text {
             position: absolute;
-            font-size: 3.5vw; /* Skalowalny rozmiar */
+            /* ZMIANA 1: Zmniejszenie rozmiaru o 50% */
+            font-size: 1.75vw; 
             font-weight: 900;
             text-transform: uppercase;
             white-space: nowrap;
@@ -66,8 +67,9 @@
             text-shadow: 
                 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; 
             
+            /* ZMIANA 2: Zwiększenie czasu trwania animacji (wolniejsze pojawianie/znikanie) */
             animation: 
-                holidayFade 6s ease-out forwards;
+                holidayFade 10s ease-out forwards; 
         }
         
         @keyframes holidayFade {
@@ -437,7 +439,7 @@
                 flex-basis: auto;
             }
             .holiday-text {
-                font-size: 8vw; /* Skalowalny rozmiar na mniejsze ekrany */
+                font-size: 4vw; /* Skalowalny rozmiar na mniejsze ekrany (proporcjonalnie do 1.75vw) */
             }
         }
         @media(max-width:768px) {
@@ -1025,8 +1027,8 @@
     }
 
     function startHolidayEffect() {
-        // Generowanie nowego tekstu co 2.5 sekundy (mniej niż czas trwania animacji, aby były widoczne nakładające się teksty)
-        setInterval(createHolidayText, 2500);
+        // ZMIANA 3: Generowanie nowego tekstu co 4 sekundy (wolniej)
+        setInterval(createHolidayText, 4000); 
     }
 
     // --- Inicjalizacja ---
