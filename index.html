@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR CHRISTMAS Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -611,7 +611,7 @@
             const glowColor = 'var(--ok-bg)'; // STAŁY ZIELONY BLASK
             // Zmiana blasku
             successRateEl.style.textShadow = `0 0 15px ${glowColor}, 0 0 25px ${glowColor}`;
-            // Zmiana koloru tekstu (aby nadal ostrzegać wizualnie, jeśli wskaźnik jest niski)
+            // Zmiana koloru tekstu (zachowana stara logika, chyba że życzysz sobie stały biały)
             successRateEl.style.color = successRate >= 70 ? '#fff' : 'var(--scrap-bg)';
         }
         // **********************************************
@@ -817,8 +817,9 @@
         const snowflake = document.createElement('div');
         snowflake.classList.add('snow');
         
-        const size = Math.random() * 5 + 2; // 2px do 7px
-        const duration = Math.random() * 15 + 10; // 10s do 25s
+        // ZMODYFIKOWANE ZAKRESY: większe i bardziej losowe
+        const size = Math.random() * 7 + 3; // 3px do 10px
+        const duration = Math.random() * 22 + 8; // 8s do 30s
         
         snowflake.style.width = `${size}px`;
         snowflake.style.height = `${size}px`;
