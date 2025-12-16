@@ -1,351 +1,301 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <script>
-    (function(){
-      var _0x1a2=["Hej :) zaciemniony kod wgrany!","log"];console[_0x1a2[1]](_0x1a2[0]);
-    })();
-    </script>
-
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR LIVE DATA</title>
+    <title>LCDR New Analytics Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         :root {
-            --ok-bg: #4ade80; /* Zieleń Neon */
-            --ndf-bg: #facc15; /* Żółć Neon */
-            --scrap-bg: #f87171; /* Czerwień Neon */
-            --txt-dark: #1F2937;
-            --btn-bg-primary: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            --btn-bg-hover: linear-gradient(135deg, #2563eb, #60a5fa);
-            --card-bg-light: rgba(255, 255, 255, 0.95);
-            --card-bg-dark: rgba(15, 23, 42, 0.9); /* Bardziej ciemny */
-            --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
-            --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
-            --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
+            --primary-color: #007BFF;
+            --secondary-color: #28A745;
+            --danger-color: #DC3545;
+            --warning-color: #FFC107;
+            --ok-color: #28A745;
+            --ndf-color: #FFC107;
+            --scrap-color: #DC3545;
+            --bg-light: #F8F9FA;
+            --bg-dark: #343A40;
+            --text-light: #F8F9FA;
+            --text-dark: #212529;
         }
 
-        html, body { margin:0; padding:0; height:100%; }
+        /* Ogólny Reset i Ciało */
+        html, body { 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100vh;
+        }
         body {
-            font-family: 'Segoe UI', sans-serif;
-            /* Ulepszone tło plazmowe + szum (noise) */
-            background: 
-                linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)),
-                linear-gradient(60deg, rgba(30, 64, 175, 0.5), rgba(147, 51, 234, 0.5), rgba(16, 185, 129, 0.5), rgba(30, 64, 175, 0.5)), 
-                url('background.jpg');
-            background-size: 100% 100%, 600% 600%, cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: animatedPlasma 25s ease infinite;
-            color: #fff;
-            transition: background-color .3s, color .3s;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            transition: all 0.3s;
         }
-        body:not(.dark-mode)::before {
-            content: ""; position:fixed; inset:0;
-            background: rgba(0,0,0,0.75); z-index:-1;
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
         }
-        @keyframes animatedPlasma {
-            0% { background-position: 0% 50%, 0% 50%, center; }
-            50% { background-position: 100% 50%, 100% 50%, center; }
-            100% { background-position: 0% 50%, 0% 50%, center; }
-        }
-        
-        /* Kontenery i Karty - Neumorficzny/Futurystyczny Look */
+
+        /* Kontener i Nagłówek */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 16px;
+            padding: 20px;
         }
-        .logo { text-align: center; margin: 20px 0; }
-        .logo img { 
-            max-width: 350px; width: 80%; height: auto; display: inline-block; 
-            animation: fadeIn 1.5s ease-in-out forwards, pulse 3s ease-in-out infinite;
-            opacity: 0;
-            transform-origin: center;
-            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)); /* Biała poświata */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 3px solid var(--primary-color);
+            margin-bottom: 25px;
         }
-        @keyframes fadeIn { to { opacity: 1; } }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
-
-        .summary-box, .data-section {
-            background: var(--card-bg-light); color: #000;
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 5px rgba(255, 255, 255, 0.5); /* Głęboki cień + wewnętrzne podświetlenie */
-            transition: background .3s, color .3s, transform 0.3s;
-            margin: 0 auto 30px; padding: 25px;
-            backdrop-filter: blur(8px); /* Mocniejszy blur */
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.15); 
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 700;
+            color: var(--primary-color);
         }
-        body.dark-mode .summary-box,
-        body.dark-mode .data-section {
-            background: var(--card-bg-dark); color: #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 5px rgba(60, 100, 200, 0.5);
+        header h1 i {
+            margin-right: 10px;
         }
-        .summary-box:hover, .data-section:hover {
-            transform: translateY(-3px); /* Subtelne uniesienie */
-        }
-
-
-        /* Kontrolki i Przyciski */
-        .header-controls {
-            display: flex; flex-wrap: wrap; gap: 10px;
-            justify-content: center; align-items: center; margin: 30px 0;
-            padding: 12px 40px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.07);
-        }
-        
-        .filter-btn, .export-btn, .oled-btn {
-            /* Dodajemy efekt Neumorficzny/Glass */
-            padding: 10px 20px;
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.7), rgba(59, 130, 246, 0.7)); 
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px;
-            cursor: pointer;
+        #current-date-info {
+            font-size: 1.1rem;
             font-weight: 600;
-            font-size: 14px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-            text-decoration: none;
-            text-align: center;
-        }
-        .filter-btn:hover, .export-btn:hover, .oled-btn:hover {
-            background: var(--btn-bg-hover);
-            transform: scale(1.05); /* Lżejszy ruch */
-        }
-        .filter-btn.active {
-            background: #fff;
-            color: #1e3a8a;
-            font-weight: bold;
-            box-shadow: 0 0 15px #3b82f6; /* Niebieski blask dla aktywnego */
-        }
-        .oled-btn {
-            background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(192, 132, 252, 0.7));
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
         }
 
-        /* Wyszukiwanie i Date Picker */
-        #serial-filter, #date-picker-input {
+        /* Kontrolki */
+        .controls-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .controls-panel button, .controls-panel input, .controls-panel a {
             padding: 10px 15px;
-            border-radius: 12px;
-            border: 2px solid #3b82f6;
-            background: rgba(255, 255, 255, 0.95);
-            color: #111;
-            font-weight: 500;
-            width: 200px;
-            transition: all 0.3s ease;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background-color: #fff;
+            color: var(--text-dark);
         }
-        body.dark-mode #serial-filter, body.dark-mode #date-picker-input {
-            background: rgba(30, 41, 59, 0.95);
-            color: #e5e7eb;
-        }
-
-
-        /* Tabela Podsumowania - Neonowe Wyróżnienie */
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border: 1px solid #ccc; }
-        
-        .summary-table th {
-            background: #1e293b;
-            color: #e5e7eb!important;
-        }
-
-        .summary-table td {
-            background-color: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 10px;
-            font-weight: 500;
+        .controls-panel button:hover, .controls-panel a:hover {
+            background-color: var(--primary-color);
             color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            border-color: var(--primary-color);
+        }
+        .controls-panel button.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+        .controls-panel input[type="date"], .controls-panel input[type="text"] {
+            width: 180px;
+            background-color: #fff;
+        }
+        .dark-mode .controls-panel button, .dark-mode .controls-panel input, .dark-mode .controls-panel a {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border-color: #6c757d;
+        }
+        .dark-mode .controls-panel button:hover, .dark-mode .controls-panel a:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* Sekcje tabel */
+        .dashboard-section {
+            margin-bottom: 40px;
+        }
+        .dashboard-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 10px;
+            font-weight: 600;
+        }
+
+        /* Tabela Ogólna (Summary) */
+        .summary-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .dark-mode .summary-table {
+            background-color: #495057;
+        }
+        .summary-table th, .summary-table td {
+            padding: 12px 15px;
             text-align: center;
-            transition: all 0.3s ease;
+            border: none;
+            border-bottom: 1px solid #dee2e6;
         }
-        body.dark-mode .summary-table td { background-color: rgba(255,255,255,0.04); }
+        .dark-mode .summary-table th, .dark-mode .summary-table td {
+            border-bottom: 1px solid #6c757d;
+        }
 
-        /* Neonowe kolory dla statystyk */
-        .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); font-weight: 800; }
-        .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); font-weight: 800; }
-        .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); font-weight: 800; }
+        .summary-table th {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .summary-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .dark-mode .summary-table tbody tr:nth-child(even) {
+            background-color: #3e444a;
+        }
+        .summary-table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        .dark-mode .summary-table tbody tr:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Kolumny statusów w podsumowaniu */
+        .summary-table td.ok { background-color: var(--ok-color); color: #fff; font-weight: bold; }
+        .summary-table td.ndf { background-color: var(--warning-color); color: var(--text-dark); font-weight: bold; }
+        .summary-table td.scrap-ttl { background-color: var(--danger-color); color: #fff; font-weight: bold; }
 
-        .summary-table td:first-child { text-align: left; padding-left: 16px; font-weight: bold; color: #fff; text-shadow: 0 0 5px #fff; }
-
-        /* Wiersz SUMARYCZNY - Intensywne Wyróżnienie */
+        /* Wiersz SUMA DZIENNA */
         .summary-table tr.total-row td {
-            font-size: 1.2em;
-            background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
-            color: #e5e7eb;
-            text-shadow: 0 0 8px #fff;
-            box-shadow: 0 0 15px #fff, 0 -5px 20px #3b82f6; /* Blask na dole */
-            border-top: 2px solid #3b82f6;
-            animation: pulseTotal 3s infinite ease-in-out;
-            position: sticky;
-            bottom: 0;
-            z-index: 5;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-weight: 800;
+            font-size: 1.2rem;
+            border-top: 3px solid var(--primary-color);
         }
-        @keyframes pulseTotal {
-            0%, 100% { box-shadow: 0 0 15px rgba(255,255,255,0.8), 0 -5px 20px rgba(59, 130, 246, 0.8); }
-            50% { box-shadow: 0 0 25px rgba(255,255,255,1), 0 -5px 30px rgba(59, 130, 246, 1); }
+        .dark-mode .summary-table tr.total-row td {
+            background-color: #212529;
+        }
+        .summary-table tr.total-row td:first-child {
+            text-align: left;
         }
 
         /* Tabela Detali */
-        .data-table td { font-size: 14px; color: #e5e7eb; }
-        .data-table tr:nth-child(even) {
-            background: linear-gradient(to right, rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+        .data-table th, .data-table td {
+            text-align: left;
         }
-        .data-table tr:hover {
-            background: rgba(59, 130, 246, 0.3); /* Akcent na niebiesko */
+        .data-table td:nth-child(1), .data-table td:nth-child(2) {
+            text-align: center;
         }
-        .data-table td.status-ok  { background: rgba(74, 222, 128, 0.2); }
-        .data-table td.status-ndf { background: rgba(250, 204, 21, 0.2); }
-        .data-table td.status-scrap_ttl { background: rgba(248, 113, 113, 0.2); }
+        .data-table td i {
+            margin-right: 5px;
+        }
         
-        /* Zegar - Intensywny Blask */
-        #clock-inline {
-            font-size: 2.2rem!important;
-            text-shadow: 0 0 10px #fff, 0 0 20px #3b82f6;
-            color: #fff;
-            animation: pulseClock 4s infinite ease-in-out;
-            margin-left: auto!important;
-            position: relative;
-            top: -5px;
+        /* Loader */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6); display: flex;
+            flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; color: #fff; font-size: 1.5rem;
         }
-        @keyframes pulseClock {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
+        .loader {
+            border: 6px solid #f3f3f3; border-top: 6px solid var(--primary-color);
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
         }
-
-        /* Flash */
-        @keyframes flashStatus {
-            0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-            50% { box-shadow: 0 0 12px rgba(255,255,255,0.7); }
-            100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-        }
-        .summary-table td.flash {
-            animation: flashStatus 1.2s ease-in-out;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Chatbot - Ulepszona bańka */
-        #chatbot-bubble {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(50, 50, 50, 0.9));
-            border: 1px solid #3b82f6;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            transition: all 0.3s;
-            line-height: 1.4em;
-        }
-
-        /* Media Queries */
-        @media(max-width:768px) {
-            .header-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            #serial-filter, #date-picker-input {
-                width: 100%;
-                box-sizing: border-box;
-            }
+        /* Przełącznik Motywu */
+        .theme-switch-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
         }
     </style>
 </head>
 <body>
-<div style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
-    <div class="theme-switch">
-        <input checked="" id="themeToggle" onchange="toggleTheme()" type="checkbox"/>
-        <label for="themeToggle">
-            <span class="slider"></span>
-            <span class="labels" data-off="☀️ Jasny" data-on="🌙 Ciemny"></span>
-        </label>
-    </div>
+
+<div class="theme-switch-container">
+    <button id="themeToggle" onclick="toggleTheme()">
+        <i class="fas fa-moon"></i> Ciemny Tryb
+    </button>
 </div>
 
-<div id="tv-icon">📺</div>
-
-<div id="chatbot-container">
-    <img alt="Robot" id="chatbot-img" src="robotlcdr.png"/>
-    <div class="robot-bubble" id="chatbot-bubble" style="cursor: pointer;">
-        <strong>🤖 LCDR Bot :</strong><br/>
-        Naprawiono <span id="chat-ok">–</span> OK,<br/>
-        Wykryto <span id="chat-ndf">–</span> NDF,<br/>
-        I <span id="chat-scrap">–</span> przypadków SCRAP TTL.
-    </div>
-</div>
-
-<div class="emoji-indicator" id="global-emoji-loading" style="display:none;">⏳</div>
 <div class="loader-overlay" id="loader" style="display:none;">
     <div class="loader"></div>
-    <div class="loader-text">Trwa ładowanie danych...</div>
+    <div>Ładowanie danych...</div>
 </div>
 
 <div class="container">
-    <div class="logo">
-        <img alt="LCDR LIVE DATA Logo" src="logo.png"/>
+    <header>
+        <h1><i class="fas fa-chart-line"></i> LCDR Analytics Dashboard</h1>
+        <div id="current-date-info">Data: <span id="summary-date">Ładowanie...</span></div>
+    </header>
+
+    <div class="controls-panel">
+        <button id="btn-today" data-type="today" onclick="setDate('today')"><i class="fas fa-calendar-day"></i> Dzisiaj</button>
+        <button id="btn-yesterday" data-type="yesterday" onclick="setDate('yesterday')"><i class="fas fa-calendar-minus"></i> Wczoraj</button>
+        
+        <input type="date" id="date-picker-input" onchange="setDate('custom')" title="Wybierz datę">
+
+        <input
+            type="text"
+            id="serial-filter"
+            placeholder="🔎 Szukaj SN lub Nazwy..."
+            oninput="filterData(this.value)"
+            title="Wyszukaj po numerze seryjnym lub nazwisku"
+        />
+
+        <button onclick="manualLoad()"><i class="fas fa-sync-alt"></i> ŁADUJ DANE</button>
+        <button onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Eksportuj do Excela</button>
+        <a href="https://r3f1.github.io/OLED-REPAIR/" target="_blank" style="background-color: #6C757D; color: #fff;"><i class="fas fa-tv"></i> OLED LIVE DATA</a>
     </div>
-    
-    <div class="controls-wrapper">
-        <div class="header-controls">
-            <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
-            <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-            
-            <input type="date" id="date-picker-input" onchange="setDate('custom')">
 
-            <input
-                type="text"
-                id="serial-filter"
-                placeholder="🔎 Szukaj SN lub Nazwy..."
-                oninput="filterBySerial(this.value)"
-            />
-
-            <a class="filter-btn oled-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank">OLED LIVE DATA</a>
-            <button class="filter-btn" onclick="manualLoad()">🔄 ŁADUJ DANE </button>
-            <button class="export-btn" onclick="exportToExcel()">📤 Excel</button>
-            <span id="clock-inline" style="font-weight:bold;"></span>
-        </div>
+    <div class="dashboard-section">
+        <h2><i class="fas fa-table"></i> Podsumowanie Napraw</h2>
+        <table class="summary-table" id="summary-table">
+            <thead>
+                <tr>
+                    <th>NAPRAWIACZ</th>
+                    <th class="ok">OK</th>
+                    <th class="ndf">NDF</th>
+                    <th class="scrap-ttl">SCRAP TTL</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
-</div>
 
-<div class="container summary-box">
-    <div class="summary-header">
-        <h2>PODSUMOWANIE</h2>
-        <div class="date-summary" id="summary-date"></div>
+    <div class="dashboard-section">
+        <h2><i class="fas fa-list"></i> Szczegóły Transakcji</h2>
+        <table class="summary-table data-table" id="data-table">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Station</th>
+                    <th>Serial Number</th>
+                    <th>Name</th>
+                    <th>Comment</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div>
     </div>
-    <table class="summary-table" id="summary-table">
-        <thead>
-            <tr>
-                <th>NAPRAWIACZ</th>
-                <th class="ok">OK <span id="count-ok"></span></th>
-                <th class="ndf">NDF <span id="count-ndf"></span></th>
-                <th class="scrap-ttl">SCRAP TTL <span id="count-scrap"></span></th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
-
-<div class="container data-section">
-    <table class="data-table" id="data-table">
-        <thead>
-            <tr>
-                <th>Status</th>
-                <th>Station</th>
-                <th>Serial Number</th>
-                <th>Name</th>
-                <th>Comment</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <div id="no-data-message" style="text-align:center; padding:20px; font-weight:bold; font-size:1.2rem; display:none;">Brak danych do wyświetlenia.</div>
 </div>
 
 <script>
     // **********************************************
-    // ORYGINALNA LOGIKA POBIERANIA DANYCH (NIEZMIENIONA)
+    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS (PRZEJĘTA BEZ ZMIAN)
     // **********************************************
     const urls = [
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
@@ -353,8 +303,10 @@
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=661466938'
     ];
 
-    let latestData = [], currentDate = new Date();
+    let latestData = [];
+    let currentDate = new Date();
     const datePicker = document.getElementById('date-picker-input');
+    const loader = document.getElementById('loader');
 
     function parseCSV(text) {
         return text.trim().split('\n').map(row =>
@@ -377,7 +329,6 @@
         return date.toISOString().split('T')[0];
     }
 
-    // Dodatkowa funkcja pomocnicza dla Date Picker
     function setDatePickerValue(date) {
         if (datePicker) {
             datePicker.value = formatDate(date);
@@ -385,7 +336,7 @@
     }
 
     function highlightActive(type) {
-        document.querySelectorAll('.filter-btn').forEach(btn => {
+        document.querySelectorAll('.controls-panel button').forEach(btn => {
             if (btn.dataset.type) {
                 btn.classList.toggle('active', btn.dataset.type === type);
             }
@@ -437,16 +388,16 @@
         return all;
     }
     // **********************************************
-    // KONIEC ORYGINALNEJ LOGIKI POBIERANIA DANYCH
+    // KONIEC LOGIKI GOOGLE SHEETS
     // **********************************************
-    
-    // NOWA/ULEPSZONA LOGIKA UX I WIZUALIZACJI
 
-    // Wyszukiwanie w tabeli detali (Zgodne z intencją, dodane jako globalna funkcja)
-    window.filterBySerial = function(value) {
+
+    // --- FUNKCJE RENDERUJĄCE I UX ---
+
+    // Funkcja do filtrowania detali (nowa)
+    window.filterData = function(value) {
         const query = value.trim().toLowerCase();
         document.querySelectorAll('#data-table tbody tr').forEach(row => {
-            // Indeksy kolumn: Station (1), Serial (2), Name (3), Comment (4) - musimy to dostosować do finalnej tabeli
             const serial = row.children[2]?.textContent.toLowerCase() || '';
             const name = row.children[3]?.textContent.toLowerCase() || '';
             row.style.display = serial.includes(query) || name.includes(query) ? '' : 'none';
@@ -454,24 +405,26 @@
     }
 
     function render(data) {
-        document.getElementById('no-data-message').style.display = data.length ? 'none' : 'block';
         latestData = data.sort((a,b)=>a.name.localeCompare(b.name));
+        document.getElementById('no-data-message').style.display = data.length ? 'none' : 'block';
 
-        // data table
+        // 1. Data Table
         const dtb = document.createElement('tbody');
         latestData.forEach(it => {
+            const statusIcon = it.status === 'OK' ? 'fa-check-circle' : (it.status === 'NDF' ? 'fa-exclamation-triangle' : 'fa-times-circle');
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="status-${it.status.toLowerCase()}">${it.status}</td>
+                <td class="status-${it.status.toLowerCase()}"><i class="fas ${statusIcon}"></i> ${it.status}</td>
                 <td>${it.station}</td>
                 <td>${it.serial}</td>
                 <td>${it.name}</td>
                 <td>${it.comment}</td>`;
             dtb.appendChild(tr);
         });
-        document.getElementById('data-table').tBodies[0].replaceWith(dtb);
+        document.getElementById('data-table').tBodies[0]?.remove();
+        document.getElementById('data-table').appendChild(dtb);
 
-        // summary
+        // 2. Summary Table
         const okC={}, ndfC={}, scrC={}, names=new Set();
         latestData.forEach(it=>{
             names.add(it.name);
@@ -483,47 +436,33 @@
         Array.from(names).sort().forEach(n=>{
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${n}</td>
-                <td class="ok">✅ ${okC[n]||0}</td>
-                <td class="ndf">⚠️ ${ndfC[n]||0}</td>
-                <td class="scrap-ttl">🗑️ ${scrC[n]||0}</td>`;
+                <td style="text-align:left;">${n}</td>
+                <td class="ok">${okC[n]||0}</td>
+                <td class="ndf">${ndfC[n]||0}</td>
+                <td class="scrap-ttl">${scrC[n]||0}</td>`;
             stb.appendChild(tr);
         });
-        
-        // DODANO: Wiersz SUMARYCZNY
+
+        // Wiersz SUMA DZIENNA
         const sumOK = Object.values(okC).reduce((a,b)=>a+b,0);
         const sumNDF = Object.values(ndfC).reduce((a,b)=>a+b,0);
         const sumSCR = Object.values(scrC).reduce((a,b)=>a+b,0);
-
+        
         const totalRow = document.createElement('tr');
         totalRow.classList.add('total-row');
         totalRow.innerHTML = `
             <td>SUMA DZIENNA</td>
-            <td class="ok">✅ ${sumOK}</td>
-            <td class="ndf">⚠️ ${sumNDF}</td>
-            <td class="scrap-ttl">🗑️ ${sumSCR}</td>`;
+            <td class="ok">${sumOK}</td>
+            <td class="ndf">${sumNDF}</td>
+            <td class="scrap-ttl">${sumSCR}</td>`;
         stb.appendChild(totalRow);
         
-        document.getElementById('count-ok').textContent = `(${sumOK})`;
-        document.getElementById('count-ndf').textContent = `(${sumNDF})`;
-        document.getElementById('count-scrap').textContent = `(${sumSCR})`;
-
-        document.getElementById('chat-ok').textContent = sumOK;
-        document.getElementById('chat-ndf').textContent = sumNDF;
-        document.getElementById('chat-scrap').textContent = sumSCR;
-
-        document.querySelectorAll('.summary-table td.ok, .summary-table td.ndf, .summary-table td.scrap-ttl').forEach(td => td.classList.add('flash'));
-
-        setTimeout(() => {
-            document.querySelectorAll('.flash').forEach(td => td.classList.remove('flash'));
-        }, 1500);
-
-        document.getElementById('summary-table').tBodies[0].replaceWith(stb);
-        updateBotPhrase(); // Odśwież info w bocie
+        document.getElementById('summary-table').tBodies[0]?.remove();
+        document.getElementById('summary-table').appendChild(stb);
     }
 
     window.setDate = function(type) {
-        document.getElementById('loader').style.display = 'flex';
+        loader.style.display = 'flex';
         
         if (type === 'today') {
             currentDate = new Date();
@@ -537,10 +476,9 @@
         } else if (type === 'custom') {
             const dateValue = datePicker.value;
             if (dateValue) {
-                // Konwersja daty z DatePicker na obiekt Date
                 currentDate = new Date(dateValue.replace(/-/g, '/')); 
             }
-            highlightActive(null); // Brak aktywnego przycisku
+            highlightActive(null);
         }
 
         document.getElementById('summary-date').textContent = formatDate(currentDate);
@@ -548,8 +486,7 @@
         loadData()
             .then(render)
             .finally(() => {
-                document.getElementById('loader').style.display = 'none';
-                updateCurrentDateLabels(); 
+                loader.style.display = 'none';
             });
     }
 
@@ -557,22 +494,14 @@
         setDate('custom'); // Działa jako przeładowanie aktualnie wybranej daty
     }
 
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme',
-            document.body.classList.contains('dark-mode')?'dark':'light'
-        );
-    }
-
-    function exportToExcel() {
+    window.exportToExcel = function() {
         const ws = XLSX.utils.json_to_sheet(
             latestData.map(d=>({
                 STATUS: d.status,
                 'SERIAL NUMBER': d.serial,
                 NAME: d.name,
                 COMMENT: d.comment,
-                STATION: d.station, // Dodano Station do eksportu
-                'SCRAP TTL': d.scrap
+                STATION: d.station
             }))
         );
         const wb = XLSX.utils.book_new();
@@ -580,98 +509,37 @@
         XLSX.writeFile(wb, `LCDR_DATA_${formatDate(currentDate)}.xlsx`);
     }
 
-    function updateClockInline() {
-        const clk = document.getElementById('clock-inline');
-        if (clk) {
-            const now = new Date();
-            const h = now.getHours().toString().padStart(2,'0');
-            const m = now.getMinutes().toString().padStart(2,'0');
-            const s = now.getSeconds().toString().padStart(2,'0');
-            clk.innerHTML = `🕒 ${h}:${m}:${s}`;
+    window.toggleTheme = function() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+        const icon = document.querySelector('#themeToggle i');
+        const text = document.querySelector('#themeToggle');
+        
+        if (isDark) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+            text.innerHTML = '<i class="fas fa-sun"></i> Jasny Tryb';
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+            text.innerHTML = '<i class="fas fa-moon"></i> Ciemny Tryb';
         }
     }
-    
-    // Logic for bot phrase update
-    const botExtraReplies = [
-        "🧠 Pracuję nad nowym algorytmem!",
-        "🧰 Mam wszystkie narzędzia gotowe!",
-        "📡 Łączę się z bazą danych...",
-        "👀 Obserwuję wszystko uważnie!",
-        "💡 Pamiętaj: każdy błąd to okazja do nauki!"
-    ];
-    
-    function updateBotPhrase() {
-        const phrases = [
-            "👋 Hej! Miłego dnia!",
-            "🔧 Masz ochotę coś naprawić?",
-            "☕ Czas na przerwę?",
-            "📈 Sprawdzam dane...",
-            "✅ Wszystko działa dobrze!"
-        ];
-        const msg = phrases[Math.floor(Math.random() * phrases.length)];
 
-        const ok = document.getElementById('chat-ok')?.textContent || '–';
-        const ndf = document.getElementById('chat-ndf')?.textContent || '–';
-        const scrap = document.getElementById('chat-scrap')?.textContent || '–';
-
-        document.getElementById('chatbot-bubble').innerHTML =
-            `<strong>🤖 LCDR Bot mówi:</strong><br>${msg}<br><br>Naprawiono <strong>${ok}</strong> OK,<br>Wykryto <strong>${ndf}</strong> NDF,<br>I <strong>${scrap}</strong> przypadków SCRAP TTL.`;
-    }
-    
-    document.getElementById('chatbot-bubble')?.addEventListener('click', () => {
-        const reply = botExtraReplies[Math.floor(Math.random() * botExtraReplies.length)];
-        const el = document.getElementById('chatbot-bubble');
-        if (el) {
-            el.innerHTML += `<br><em>${reply}</em>`;
-            setTimeout(() => updateBotPhrase(), 8000); // Zmiana na 8s, aby szybciej wróciło do cyklu
-        }
-    });
-
-    // Uproszczona funkcja updateCurrentDateLabels (tylko dla uniknięcia błędu, bo była w oryginalnym kodzie)
-    async function updateCurrentDateLabels() {
-        // Ta funkcja jest wywoływana, ale jej dokładna implementacja nie jest krytyczna dla głównej funkcjonalności
-        // Można ją usunąć, jeśli nie jest używana, ale pozostawiam dla zgodności z oryginalną strukturą
-        return; 
-    }
-    
     // --- Inicjalizacja ---
     
     function init() {
-        // Ustawienie motywu
+        // Ustawienie motywu na podstawie localStorage
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
-            const themeToggle = document.getElementById('themeToggle');
-            if (themeToggle) themeToggle.checked = true;
-        } else {
-             const themeToggle = document.getElementById('themeToggle');
-             if (themeToggle) themeToggle.checked = false;
+            toggleTheme(); // Wymuś aktualizację tekstu/ikony przycisku
         }
 
-        // Ustawienie DatePicker na dzisiejszą datę i załadowanie danych
+        // Ustawienie daty na "Dzisiaj" i ładowanie danych
         setDate('today');
-        
-        // Zegar
-        setInterval(updateClockInline, 1000);
-        updateClockInline();
-
-        // Bot
-        updateBotPhrase();
-        setInterval(updateBotPhrase, 10000);
-
-        // Automatyczne odświeżanie danych co 30 sekund
-        (function loop(){
-            setTimeout(()=>loadData().then(render).finally(loop),30000);
-        })();
-
-        // Sprawdzenie zmiany dnia (co 5 minut)
-        let lastCheckedDate = new Date().toDateString();
-        setInterval(() => {
-            const now = new Date().toDateString();
-            if (now !== lastCheckedDate) {
-                lastCheckedDate = now;
-                setDate('today');
-            }
-        }, 300000); 
     }
     
     init();
