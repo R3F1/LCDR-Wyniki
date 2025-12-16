@@ -182,8 +182,7 @@
             border-collapse: separate; 
             border-spacing: 0;
             border-radius: var(--general-radius); 
-            margin-top: 10px; /* Margines po nagłówku sekcji */
-            flex-basis: 70%; /* DODAĆ TO, ABY DZIAŁAŁO Z KPI */
+            flex-basis: 70%; 
             margin-top: 0;
         }
         
@@ -244,19 +243,20 @@
             border-bottom-right-radius: var(--general-radius);
         }
 
-        /* Nagłówek Sekcji Szczegóły - USUNIĘCIE NIEBIESKIEGO PASKA */
+        /* Ujednolicony styl nagłówków H2 w sekcjach summary-box i data-section */
+        .container.summary-box h2,
         .container.data-section h2 {
-            margin-top: 15px; /* Dodatkowa przestrzeń nad tekstem */
+            margin: 0; /* Zapewnia kontrolę nad odstępami */
             padding: 0; 
             background: none; 
             border-radius: 0;
             box-shadow: none;
             
-            /* Usuwamy pasek z lewej */
+            /* Usuwamy wszelkie paski i wcięcia */
             border-left: none !important;
             padding-left: 0 !important; 
             
-            /* Utrzymanie estetyki */
+            /* Ujednolicona estetyka */
             color: #fff;
             font-size: 1.8rem;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Subtelny blask */
@@ -384,7 +384,7 @@
 
 <div class="container summary-box">
     <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <h2 style="margin: 0;">PODSUMOWANIE</h2>
+        <h2>PODSUMOWANIE</h2>
         <div class="date-summary" id="summary-date"></div>
     </div>
     
@@ -416,7 +416,7 @@
     </div>
 
 <div class="container data-section">
-    <h2 style="margin-bottom: 15px; margin-top: 0; font-size: 1.8rem; border-left: none !important; padding-left: 0 !important; color: #fff; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);">SZCZEGÓŁY</h2>
+    <h2 style="margin-bottom: 15px; margin-top: 0;">SZCZEGÓŁY</h2>
     <table class="summary-table data-table" id="data-table">
         <thead>
             <tr>
