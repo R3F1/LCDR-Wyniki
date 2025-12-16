@@ -194,7 +194,8 @@
             background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
             border: none;
-            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center; /* NOWA ZMIANA: Wyrównanie nagłówków do środka */
         }
         .summary-table th:last-child { border-right: none; }
         .summary-table thead tr:first-child th:first-child { border-top-left-radius: var(--general-radius); }
@@ -202,7 +203,7 @@
         
         /* KOMÓRKI W TABELI */
         .summary-table td { 
-            padding: 10px; text-align: center; font-weight: bold;
+            padding: 10px; text-align: center; font-weight: bold; /* ZMIENIONO: Wyrównanie do środka */
             border-right: 1px solid rgba(255, 255, 255, 0.1); 
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.05); 
@@ -211,7 +212,7 @@
         .summary-table td:last-child { border-right: none; }
 
         /* Neonowe Wyróżnienie Statusów */
-        .summary-table td:first-child { text-align: left; font-weight: bold; }
+        .summary-table td:first-child { text-align: center; font-weight: bold; } /* ZMIENIONO: Pierwsza kolumna na środek */
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
@@ -236,7 +237,7 @@
         /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy (dolne rogi) */
         .summary-table tr.total-row td:first-child {
             border-bottom-left-radius: var(--general-radius);
-            text-align: left; 
+            text-align: center; /* ZMIENIONO: "SUMA DZIENNA" na środek */
             padding-left: 20px;
         }
         .summary-table tr.total-row td:last-child {
@@ -609,7 +610,7 @@
         Array.from(names).sort().forEach(n=>{
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="text-align:left;">${n}</td>
+                <td>${n}</td>
                 <td class="ok">${okC[n]||0}</td>
                 <td class="ndf">${ndfC[n]||0}</td>
                 <td class="scrap-ttl">${scrC[n]||0}</td>`;
