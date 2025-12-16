@@ -71,7 +71,7 @@
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* KARTY (Glassmorphism) - WAŻNA ZMIANA DLA WYGŁADZENIA */
+        /* KARTY (Glassmorphism) */
         .summary-box, .data-section {
             background: rgba(255, 255, 255, 0.08); 
             border-radius: var(--general-radius); 
@@ -130,7 +130,6 @@
             width: 100%; 
             border-collapse: separate; 
             border-spacing: 0;
-            /* Zwiększamy zaokrąglenie w środku, aby pasowało do kart */
             border-radius: var(--general-radius); 
         }
         
@@ -158,6 +157,12 @@
         }
         .summary-table td:last-child { border-right: none; }
 
+        /* Neonowe Wyróżnienie Statusów */
+        .summary-table td:first-child { text-align: left; font-weight: bold; }
+        .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
+        .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
+        .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
+        
         /* Wiersz SUMARYCZNY - KLUCZOWA POPRAWKA A */
         .summary-table tr.total-row td {
             font-size: 1.2em;
@@ -176,7 +181,6 @@
         }
         
         /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy */
-        /* W tym miejscu używamy border-radius na komórkach, aby dopasować je do rogów kontenera */
         .summary-table tr.total-row td:first-child {
             border-bottom-left-radius: var(--general-radius);
             text-align: left; 
@@ -186,15 +190,22 @@
             border-bottom-right-radius: var(--general-radius);
         }
 
-        /* Nagłówek Sekcji Szczegóły */
+        /* Nagłówek Sekcji Szczegóły - WAŻNA ZMIANA */
         .container.data-section h2 {
             margin-top: 0;
-            padding: 12px 10px;
-            background: linear-gradient(90deg, #1e3a8a, var(--primary-color));
-            border-radius: var(--general-radius) var(--general-radius) 0 0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            border-left: none !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0 0 10px 0; /* Mniejsze paddingi */
+            
+            /* USUNIĘTO NIEBIESKI GRADIENT */
+            background: none; 
+            border-radius: 0;
+            box-shadow: none;
+            
+            /* Utrzymanie subtelnego podkreślenia/paska z boku */
+            border-left: 5px solid var(--primary-color);
+            padding-left: 10px; 
+            border-bottom: none; /* Usuwamy dolną linię */
+            margin-bottom: 10px; /* Dodajemy margines, żeby oddzielić się od tabeli */
+            font-size: 1.8rem;
         }
 
         /* KLUCZOWA POPRAWKA B: Zaokrąglenie rogów tabeli detali na dole */
@@ -315,7 +326,7 @@
 </div>
 
 <div class="container data-section">
-    <h2 style="border-left: 5px solid var(--primary-color); padding-left: 10px;">SZCZEGÓŁY</h2>
+    <h2 style="border-left: 5px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px; margin-top: 0; font-size: 1.8rem;">SZCZEGÓŁY</h2>
     <table class="summary-table data-table" id="data-table">
         <thead>
             <tr>
