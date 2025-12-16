@@ -428,6 +428,43 @@
             order: -1;
         }
         
+        /* ********************************************** */
+        /* NOWY ALARM OBIADOWY (FULL SCREEN ALERT) */
+        /* ********************************************** */
+        #lunch-alert-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            display: none; /* Domyślnie ukryty */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10002; /* Nad wszystkimi innymi elementami (w tym loaderem) */
+            pointer-events: none; /* Umożliwia klikanie w tle */
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+        }
+
+        #lunch-alert-box {
+            padding: 30px 60px;
+            background: linear-gradient(45deg, #facc15, #f87171); /* Żółto-czerwony gradient */
+            border-radius: 20px;
+            box-shadow: 0 0 40px #facc15, 0 0 80px #facc15;
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #1F2937;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            animation: alertPulse 1s infinite alternate;
+        }
+
+        @keyframes alertPulse {
+            from { transform: scale(1.0); opacity: 0.8; }
+            to { transform: scale(1.05); opacity: 1; }
+        }
+
+
         /* Media Queries */
         @media(max-width: 992px) {
             .summary-content-wrapper {
@@ -456,11 +493,20 @@
             #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; box-sizing: border-box; }
             #chatbot-img { width: 120px; }
             #clock-inline { font-size: 1.5rem; }
+            #lunch-alert-box {
+                 font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
 <audio id="lunchAlarm" src="lunch_alarm.mp3" preload="auto"></audio>
+
+<div id="lunch-alert-overlay">
+    <div id="lunch-alert-box">
+        PRZERWA OBIAD
+    </div>
+</div>
 
 <div id="holiday-container"></div>
 
@@ -884,7 +930,8 @@
     }
 
     // --- ZEGAR I MOTYW ---
-    let lastCheckedHour = -1; // Używane do alarmu obiadowego
+    let lastCheckedHour = -1; // Nieużywana, ale zostawiam
+    let lunchAlarmTriggered = false; // Definicja tutaj dla przejrzystości
 
     window.updateClockInline = function() {
         const clk = document.getElementById('clock-inline');
@@ -896,16 +943,36 @@
             
             clk.innerHTML = `🕒 ${h.toString().padStart(2,'0')}:${m}:${s}`;
             
-            // Logika Alarmu Obiadowego
-            if (h === 12 && m === '00' && s === '00' && !lunchAlarmTriggered) {
+            // NOWA LOGIKA ALARMU OBIADOWEGO (12:10:00 z alertem)
+            const alertOverlay = document.getElementById('lunch-alert-overlay');
+
+            if (h === 12 && m === '10' && s === '00' && !lunchAlarmTriggered) {
+                 // 1. Odtwarzanie dźwięku
                  if(lunchAlarm) {
                     lunchAlarm.play().catch(e => console.error("Błąd odtwarzania alarmu obiadowego:", e));
-                    lunchAlarmTriggered = true; // Ustaw flagę
                  }
+                 
+                 // 2. Wyświetlanie alertu
+                 if (alertOverlay) {
+                     alertOverlay.style.display = 'flex'; // Pokaż element
+                     setTimeout(() => {
+                         alertOverlay.style.opacity = 1; // W pełni widoczny (rozpocznij transition)
+                     }, 50); 
+                     
+                     // 3. Ukrywanie alertu po 5 sekundach
+                     setTimeout(() => {
+                         alertOverlay.style.opacity = 0; // Rozpocznij przejście do przezroczystości
+                         setTimeout(() => {
+                             alertOverlay.style.display = 'none'; // Ukryj po przejściu
+                         }, 500); 
+                     }, 5000); // 5 sekund wyświetlania
+                 }
+                 
+                 lunchAlarmTriggered = true; // Ustaw flagę, aby zapobiec powtórzeniu
             }
             
-            // Reset flagi po 12:00 (np. po 13:00)
-            if (h > 12) {
+            // Reset flagi po 12:10 (np. o 12:11 lub później)
+            if (h > 12 || (h === 12 && m > '10')) {
                  lunchAlarmTriggered = false;
             }
         }
