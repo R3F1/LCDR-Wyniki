@@ -83,7 +83,8 @@
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
-            overflow: hidden; 
+            /* ZMIANA 1: USUNIĘCIE OVERFLOW HIDDEN, ABY TŁO ROZCIĄGAŁO SIĘ PRAWIDŁOWO */
+            overflow: visible; 
         }
         .summary-box:hover, .data-section:hover {
             transform: translateY(-3px);
@@ -113,6 +114,12 @@
             border: 1px solid var(--primary-color);
             position: sticky; /* Przyklejamy go */
             top: 30px; 
+            
+            /* ZMIANA 2: Umożliwia wyśrodkowanie elementów wewnątrz */
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            text-align: center;
         }
 
         .kpi-item {
@@ -121,6 +128,7 @@
             border-radius: 8px;
             background: rgba(0, 0, 0, 0.4);
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+            width: 100%; /* Zapewnia, że kpi-item się rozciągnie, ale wartość pozostaje wyśrodkowana */
         }
 
         .kpi-item h3 {
@@ -138,6 +146,14 @@
             /* Ten blask jest dynamicznie zmieniany przez JS */
             text-shadow: 0 0 15px var(--ok-bg), 0 0 25px var(--ok-bg); 
             animation: kpiPulse 2s infinite alternate;
+        }
+        
+        /* Specjalne kolory dla NDF i SCRAP KPI */
+        #kpi-ndf-share {
+            text-shadow: 0 0 15px var(--ndf-bg), 0 0 25px var(--ndf-bg);
+        }
+        #kpi-scrap-share {
+            text-shadow: 0 0 15px var(--scrap-bg), 0 0 25px var(--scrap-bg);
         }
 
         @keyframes kpiPulse {
@@ -195,7 +211,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
             border: none;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center; /* NOWA ZMIANA: Wyrównanie nagłówków do środka */
+            text-align: center;
         }
         .summary-table th:last-child { border-right: none; }
         .summary-table thead tr:first-child th:first-child { border-top-left-radius: var(--general-radius); }
@@ -203,7 +219,7 @@
         
         /* KOMÓRKI W TABELI */
         .summary-table td { 
-            padding: 10px; text-align: center; font-weight: bold; /* ZMIENIONO: Wyrównanie do środka */
+            padding: 10px; text-align: center; font-weight: bold;
             border-right: 1px solid rgba(255, 255, 255, 0.1); 
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.05); 
@@ -212,7 +228,7 @@
         .summary-table td:last-child { border-right: none; }
 
         /* Neonowe Wyróżnienie Statusów */
-        .summary-table td:first-child { text-align: center; font-weight: bold; } /* ZMIENIONO: Pierwsza kolumna na środek */
+        .summary-table td:first-child { text-align: center; font-weight: bold; } 
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
@@ -237,7 +253,7 @@
         /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy (dolne rogi) */
         .summary-table tr.total-row td:first-child {
             border-bottom-left-radius: var(--general-radius);
-            text-align: center; /* ZMIENIONO: "SUMA DZIENNA" na środek */
+            text-align: center;
             padding-left: 20px;
         }
         .summary-table tr.total-row td:last-child {
@@ -396,8 +412,12 @@
                 <div id="kpi-success-rate" class="kpi-value">--%</div>
             </div>
             <div class="kpi-item">
-                <h3><i class="fas fa-times-circle"></i> Udział NDF/Scrap</h3>
-                <div id="kpi-ndf-scrap-share" class="kpi-value">--%</div>
+                <h3><i class="fas fa-search-plus"></i> Udział NDF (No Defect Found)</h3>
+                <div id="kpi-ndf-share" class="kpi-value">--%</div>
+            </div>
+            <div class="kpi-item">
+                <h3><i class="fas fa-trash-alt"></i> Udział SCRAP (Złom)</h3>
+                <div id="kpi-scrap-share" class="kpi-value">--%</div>
             </div>
             <p style="font-size: 0.8rem; margin-top: 20px; color: #aaa;">Statystyki z ostatnich 24h lub wybranego dnia.</p>
         </div>
@@ -547,26 +567,33 @@
     function updateKPIs(ok, ndf, scrap) {
         const total = ok + ndf + scrap;
         const successRateEl = document.getElementById('kpi-success-rate');
-        const ndfScrapShareEl = document.getElementById('kpi-ndf-scrap-share');
+        // ZMIANA 3: Nowe elementy KPI
+        const ndfShareEl = document.getElementById('kpi-ndf-share');
+        const scrapShareEl = document.getElementById('kpi-scrap-share');
 
         if (total === 0) {
             successRateEl.textContent = 'N/A';
-            ndfScrapShareEl.textContent = 'N/A';
+            ndfShareEl.textContent = 'N/A';
+            scrapShareEl.textContent = 'N/A';
             // Reset stylów przy braku danych
             successRateEl.style.textShadow = ''; 
             successRateEl.style.color = '#fff';
             return;
         }
 
-        // Wskaźnik Sukcesu: (OK / (OK + NDF + SCRAP)) * 100
+        // Wskaźnik Sukcesu: (OK / Total) * 100
         const successRate = (ok / total) * 100;
         successRateEl.textContent = `${successRate.toFixed(1)}%`;
         
-        // Udział NDF/Scrap: ((NDF + SCRAP) / Total) * 100
-        const ndfScrapShare = ((ndf + scrap) / total) * 100;
-        ndfScrapShareEl.textContent = `${ndfScrapShare.toFixed(1)}%`;
+        // Udział NDF: (NDF / Total) * 100
+        const ndfShare = (ndf / total) * 100;
+        ndfShareEl.textContent = `${ndfShare.toFixed(1)}%`;
         
-        // Logika do zmiany koloru blasku w zależności od Wskaźnika Sukcesu
+        // Udział SCRAP: (SCRAP / Total) * 100
+        const scrapShare = (scrap / total) * 100;
+        scrapShareEl.textContent = `${scrapShare.toFixed(1)}%`;
+        
+        // Logika do zmiany koloru blasku Wskaźnika Sukcesu
         if (successRateEl) {
             const glowColor = successRate >= 90 ? 'var(--ok-bg)' : 
                               successRate >= 70 ? 'var(--ndf-bg)' : 
