@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR HYBRID WOW Dashboard</title>
+    <title>LCDR WINTER Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -15,11 +15,9 @@
             --scrap-bg: #f87171; /* Czerwień Neon */
             --txt-dark: #1F2937;
             --card-bg-dark: rgba(15, 23, 42, 0.9);
-            --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
-            --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
-            --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
-            
-            /* NOWE: Efekt blasku dla sumy dziennej */
+            --neon-glow-ok: 0 0 5px #4ade80;
+            --neon-glow-ndf: 0 0 5px #facc15;
+            --neon-glow-scrap: 0 0 5px #f87171;
             --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
         }
 
@@ -28,25 +26,35 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             color: #fff;
-            /* Dynamiczne tło plazmowe + wgrany background.jpg */
+            /* ZMNIEJSZONA INTENSYWNOŚĆ TŁA */
             background: 
-                linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
-                linear-gradient(60deg, rgba(30, 64, 175, 0.5), rgba(147, 51, 234, 0.5), rgba(16, 185, 129, 0.5), rgba(30, 64, 175, 0.5)), 
-                url('background.jpg');
-            background-size: 100% 100%, 600% 600%, cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: animatedPlasma 25s ease infinite;
+                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), /* Większe zaciemnienie dla lepszej widoczności tekstu */
+                url('background.jpg') center/cover no-repeat fixed;
+            background-size: cover;
+            animation: none; /* Usuwamy animację plazmy */
             transition: background-color .3s, color .3s;
+            overflow-x: hidden; /* Zapobieganie poziomemu scrollowaniu */
         }
         body.dark-mode { background-color: #0f172a; }
 
-        @keyframes animatedPlasma {
-            0% { background-position: 0% 50%, 0% 50%, center; }
-            50% { background-position: 100% 50%, 100% 50%, center; }
-            100% { background-position: 0% 50%, 0% 50%, center; }
+        /* Efekt Śniegu */
+        .snow-container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 999; 
         }
-        
+        .snow {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+
         /* LOGO */
         .logo { text-align: center; margin: 20px 0; }
         .logo img { 
@@ -60,19 +68,15 @@
 
         /* KARTY (Glassmorphism) */
         .summary-box, .data-section {
-            background: rgba(255, 255, 255, 0.1); /* Jasne szkło */
+            background: rgba(255, 255, 255, 0.08); /* Ciemniejsze szkło */
             border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 5px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             margin: 0 auto 30px; padding: 25px;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
-        }
-        .summary-box:hover, .data-section:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
         
         /* PRZERWA POMIĘDZY TABELAMI */
@@ -86,9 +90,9 @@
             display: flex; flex-wrap: wrap; gap: 10px;
             justify-content: center; align-items: center; margin: 30px 0;
             padding: 15px 40px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.15); /* Półprzezroczysty pasek */
+            background: rgba(255, 255, 255, 0.1); 
         }
         .filter-btn, .export-btn, #date-picker-input, #serial-filter {
             padding: 10px 15px;
@@ -101,42 +105,49 @@
             color: #fff;
             background: rgba(59, 130, 246, 0.4);
         }
-        .filter-btn:hover, .export-btn:hover {
-            background: var(--primary-color);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
-        }
+        
+        /* POPRAWA STYLU INPUTÓW (aby nie wyglądały jak stary windows) */
         #date-picker-input, #serial-filter {
             width: 180px;
-            background: rgba(255, 255, 255, 0.95);
-            color: var(--txt-dark);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 5px var(--primary-color);
         }
-
+        
         /* TABELA */
         .summary-table { 
             width: 100%; 
             border-collapse: separate; 
             border-spacing: 0;
-            overflow: hidden; /* Wymagane, żeby zaokrąglenie rogów działało na całej karcie */
         }
         
-        /* NAGŁÓWKI TABEL - WOW EFFECT */
+        /* NAGŁÓWKI TABEL - WOW EFFECT & POPRAWA SPASOWANIA */
         .summary-table th { 
             padding: 12px; 
             color: #fff; 
             font-weight: 700;
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); /* Głęboki gradient */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Duży cień */
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
             border: none;
+            /* Usunięcie obramowania wewnętrznego na nagłówkach */
+            border-right: 1px solid rgba(255, 255, 255, 0.1); 
         }
+        .summary-table th:last-child { border-right: none; }
         .summary-table thead tr:first-child th:first-child { border-top-left-radius: 12px; }
         .summary-table thead tr:first-child th:last-child { border-top-right-radius: 12px; }
         
-        /* KOMÓRKI W TABELI */
+        /* KOMÓRKI W TABELI - NOWE, LEPSZE OBARMOWANIE */
         .summary-table td { 
             padding: 10px; text-align: center; font-weight: bold;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); /* Półprzezroczyste tło */
+            /* Nowe, subtelne obramowanie */
+            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05); 
+            color: #fff; /* Ujednolicony kolor tekstu detali */
         }
+        .summary-table td:last-child { border-right: none; }
+
 
         /* Neonowe Wyróżnienie Statusów */
         .summary-table td:first-child { text-align: left; font-weight: bold; }
@@ -144,19 +155,18 @@
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
         
-        /* Wiersz SUMARYCZNY - EXTENDED GLOW */
+        /* Wiersz SUMARYCZNY - EXTENDED GLOW & ZAOKRĄGLENIE */
         .summary-table tr.total-row td {
             font-size: 1.2em;
             background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
             color: #e5e7eb;
             text-shadow: 0 0 8px #fff;
             
-            /* ZMIANA 1: Extended Glow - cień puszczony pod spód */
+            /* Extended Glow */
             box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
             
             border: none; 
             padding: 15px 10px;
-            /* Zapewnienie, że wiersz sumaryczny jest zawsze na spodzie tabeli */
             position: sticky;
             bottom: 0;
             z-index: 5;
@@ -172,9 +182,13 @@
         .summary-table tr.total-row td:last-child {
             border-top-right-radius: 12px;
             border-bottom-right-radius: 12px;
+            border-right: none;
         }
+        .summary-table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+        .summary-table tr:last-child td:last-child { border-bottom-right-radius: 12px; border-right: none; }
 
-        /* Nagłówek Sekcji Szczegóły - Ujednolicenie z resztą */
+
+        /* Nagłówek Sekcji Szczegóły */
         .container.data-section h2 {
             margin-top: 0;
             padding: 12px 10px;
@@ -182,6 +196,7 @@
             border-radius: 12px 12px 0 0; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             border-left: none !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         /* ZEGAR */
@@ -227,6 +242,7 @@
     </style>
 </head>
 <body>
+<div class="snow-container" id="snow-container"></div>
 
 <div class="theme-switch-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
     <button id="themeToggle" onclick="toggleTheme()" style="padding: 8px 12px; border-radius: 8px; background: #1f2937; color: #fff; border: none; cursor: pointer;">
@@ -607,6 +623,38 @@
         }
     });
 
+    // --- Efekt Śniegu JavaScript ---
+    function createSnowflake() {
+        const snowContainer = document.getElementById('snow-container');
+        if (!snowContainer) return;
+        
+        const snowflake = document.createElement('div');
+        snowflake.classList.add('snow');
+        
+        const size = Math.random() * 5 + 2; // 2px do 7px
+        const duration = Math.random() * 15 + 10; // 10s do 25s
+        
+        snowflake.style.width = `${size}px`;
+        snowflake.style.height = `${size}px`;
+        snowflake.style.left = `${Math.random() * 100}vw`;
+        snowflake.style.animationDuration = `${duration}s`;
+        snowflake.style.animationDelay = `-${Math.random() * duration}s`;
+        
+        snowContainer.appendChild(snowflake);
+        
+        // Usunięcie płatków śniegu po zakończeniu animacji, aby nie obciążały DOM
+        snowflake.addEventListener('animationend', () => {
+            snowflake.remove();
+            createSnowflake(); // Tworzenie nowego płatka
+        });
+    }
+
+    function generateSnow(count) {
+        for (let i = 0; i < count; i++) {
+            createSnowflake();
+        }
+    }
+    
     // --- Inicjalizacja ---
     
     function init() {
@@ -621,6 +669,9 @@
                 text.innerHTML = '<i class="fas fa-sun"></i> Jasny Tryb';
             }
         }
+
+        // Generowanie 50 płatków śniegu
+        generateSnow(50);
 
         // Ustawienie daty na "Dzisiaj" i ładowanie danych
         setDate('today');
