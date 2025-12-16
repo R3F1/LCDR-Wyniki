@@ -72,7 +72,7 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
         
-        /* ZMIANA TUTAJ: Dodajemy przerwę nad sekcją detali */
+        /* PRZERWA POMIĘDZY TABELAMI */
         .container.data-section {
              margin-top: 40px; 
         }
@@ -109,7 +109,11 @@
         }
 
         /* TABELA PODSUMOWANIA (Neon) */
-        .summary-table { width: 100%; border-collapse: collapse; }
+        .summary-table { 
+            width: 100%; 
+            border-collapse: separate; /* Wymagane dla border-radius na komórkach */
+            border-spacing: 0;
+        }
         .summary-table th { background: var(--primary-color); color: #fff; padding: 12px; }
         .summary-table td { 
             padding: 10px; text-align: center; font-weight: bold;
@@ -129,7 +133,22 @@
             color: #e5e7eb;
             text-shadow: 0 0 8px #fff;
             box-shadow: 0 0 15px #fff, 0 -5px 20px var(--primary-color);
+            border: none; /* Usuwamy standardowe obramowanie komórek */
+            padding: 15px 10px; /* Dodajemy większy padding, żeby było widoczne */
         }
+        
+        /* ZAOKRĄGLENIE WŁAŚCIWE */
+        .summary-table tr.total-row td:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            text-align: left; 
+            padding-left: 20px;
+        }
+        .summary-table tr.total-row td:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        /* KONIEC ZAOKRĄGLENIA */
 
         /* ZEGAR */
         #clock-inline {
