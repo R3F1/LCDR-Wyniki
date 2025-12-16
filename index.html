@@ -23,7 +23,6 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             color: #fff;
-            /* ZMNIEJSZONA INTENSYWNOŚĆ TŁA */
             background: 
                 linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                 url('background.jpg') center/cover no-repeat fixed;
@@ -121,7 +120,7 @@
             color: #fff;
             animation: pulseClock 4s infinite ease-in-out;
             margin-left: auto;
-            /* KLUCZOWA ZMIANA WYRÓWNANIA */
+            /* WYRÓWNANIE ZEGARA DO ŚRODKA PANELU */
             height: 100%; 
             display: flex;
             align-items: center;
@@ -131,7 +130,7 @@
             50% { opacity: 0.85; }
         }
 
-        /* NAGŁÓWKI SEKCJI (PODSUMOWANIE i SZCZEGÓŁY) */
+        /* NAGŁÓWKI SEKCJI */
         .container .summary-header h2,
         .container .data-section h2 {
             margin: 0;
@@ -209,52 +208,52 @@
         .data-table tbody tr:last-child td { border-bottom: none; }
 
 
-        /* --- CHOINKA CSS --- */
+        /* --- CHOINKA CSS --- POPRAWIONA POZYCJA I ROZMIAR */
         #christmas-tree-container {
             position: fixed;
             top: 50%;
-            left: 5px; 
+            left: 50px; /* ODDALENIE OD KRAWĘDZI */
             transform: translateY(-50%);
-            width: 150px;
-            height: 250px;
+            width: 200px; /* WIĘKSZY ROZMIAR */
+            height: 300px;
             z-index: 1000;
             pointer-events: none;
-            opacity: 0.8;
+            opacity: 0.9;
             transition: all 0.5s;
         }
 
-        /* Pień Choinki */
+        /* Pień Choinki (skalowanie proporcjonalne) */
         #tree-trunk {
             position: absolute;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            width: 20px;
-            height: 30px;
+            width: 25px; 
+            height: 40px;
             background: #6f4e37;
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0,0,0,0.5);
         }
 
-        /* Liście Choinki (Trójkąty CSS) */
+        /* Liście Choinki (Trójkąty CSS) - Skalowanie */
         #tree-leaves {
             position: absolute;
-            bottom: 30px;
+            bottom: 40px; 
             left: 50%;
             transform: translateX(-50%);
         }
         .leaf {
             width: 0;
             height: 0;
-            border-left: 50px solid transparent;
-            border-right: 50px solid transparent;
-            border-bottom: 100px solid #28a745; 
+            border-left: 65px solid transparent; /* Większy rozmiar */
+            border-right: 65px solid transparent;
+            border-bottom: 130px solid #28a745; 
             position: relative;
-            margin-top: -30px;
+            margin-top: -35px;
             filter: drop-shadow(0 0 3px rgba(40, 167, 69, 0.5));
         }
-        .leaf:nth-child(2) { transform: translateY(-50px) scale(0.8); z-index: 1; }
-        .leaf:nth-child(3) { transform: translateY(-100px) scale(0.6); z-index: 2; }
+        .leaf:nth-child(2) { transform: translateY(-70px) scale(0.8); z-index: 1; }
+        .leaf:nth-child(3) { transform: translateY(-140px) scale(0.6); z-index: 2; }
         
         /* DEKORACJE - Domyślnie ukryte */
         .decoration, #tree-star {
@@ -262,7 +261,7 @@
             transition: opacity 1s, transform 0.5s;
         }
 
-        /* L1: LAMPKI (Subtelny blask na liściach) */
+        /* L1: LAMPKI */
         .level-1 .leaf {
             box-shadow: 0 0 5px #fff, inset 0 0 10px rgba(255, 255, 255, 0.3);
         }
@@ -285,26 +284,27 @@
         /* BOMBKI POZYCJONOWANIE */
         .decoration {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 10px; /* Większe bombki */
+            height: 10px;
             border-radius: 50%;
             box-shadow: 0 0 5px #fff;
         }
-        #tree-leaves .decoration:nth-child(4) { background: red; top: -10px; left: -40px; }
-        #tree-leaves .decoration:nth-child(5) { background: yellow; top: -50px; left: -20px; }
-        #tree-leaves .decoration:nth-child(6) { background: blue; top: -90px; left: 10px; }
-        #tree-leaves .decoration:nth-child(7) { background: red; top: -140px; left: -30px; }
-        #tree-leaves .decoration:nth-child(8) { background: yellow; top: -180px; left: 0px; }
+        /* Pozycjonowanie bombek na większej choince */
+        #tree-leaves .decoration:nth-child(4) { background: red; top: -20px; left: -55px; }
+        #tree-leaves .decoration:nth-child(5) { background: yellow; top: -60px; left: -25px; }
+        #tree-leaves .decoration:nth-child(6) { background: blue; top: -100px; left: 15px; }
+        #tree-leaves .decoration:nth-child(7) { background: red; top: -160px; left: -40px; }
+        #tree-leaves .decoration:nth-child(8) { background: yellow; top: -200px; left: 0px; }
 
 
         /* GWIAZDA */
         #tree-star {
             position: absolute;
-            top: -190px;
+            top: -240px; /* Dostosowanie pozycji gwiazdy */
             left: 50%;
             transform: translateX(-50%);
             color: gold;
-            font-size: 2.2em;
+            font-size: 2.5em;
             text-shadow: 0 0 10px yellow, 0 0 20px gold;
             z-index: 5;
         }
@@ -345,7 +345,7 @@
     </button>
 </div>
 
-<div id="chatbot-container">
+<div id="chatbot-container" style="right: 20px; bottom: 20px;"> 
     <img alt="Robot" id="chatbot-img" src="robotlcdr.png"/> 
     <div id="chatbot-bubble" style="cursor: pointer;">
         Ładowanie bota...
