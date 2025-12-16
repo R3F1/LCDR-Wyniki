@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR HYBRID WOW Dashboard</title>
+    <title>LCDR WINTER Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -15,15 +15,10 @@
             --scrap-bg: #f87171; /* Czerwień Neon */
             --txt-dark: #1F2937;
             --card-bg-dark: rgba(15, 23, 42, 0.9);
-            --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
-            --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
-            --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
-            
-            /* NOWE: Efekt blasku dla sumy dziennej */
+            --neon-glow-ok: 0 0 5px #4ade80;
+            --neon-glow-ndf: 0 0 5px #facc15;
+            --neon-glow-scrap: 0 0 5px #f87171;
             --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
-
-            /* NOWE: Ogólne zaokrąglenie rogów elementów w kontenerach */
-            --general-radius: 12px;
         }
 
         /* TŁO I ANIMACJE */
@@ -33,12 +28,12 @@
             color: #fff;
             /* ZMNIEJSZONA INTENSYWNOŚĆ TŁA */
             background: 
-                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), /* Większe zaciemnienie dla lepszej widoczności tekstu */
                 url('background.jpg') center/cover no-repeat fixed;
             background-size: cover;
-            animation: none; 
+            animation: none; /* Usuwamy animację plazmy */
             transition: background-color .3s, color .3s;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Zapobieganie poziomemu scrollowaniu */
         }
         body.dark-mode { background-color: #0f172a; }
 
@@ -71,10 +66,10 @@
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* KARTY (Glassmorphism) - Zwiększone zaokrąglenie */
+        /* KARTY (Glassmorphism) */
         .summary-box, .data-section {
-            background: rgba(255, 255, 255, 0.08); 
-            border-radius: var(--general-radius); /* Używamy zmiennej */
+            background: rgba(255, 255, 255, 0.08); /* Ciemniejsze szkło */
+            border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             margin: 0 auto 30px; padding: 25px;
             backdrop-filter: blur(8px);
@@ -82,11 +77,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
-            overflow: hidden; /* KLUCZOWE: Zapobiega wyciekaniu komórek poza zaokrąglenie karty */
-        }
-        .summary-box:hover, .data-section:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
         
         /* PRZERWA POMIĘDZY TABELAMI */
@@ -116,7 +106,7 @@
             background: rgba(59, 130, 246, 0.4);
         }
         
-        /* POPRAWA STYLU INPUTÓW */
+        /* POPRAWA STYLU INPUTÓW (aby nie wyglądały jak stary windows) */
         #date-picker-input, #serial-filter {
             width: 180px;
             background: rgba(255, 255, 255, 0.1);
@@ -140,23 +130,24 @@
             background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
             border: none;
+            /* Usunięcie obramowania wewnętrznego na nagłówkach */
             border-right: 1px solid rgba(255, 255, 255, 0.1); 
         }
         .summary-table th:last-child { border-right: none; }
+        .summary-table thead tr:first-child th:first-child { border-top-left-radius: 12px; }
+        .summary-table thead tr:first-child th:last-child { border-top-right-radius: 12px; }
         
-        /* KLUCZOWA POPRAWKA A: Zaokrąglenie nagłówków sekcji PODSUMOWANIE i SZCZEGÓŁY */
-        .summary-table thead tr:first-child th:first-child { border-top-left-radius: var(--general-radius); }
-        .summary-table thead tr:first-child th:last-child { border-top-right-radius: var(--general-radius); }
-        
-        /* KOMÓRKI W TABELI */
+        /* KOMÓRKI W TABELI - NOWE, LEPSZE OBARMOWANIE */
         .summary-table td { 
             padding: 10px; text-align: center; font-weight: bold;
+            /* Nowe, subtelne obramowanie */
             border-right: 1px solid rgba(255, 255, 255, 0.1); 
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.05); 
-            color: #fff; 
+            color: #fff; /* Ujednolicony kolor tekstu detali */
         }
         .summary-table td:last-child { border-right: none; }
+
 
         /* Neonowe Wyróżnienie Statusów */
         .summary-table td:first-child { text-align: left; font-weight: bold; }
@@ -181,39 +172,32 @@
             z-index: 5;
         }
         
-        /* KLUCZOWA POPRAWKA B: Zaokrąglenie Sumy Dziennej (dla dolnych rogów całej karty) */
+        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy */
         .summary-table tr.total-row td:first-child {
-            border-top-left-radius: 0; /* Zapewnienie ostrego przejścia z poprzedniego wiersza danych */
-            border-bottom-left-radius: var(--general-radius);
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
             text-align: left; 
             padding-left: 20px;
         }
         .summary-table tr.total-row td:last-child {
-            border-top-right-radius: 0; /* Zapewnienie ostrego przejścia z poprzedniego wiersza danych */
-            border-bottom-right-radius: var(--general-radius);
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
             border-right: none;
         }
-        /* KONIEC POPRAWKI B */
+        .summary-table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+        .summary-table tr:last-child td:last-child { border-bottom-right-radius: 12px; border-right: none; }
 
-        /* Nagłówek Sekcji Szczegóły - Ujednolicenie i zaokrąglenie */
+
+        /* Nagłówek Sekcji Szczegóły */
         .container.data-section h2 {
             margin-top: 0;
             padding: 12px 10px;
             background: linear-gradient(90deg, #1e3a8a, var(--primary-color));
-            border-radius: var(--general-radius) var(--general-radius) 0 0; /* Zaokrąglenie górnych rogów */
+            border-radius: 12px 12px 0 0; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
             border-left: none !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        /* KLUCZOWA POPRAWKA C: Usuwanie obramowania z dolnych rogów sekcji detali */
-        .data-table tbody tr:last-child td:first-child {
-             border-bottom-left-radius: var(--general-radius);
-        }
-        .data-table tbody tr:last-child td:last-child {
-             border-bottom-right-radius: var(--general-radius);
-        }
-        /* KONIEC POPRAWKI C */
 
         /* ZEGAR */
         #clock-inline {
