@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR HYBRID WOW Dashboard</title>
+    <title>LCDR LIVE Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -68,7 +68,7 @@
             height: 100%; width: 0%;
             background: linear-gradient(90deg, #ef4444, #eab308, #22c55e); 
             border-radius: 15px;
-            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 1.0s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
             position: relative;
         }
@@ -84,9 +84,7 @@
             font-weight: bold; text-shadow: 0 0 4px #000; z-index: 2; pointer-events: none;
         }
 
-        /* ********************************************** */
-        /* STYLE DLA KORON TOP 3 */
-        /* ********************************************** */
+        /* STYL KORON */
         .crown-icon {
             font-size: 1.3em;
             margin-left: 8px;
@@ -94,7 +92,6 @@
             animation: bounceCrown 2s infinite ease-in-out;
             vertical-align: middle;
         }
-        
         .crown-gold { color: var(--gold-leader); filter: drop-shadow(0 0 8px var(--gold-leader)); }
         .crown-silver { color: var(--silver-rank); filter: drop-shadow(0 0 5px rgba(255,255,255,0.6)); }
         .crown-bronze { color: var(--bronze-rank); filter: drop-shadow(0 0 5px rgba(205,127,50,0.6)); }
@@ -104,7 +101,7 @@
             50% { transform: translateY(-3px) scale(1.2); }
         }
 
-        /* Tylko lider (Top 1) dostaje specjalne tło wiersza */
+        /* Styl dla wiersza lidera (Top 1) */
         tr.leader-row td {
             background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05)) !important;
             border-top: 1px solid rgba(255, 215, 0, 0.5);
@@ -114,7 +111,6 @@
         }
         tr.leader-row td:first-child { border-left: 3px solid var(--gold-leader); }
         tr.leader-row td:last-child { border-right: 3px solid var(--gold-leader); }
-
 
         /* EFEKTY POGODOWE */
         #holiday-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 998; }
@@ -165,8 +161,6 @@
         .summary-table th:last-child { border-top-right-radius: var(--general-radius); border-right: none; }
         
         .summary-table td { padding: 10px; text-align: center; font-weight: bold; border-right: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: #fff; }
-        
-        /* STANDARDOWE KOLORY KOMÓREK (DLA WSZYSTKICH) */
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
@@ -540,20 +534,23 @@
         ticker.innerHTML = html + html; 
     }
 
-    // --- AKTUALIZACJA PASKA CELU ---
+    // --- NAPRAWIONA FUNKCJA AKTUALIZACJI PASKA CELU ---
     function updateTargetBar(currentOk) {
         const bar = document.getElementById('target-bar');
         const textLabel = document.getElementById('target-text');
         const textPercent = document.getElementById('target-percent');
         
-        // Zabezpieczenie przed błędem
         if (!bar || !textLabel || !textPercent) return;
 
-        let percentage = (currentOk / DAILY_TARGET_OK) * 100;
+        // Zabezpieczenie przed brakiem danych
+        let val = parseInt(currentOk, 10);
+        if (isNaN(val)) val = 0;
+
+        let percentage = (val / DAILY_TARGET_OK) * 100;
         if (percentage > 100) percentage = 100;
         
         bar.style.width = `${percentage}%`;
-        textLabel.innerHTML = `${currentOk} / ${DAILY_TARGET_OK}`;
+        textLabel.innerHTML = `${val} / ${DAILY_TARGET_OK}`;
         textPercent.innerHTML = `${Math.floor(percentage)}%`;
         
         if(percentage > 50) textPercent.style.color = "#000";
@@ -648,12 +645,8 @@
         updateKPIs(data.currentKpi, data.prevKpi);
         updateTicker(latestData);
         
-        // NAPRAWA: Oblicz sumę OK ręcznie, aby pasek celu był zgodny z tabelą
-        let calculatedSumOK = 0;
-        latestData.forEach(d => {
-            if (d.status === 'OK') calculatedSumOK++;
-        });
-        updateTargetBar(calculatedSumOK);
+        // NAPRAWA: Bezpośrednie wywołanie aktualizacji paska
+        updateTargetBar(sumOK);
     }
 
     window.setDate = function(type) {
