@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR LIVE Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -15,9 +15,6 @@
             --ndf-bg: #facc15; 
             --scrap-bg: #f87171; 
             --gold-leader: #ffd700; 
-            --silver-rank: #e0e0e0; 
-            --bronze-rank: #cd7f32;
-            
             --txt-dark: #1F2937;
             --card-bg-dark: rgba(15, 23, 42, 0.9);
             --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
@@ -29,7 +26,7 @@
             --ticker-height: 40px;
         }
 
-        /* TŁO I PODSTAWY */
+        /* TŁO I ANIMACJE */
         html, body { margin:0; padding:0; min-height:100vh; overflow-x: hidden; }
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -38,11 +35,15 @@
                 linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                 url('background.jpg') center/cover no-repeat fixed;
             background-size: cover;
+            animation: none; 
+            transition: background-color .3s, color .3s;
             padding-bottom: var(--ticker-height);
         }
         body.dark-mode { background-color: #0f172a; }
 
-        /* PASEK CELU */
+        /* ********************************************** */
+        /* PASEK CELU (TARGET BAR) */
+        /* ********************************************** */
         .target-wrapper {
             max-width: 1200px; margin: 20px auto 10px; padding: 0 16px;
             position: relative; z-index: 1001;
@@ -68,7 +69,7 @@
             height: 100%; width: 0%;
             background: linear-gradient(90deg, #ef4444, #eab308, #22c55e); 
             border-radius: 15px;
-            transition: width 1.0s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
             position: relative;
         }
@@ -79,40 +80,37 @@
             animation: shimmer 2s infinite linear;
         }
         @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+        
         .progress-text {
             position: absolute; width: 100%; text-align: center; top: 0; line-height: 25px;
             font-weight: bold; text-shadow: 0 0 4px #000; z-index: 2; pointer-events: none;
         }
 
-        /* STYL KORON */
-        .crown-icon {
-            font-size: 1.3em;
+        /* ********************************************** */
+        /* LIDERA (KORONA) */
+        /* ********************************************** */
+        .leader-crown {
+            color: var(--gold-leader);
+            font-size: 1.2em;
             margin-left: 8px;
             display: inline-block;
+            filter: drop-shadow(0 0 5px var(--gold-leader));
             animation: bounceCrown 2s infinite ease-in-out;
-            vertical-align: middle;
         }
-        .crown-gold { color: var(--gold-leader); filter: drop-shadow(0 0 8px var(--gold-leader)); }
-        .crown-silver { color: var(--silver-rank); filter: drop-shadow(0 0 5px rgba(255,255,255,0.6)); }
-        .crown-bronze { color: var(--bronze-rank); filter: drop-shadow(0 0 5px rgba(205,127,50,0.6)); }
-
         @keyframes bounceCrown {
             0%, 100% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-3px) scale(1.2); }
         }
-
-        /* Styl dla wiersza lidera (Top 1) */
         tr.leader-row td {
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05)) !important;
-            border-top: 1px solid rgba(255, 215, 0, 0.5);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.5);
-            color: #fff !important; 
-            text-shadow: 0 0 5px #000;
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05)) !important;
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            color: #fff !important;
         }
         tr.leader-row td:first-child { border-left: 3px solid var(--gold-leader); }
         tr.leader-row td:last-child { border-right: 3px solid var(--gold-leader); }
 
-        /* EFEKTY POGODOWE */
+        /* EFEKTY POGODOWE I INNE */
         #holiday-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 998; }
         .holiday-text { position: absolute; font-size: 1.75vw; font-weight: 900; text-transform: uppercase; white-space: nowrap; opacity: 0; user-select: none; color: #fff; text-shadow: 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; animation: holidayFade 10s ease-out forwards; }
         @keyframes holidayFade { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1); } 90% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
@@ -159,12 +157,10 @@
         .summary-table th { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border: none; border-right: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
         .summary-table th:first-child { border-top-left-radius: var(--general-radius); }
         .summary-table th:last-child { border-top-right-radius: var(--general-radius); border-right: none; }
-        
         .summary-table td { padding: 10px; text-align: center; font-weight: bold; border-right: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: #fff; }
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
-        
         .summary-table tr.total-row td { font-size: 1.2em; background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b); color: #e5e7eb; text-shadow: 0 0 8px #fff; box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); border: none; padding: 15px 10px; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
         .summary-table tr.total-row td:first-child { border-bottom-left-radius: var(--general-radius); text-align: center; padding-left: 20px; }
         .summary-table tr.total-row td:last-child { border-bottom-right-radius: var(--general-radius); }
@@ -228,7 +224,7 @@
         <div class="target-container">
             <div class="target-label">
                 <span><i class="fas fa-crosshairs"></i> Cel Dzienny (OK)</span>
-                <span id="target-text">0 / 80</span>
+                <span id="target-text">0 / 70</span>
             </div>
             <div class="progress-bg">
                 <div class="progress-fill" id="target-bar"></div>
@@ -306,7 +302,7 @@
 </div>
 
 <script>
-    const DAILY_TARGET_OK = 80; 
+    const DAILY_TARGET_OK = 70; 
 
     const urls = [
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
@@ -476,9 +472,17 @@
             return `<span class="kpi-trend ${colorClass}">${icon} ${diffText}% vs Wczoraj</span>`;
         }
 
+
+        // Wskaźnik Sukcesu (OK)
         const successRate = currentKpi.successRate;
         successRateEl.innerHTML = `${successRate.toFixed(1)}% ${getTrendHTML(successRate, prevKpi.successRate, true)}`;
+        
+        // Udział NDF (No Defect Found)
+        const ndfShare = currentKpi.ndfShare;
         ndfShareEl.innerHTML = `${ndfShare.toFixed(1)}% ${getTrendHTML(ndfShare, prevKpi.ndfShare, false)}`;
+        
+        // Udział SCRAP (Złom)
+        const scrapShare = currentKpi.scrapShare;
         scrapShareEl.innerHTML = `${scrapShare.toFixed(1)}% ${getTrendHTML(scrapShare, prevKpi.scrapShare, false)}`;
         
         if (successRateEl) {
@@ -534,23 +538,17 @@
         ticker.innerHTML = html + html; 
     }
 
-    // --- NAPRAWIONA FUNKCJA AKTUALIZACJI PASKA CELU ---
+    // --- AKTUALIZACJA PASKA CELU ---
     function updateTargetBar(currentOk) {
         const bar = document.getElementById('target-bar');
         const textLabel = document.getElementById('target-text');
         const textPercent = document.getElementById('target-percent');
         
-        if (!bar || !textLabel || !textPercent) return;
-
-        // Zabezpieczenie przed brakiem danych
-        let val = parseInt(currentOk, 10);
-        if (isNaN(val)) val = 0;
-
-        let percentage = (val / DAILY_TARGET_OK) * 100;
+        let percentage = (currentOk / DAILY_TARGET_OK) * 100;
         if (percentage > 100) percentage = 100;
         
         bar.style.width = `${percentage}%`;
-        textLabel.innerHTML = `${val} / ${DAILY_TARGET_OK}`;
+        textLabel.innerHTML = `${currentOk} / ${DAILY_TARGET_OK}`;
         textPercent.innerHTML = `${Math.floor(percentage)}%`;
         
         if(percentage > 50) textPercent.style.color = "#000";
@@ -576,7 +574,7 @@
         document.getElementById('data-table').tBodies[0]?.remove();
         document.getElementById('data-table').appendChild(dtb);
 
-        // 2. Summary Table z KORONAMI
+        // 2. Summary Table z LIDEREM
         const okC={}, ndfC={}, scrC={}, names=new Set();
         latestData.forEach(it=>{
             names.add(it.name);
@@ -585,36 +583,25 @@
             scrC[it.name] = (scrC[it.name]||0)+it.scrap;
         });
 
-        // Znajdź unikalne wyniki OK, żeby wyłonić Top 1, 2, 3
-        const scores = [];
+        // Znajdź lidera
+        let maxOK = -1;
+        let leaderName = '';
         names.forEach(n => {
-            scores.push({ name: n, count: okC[n] || 0 });
+            if(okC[n] > maxOK) {
+                maxOK = okC[n];
+                leaderName = n;
+            }
         });
-        // Sortowanie i unikalne
-        const uniqueScores = [...new Set(scores.map(s => s.count).filter(s => s > 0))].sort((a, b) => b - a);
-        const goldScore = uniqueScores[0]; 
-        const silverScore = uniqueScores[1];
-        const bronzeScore = uniqueScores[2];
+        if (maxOK === 0) leaderName = '';
 
         const stb = document.createElement('tbody');
         Array.from(names).sort().forEach(n=>{
             const tr = document.createElement('tr');
-            const score = okC[n] || 0;
-            
-            let iconHtml = '';
-            
-            if (score > 0) {
-                if (score === goldScore) {
-                    tr.classList.add('leader-row'); // TYLKO LIDER ma tło
-                    iconHtml = '<i class="fas fa-crown crown-icon crown-gold"></i>';
-                } else if (score === silverScore) {
-                    iconHtml = '<i class="fas fa-crown crown-icon crown-silver"></i>';
-                } else if (score === bronzeScore) {
-                    iconHtml = '<i class="fas fa-crown crown-icon crown-bronze"></i>';
-                }
-            }
+            // Logika lidera
+            const isLeader = (n === leaderName && leaderName !== '');
+            if(isLeader) tr.classList.add('leader-row');
 
-            const nameHtml = `${n} ${iconHtml}`;
+            const nameHtml = isLeader ? `${n} <i class="fas fa-crown leader-crown"></i>` : n;
 
             tr.innerHTML = `
                 <td>${nameHtml}</td>
@@ -644,8 +631,6 @@
         updateBotPhrase(sumOK, sumNDF, sumSCR);
         updateKPIs(data.currentKpi, data.prevKpi);
         updateTicker(latestData);
-        
-        // NAPRAWA: Bezpośrednie wywołanie aktualizacji paska
         updateTargetBar(sumOK);
     }
 
@@ -721,7 +706,7 @@
             
             clk.innerHTML = `🕒 ${h.toString().padStart(2,'0')}:${m}:${s}`;
             
-            // ALARM NA 12:10 (m === '10')
+            // ZMIANA ALARMU NA 12:10 (m === '10')
             if (h === 12 && m === '10' && s === '00' && !lunchAlarmTriggered) {
                  if(lunchAlarm) {
                     lunchAlarm.play().catch(e => console.error("Błąd odtwarzania alarmu obiadowego:", e));
