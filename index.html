@@ -153,7 +153,7 @@
         .filter-btn.active { background: var(--primary-color); box-shadow: 0 0 10px var(--primary-color), inset 0 0 5px #fff; transform: scale(1.05); }
         #date-picker-input, #serial-filter { width: 180px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--primary-color); box-shadow: 0 0 5px var(--primary-color); }
         
-        .summary-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: var(--general-radius); flex-basis: 70%; margin-top: 0; }
+        .summary-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: var(--general-radius); margin-top: 0; }
         .summary-table th { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border: none; border-right: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
         .summary-table th:first-child { border-top-left-radius: var(--general-radius); }
         .summary-table th:last-child { border-top-right-radius: var(--general-radius); border-right: none; }
@@ -214,6 +214,92 @@
         .mini-table tr:first-child td { color: #fff; font-weight: bold; } /* Lider */
         .mini-table .rank-idx { width: 20px; color: #555; font-size: 0.7rem; }
         .mini-table .val-ok { text-align: right; color: var(--ok-bg); font-weight: bold; }
+
+        /* --- STYLE DLA NOWYCH WIDŻETÓW (POD TABELĄ) --- */
+        .widgets-wrapper {
+            flex-basis: 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* 1. Battle Arena (Pojedynek) */
+        .battle-container {
+            background: linear-gradient(90deg, rgba(20, 30, 60, 0.8), rgba(40, 20, 60, 0.8));
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .battle-header {
+            text-align: center; font-size: 0.85rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;
+        }
+        .battle-arena {
+            display: flex; align-items: center; justify-content: space-between; position: relative;
+        }
+        .fighter {
+            text-align: center; width: 30%; position: relative; z-index: 2;
+        }
+        .fighter-name {
+            font-weight: 800; font-size: 1.1rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .fighter-score {
+            font-size: 1.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--primary-color);
+        }
+        .vs-badge {
+            width: 50px; height: 50px; background: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-style: italic; font-size: 1.2rem; border: 3px solid #fff; box-shadow: 0 0 15px #ef4444; z-index: 3;
+            animation: pulseVS 1.5s infinite;
+        }
+        @keyframes pulseVS { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        
+        .battle-bar-bg {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; transform: translateY(-50%); z-index: 1;
+        }
+        .battle-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #3b82f6, #ef4444); border-radius: 5px; transition: width 1s ease;
+        }
+
+        /* 2. Wykres Barowy (Pod tabelą) */
+        .chart-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .chart-title {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 100px;
+            gap: 5px;
+        }
+        .bar-wrapper {
+            display: flex; flex-direction: column; align-items: center; flex: 1;
+        }
+        .bar {
+            width: 40px; max-width: 60%;
+            background: linear-gradient(0deg, var(--primary-color), #60a5fa);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease;
+            min-height: 2px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            position: relative;
+        }
+        .bar:hover { filter: brightness(1.2); }
+        .bar-value { font-size: 0.75rem; color: #fff; margin-bottom: 3px; font-weight: bold; }
+        .bar-label { margin-top: 5px; font-size: 0.7rem; color: #888; text-align: center; }
+
     </style>
 </head>
 <body>
@@ -313,17 +399,45 @@
             </div>
         </div>
         
-        <table class="summary-table" id="summary-table">
-            <thead>
-                <tr>
-                    <th>NAPRAWIACZ</th>
-                    <th class="ok">OK</th>
-                    <th class="ndf">NDF</th>
-                    <th class="scrap-ttl">SCRAP TTL</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="widgets-wrapper">
+            <table class="summary-table" id="summary-table">
+                <thead>
+                    <tr>
+                        <th>NAPRAWIACZ</th>
+                        <th class="ok">OK</th>
+                        <th class="ndf">NDF</th>
+                        <th class="scrap-ttl">SCRAP TTL</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="battle-container" id="battle-container" style="display:none;">
+                <div class="battle-header"><i class="fas fa-fist-raised"></i> Pojedynek Liderów (OK)</div>
+                <div class="battle-bar-bg"><div class="battle-bar-fill" id="battle-bar" style="width: 50%;"></div></div>
+                <div class="battle-arena">
+                    <div class="fighter" style="color:#3b82f6;">
+                        <div class="fighter-name" id="p1-name">Gracz 1</div>
+                        <div class="fighter-score" id="p1-score">0</div>
+                    </div>
+                    <div class="vs-badge">VS</div>
+                    <div class="fighter" style="color:#ef4444;">
+                        <div class="fighter-name" id="p2-name">Gracz 2</div>
+                        <div class="fighter-score" id="p2-score">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title"><i class="fas fa-chart-bar"></i> Wynik wg Stacji (Top 3)</div>
+                <div class="chart-bars" id="station-chart">
+                    <div style="color:#666; font-size:0.8rem; width:100%; text-align:center; padding-top:40px;">
+                        Brak danych
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div> 
     </div>
 
@@ -450,7 +564,7 @@
             current: currentDayData.details,
             currentKpi: currentDayData.kpi,
             prevKpi: prevDayData.kpi,
-            prevDetails: prevDayData.details // Zwracamy detale z wczoraj
+            prevDetails: prevDayData.details
         };
     }
 
@@ -607,7 +721,6 @@
             return;
         }
 
-        // Zliczanie OK dla każdego pracownika
         const counts = {};
         prevDetails.forEach(d => {
             if (d.status === 'OK') {
@@ -615,10 +728,9 @@
             }
         });
 
-        // Sortowanie i wybór TOP 3
         const sorted = Object.entries(counts)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 3); // Bierzemy tylko 3 najlepszych
+            .slice(0, 3); 
 
         if (sorted.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Brak napraw OK</td></tr>';
@@ -643,6 +755,72 @@
         });
         tableBody.innerHTML = html;
     }
+
+    // --- FUNKCJA RENDEROWANIA BATTLE ARENA I WYKRESU ---
+    function updateExtraCharts(detailsData) {
+        // 1. Battle Arena (Pojedynek Liderów)
+        const counts = {};
+        detailsData.forEach(d => {
+            if (d.status === 'OK') {
+                counts[d.name] = (counts[d.name] || 0) + 1;
+            }
+        });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+        const battleContainer = document.getElementById('battle-container');
+        if (sorted.length >= 2) {
+            battleContainer.style.display = 'block';
+            const p1 = sorted[0];
+            const p2 = sorted[1];
+            
+            document.getElementById('p1-name').textContent = p1[0];
+            document.getElementById('p1-score').textContent = p1[1];
+            document.getElementById('p2-name').textContent = p2[0];
+            document.getElementById('p2-score').textContent = p2[1];
+
+            const total = p1[1] + p2[1];
+            const p1Percent = total > 0 ? (p1[1] / total) * 100 : 50;
+            document.getElementById('battle-bar').style.width = `${p1Percent}%`;
+        } else {
+            battleContainer.style.display = 'none';
+        }
+
+        // 2. Wykres Barowy (Stacje)
+        // Jako że nie mamy pola 'Time' w CSV, pokazujemy rozkład na stacje (Station Performance)
+        const chartContainer = document.getElementById('station-chart');
+        const stationCounts = {};
+        
+        detailsData.forEach(d => {
+             // Zliczamy wszystkie akcje (OK+NDF+SCRAP) lub tylko OK. Tutaj tylko OK.
+             if(d.status === 'OK') {
+                stationCounts[d.station] = (stationCounts[d.station] || 0) + 1;
+             }
+        });
+
+        if (Object.keys(stationCounts).length === 0) {
+             chartContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; width:100%; text-align:center; padding-top:40px;">Brak danych OK</div>';
+             return;
+        }
+
+        const maxVal = Math.max(...Object.values(stationCounts), 1);
+        let barHtml = '';
+        
+        // Sortujemy stacje po ilości
+        const sortedStations = Object.entries(stationCounts).sort((a,b) => b[1] - a[1]).slice(0,5);
+
+        sortedStations.forEach(([st, val]) => {
+            const h = (val / maxVal) * 80; // max 80% wysokości kontenera
+            barHtml += `
+                <div class="bar-wrapper">
+                    <div class="bar-value">${val}</div>
+                    <div class="bar" style="height: ${h}%;"></div>
+                    <div class="bar-label">${st}</div>
+                </div>
+            `;
+        });
+        chartContainer.innerHTML = barHtml;
+    }
+
 
     function render(data) {
         latestData = data.current.sort((a,b)=>a.name.localeCompare(b.name));
@@ -721,7 +899,8 @@
         updateKPIs(data.currentKpi, data.prevKpi);
         updateTicker(latestData);
         updateTargetBar(sumOK);
-        updateYesterdaySideBar(data.prevDetails); // WYWOŁANIE NOWEJ FUNKCJI
+        updateYesterdaySideBar(data.prevDetails);
+        updateExtraCharts(latestData); // <--- NOWE WYWOŁANIE (Battle + Chart)
     }
 
     window.setDate = function(type) {
