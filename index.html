@@ -996,8 +996,8 @@
             
             clk.innerHTML = `🕒 ${h.toString().padStart(2,'0')}:${m}:${s}`;
             
-            // ZMIANA ALARMU NA 12:10 (m === '10')
-            if (h === 12 && m === '10' && s === '00' && !lunchAlarmTriggered) {
+            // ZMIANA ALARMU NA 12:15 (m === '15')
+            if (h === 12 && m === '15' && s === '00' && !lunchAlarmTriggered) {
                  if(lunchAlarm) {
                     lunchAlarm.play().catch(e => console.error("Błąd odtwarzania alarmu obiadowego:", e));
                     lunchAlarmTriggered = true; 
