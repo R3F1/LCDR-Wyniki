@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>LCDR Live Dashboard</title>
+    <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -15,7 +15,7 @@
             --ndf-bg: #facc15; 
             --scrap-bg: #f87171; 
             --gold-leader: #ffd700; 
-            --silver-rank: #e0e0e0; /* Jasny srebrny dla lepszej widoczności */
+            --silver-rank: #e0e0e0; 
             --bronze-rank: #cd7f32;
             
             --txt-dark: #1F2937;
@@ -312,7 +312,7 @@
 </div>
 
 <script>
-    const DAILY_TARGET_OK = 70; 
+    const DAILY_TARGET_OK = 80; 
 
     const urls = [
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
@@ -482,17 +482,9 @@
             return `<span class="kpi-trend ${colorClass}">${icon} ${diffText}% vs Wczoraj</span>`;
         }
 
-
-        // Wskaźnik Sukcesu (OK)
         const successRate = currentKpi.successRate;
         successRateEl.innerHTML = `${successRate.toFixed(1)}% ${getTrendHTML(successRate, prevKpi.successRate, true)}`;
-        
-        // Udział NDF (No Defect Found)
-        const ndfShare = currentKpi.ndfShare;
         ndfShareEl.innerHTML = `${ndfShare.toFixed(1)}% ${getTrendHTML(ndfShare, prevKpi.ndfShare, false)}`;
-        
-        // Udział SCRAP (Złom)
-        const scrapShare = currentKpi.scrapShare;
         scrapShareEl.innerHTML = `${scrapShare.toFixed(1)}% ${getTrendHTML(scrapShare, prevKpi.scrapShare, false)}`;
         
         if (successRateEl) {
