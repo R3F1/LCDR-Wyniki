@@ -546,6 +546,9 @@
         const textLabel = document.getElementById('target-text');
         const textPercent = document.getElementById('target-percent');
         
+        // Zabezpieczenie przed błędem
+        if (!bar || !textLabel || !textPercent) return;
+
         let percentage = (currentOk / DAILY_TARGET_OK) * 100;
         if (percentage > 100) percentage = 100;
         
@@ -644,7 +647,13 @@
         updateBotPhrase(sumOK, sumNDF, sumSCR);
         updateKPIs(data.currentKpi, data.prevKpi);
         updateTicker(latestData);
-        updateTargetBar(sumOK);
+        
+        // NAPRAWA: Oblicz sumę OK ręcznie, aby pasek celu był zgodny z tabelą
+        let calculatedSumOK = 0;
+        latestData.forEach(d => {
+            if (d.status === 'OK') calculatedSumOK++;
+        });
+        updateTargetBar(calculatedSumOK);
     }
 
     window.setDate = function(type) {
