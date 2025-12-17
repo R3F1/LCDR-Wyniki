@@ -14,21 +14,16 @@
             --ok-bg: #4ade80; 
             --ndf-bg: #facc15; 
             --scrap-bg: #f87171; 
-            
-            /* KOLORY RANKINGU */
-            --rank-1-gold: #ffd700; 
-            --rank-2-silver: #c0c0c0; /* Srebrny */
-            --rank-3-bronze: #cd7f32; /* Brązowy */
-
+            --gold-leader: #ffd700; 
             --txt-dark: #1F2937;
-            --card-bg-dark: rgba(15, 23, 42, 0.9);
+            --general-radius: 12px;
+            --ticker-height: 40px;
+            
             --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
             --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
             --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
             
             --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
-            --general-radius: 12px;
-            --ticker-height: 40px;
         }
 
         /* TŁO I PODSTAWY */
@@ -40,8 +35,6 @@
                 linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                 url('background.jpg') center/cover no-repeat fixed;
             background-size: cover;
-            animation: none; 
-            transition: background-color .3s, color .3s;
             padding-bottom: var(--ticker-height);
         }
         body.dark-mode { background-color: #0f172a; }
@@ -89,54 +82,32 @@
         }
 
         /* ********************************************** */
-        /* STYLE DLA TOP 3 (KORONY I WIERSZE) */
+        /* STYLE DLA LIDERA (TYLKO ZŁOTO) */
         /* ********************************************** */
         .crown-icon {
             font-size: 1.2em;
             margin-left: 8px;
             display: inline-block;
             animation: bounceCrown 2s infinite ease-in-out;
+            color: var(--gold-leader); 
+            filter: drop-shadow(0 0 5px var(--gold-leader));
         }
-        /* Złota */
-        .crown-gold { color: var(--rank-1-gold); filter: drop-shadow(0 0 5px var(--rank-1-gold)); }
-        /* Srebrna */
-        .crown-silver { color: var(--rank-2-silver); filter: drop-shadow(0 0 5px var(--rank-2-silver)); }
-        /* Brązowa */
-        .crown-bronze { color: var(--rank-3-bronze); filter: drop-shadow(0 0 5px var(--rank-3-bronze)); }
-
         @keyframes bounceCrown {
             0%, 100% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-3px) scale(1.2); }
         }
 
-        /* Style wierszy tabeli dla TOP 3 */
-        /* Rank 1 */
-        tr.rank-1 td {
-            background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05)) !important;
-            border-top: 1px solid rgba(255, 215, 0, 0.3);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-            color: #fff !important;
+        /* Wiersz lidera - złote podświetlenie */
+        tr.leader-row td {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05)) !important;
+            border-top: 1px solid rgba(255, 215, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+            color: #fff !important; /* Wymuszamy biały tekst dla lidera, żeby był czytelny na złocie */
+            text-shadow: 0 0 5px #000;
         }
-        tr.rank-1 td:first-child { border-left: 3px solid var(--rank-1-gold); }
-        tr.rank-1 td:last-child { border-right: 3px solid var(--rank-1-gold); }
+        tr.leader-row td:first-child { border-left: 3px solid var(--gold-leader); }
+        tr.leader-row td:last-child { border-right: 3px solid var(--gold-leader); }
 
-        /* Rank 2 */
-        tr.rank-2 td {
-            background: linear-gradient(90deg, rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.05)) !important;
-            border-top: 1px solid rgba(192, 192, 192, 0.3);
-            border-bottom: 1px solid rgba(192, 192, 192, 0.3);
-        }
-        tr.rank-2 td:first-child { border-left: 3px solid var(--rank-2-silver); }
-        tr.rank-2 td:last-child { border-right: 3px solid var(--rank-2-silver); }
-
-        /* Rank 3 */
-        tr.rank-3 td {
-            background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.05)) !important;
-            border-top: 1px solid rgba(205, 127, 50, 0.3);
-            border-bottom: 1px solid rgba(205, 127, 50, 0.3);
-        }
-        tr.rank-3 td:first-child { border-left: 3px solid var(--rank-3-bronze); }
-        tr.rank-3 td:last-child { border-right: 3px solid var(--rank-3-bronze); }
 
         /* EFEKTY POGODOWE */
         #holiday-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 998; }
@@ -185,10 +156,14 @@
         .summary-table th { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border: none; border-right: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
         .summary-table th:first-child { border-top-left-radius: var(--general-radius); }
         .summary-table th:last-child { border-top-right-radius: var(--general-radius); border-right: none; }
+        
         .summary-table td { padding: 10px; text-align: center; font-weight: bold; border-right: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: #fff; }
+        
+        /* STANDARDOWE KOLORY KOMÓREK (DLA WSZYSTKICH POZA LIDEREM) */
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
+        
         .summary-table tr.total-row td { font-size: 1.2em; background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b); color: #e5e7eb; text-shadow: 0 0 8px #fff; box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); border: none; padding: 15px 10px; border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
         .summary-table tr.total-row td:first-child { border-bottom-left-radius: var(--general-radius); text-align: center; padding-left: 20px; }
         .summary-table tr.total-row td:last-child { border-bottom-right-radius: var(--general-radius); }
@@ -500,10 +475,18 @@
             return `<span class="kpi-trend ${colorClass}">${icon} ${diffText}% vs Wczoraj</span>`;
         }
 
+
+        // Wskaźnik Sukcesu (OK)
         const successRate = currentKpi.successRate;
         successRateEl.innerHTML = `${successRate.toFixed(1)}% ${getTrendHTML(successRate, prevKpi.successRate, true)}`;
-        ndfShareEl.innerHTML = `${currentKpi.ndfShare.toFixed(1)}% ${getTrendHTML(currentKpi.ndfShare, prevKpi.ndfShare, false)}`;
-        scrapShareEl.innerHTML = `${currentKpi.scrapShare.toFixed(1)}% ${getTrendHTML(currentKpi.scrapShare, prevKpi.scrapShare, false)}`;
+        
+        // Udział NDF (No Defect Found)
+        const ndfShare = currentKpi.ndfShare;
+        ndfShareEl.innerHTML = `${ndfShare.toFixed(1)}% ${getTrendHTML(ndfShare, prevKpi.ndfShare, false)}`;
+        
+        // Udział SCRAP (Złom)
+        const scrapShare = currentKpi.scrapShare;
+        scrapShareEl.innerHTML = `${scrapShare.toFixed(1)}% ${getTrendHTML(scrapShare, prevKpi.scrapShare, false)}`;
         
         if (successRateEl) {
             const glowColor = 'var(--ok-bg)'; 
@@ -594,7 +577,7 @@
         document.getElementById('data-table').tBodies[0]?.remove();
         document.getElementById('data-table').appendChild(dtb);
 
-        // 2. Summary Table z LIDERAMI TOP 3
+        // 2. Summary Table z LIDEREM (TYLKO ZŁOTO)
         const okC={}, ndfC={}, scrC={}, names=new Set();
         latestData.forEach(it=>{
             names.add(it.name);
@@ -603,45 +586,29 @@
             scrC[it.name] = (scrC[it.name]||0)+it.scrap;
         });
 
-        // Obliczanie Rankingu TOP 3
-        // Tworzymy tablicę obiektów {name, count}
+        // Znajdź unikalne wyniki OK, żeby wyłonić Top 1
         const scores = [];
         names.forEach(n => {
             scores.push({ name: n, count: okC[n] || 0 });
         });
-        
-        // Znajdź unikalne wyniki OK (większe od 0), posortowane malejąco
+        // Sortowanie
         const uniqueScores = [...new Set(scores.map(s => s.count).filter(s => s > 0))].sort((a, b) => b - a);
-        
-        // Zdefiniuj progi dla złota, srebra, brązu
-        const goldScore = uniqueScores[0];
-        const silverScore = uniqueScores[1];
-        const bronzeScore = uniqueScores[2];
+        const goldScore = uniqueScores[0]; // Najlepszy wynik
 
         const stb = document.createElement('tbody');
         Array.from(names).sort().forEach(n=>{
             const tr = document.createElement('tr');
             const score = okC[n] || 0;
             
-            let rankClass = '';
-            let iconHtml = '';
-            
-            // Przypisywanie rangi
-            if (score > 0) {
-                if (score === goldScore) {
-                    rankClass = 'rank-1';
-                    iconHtml = '<i class="fas fa-crown crown-icon crown-gold"></i>';
-                } else if (score === silverScore) {
-                    rankClass = 'rank-2';
-                    iconHtml = '<i class="fas fa-crown crown-icon crown-silver"></i>';
-                } else if (score === bronzeScore) {
-                    rankClass = 'rank-3';
-                    iconHtml = '<i class="fas fa-crown crown-icon crown-bronze"></i>';
-                }
+            // Logika lidera: Tylko jeśli wynik > 0 i jest równy najlepszemu wynikowi
+            const isLeader = (score > 0 && score === goldScore);
+
+            if (isLeader) {
+                tr.classList.add('leader-row');
             }
 
-            if (rankClass) tr.classList.add(rankClass);
-
+            // Ikona tylko dla lidera
+            const iconHtml = isLeader ? '<i class="fas fa-crown crown-icon"></i>' : '';
             const nameHtml = `${n} ${iconHtml}`;
 
             tr.innerHTML = `
