@@ -259,16 +259,11 @@
         }
         .vs-badge {
             width: 50px; height: 50px; 
-            background: radial-gradient(circle at 30% 30%, #ff5555, #990000); /* Gradient zamiast płaskiego koloru */
+            background: radial-gradient(circle at 30% 30%, #ff5555, #990000); 
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-weight: 900; font-style: italic; font-size: 1.2rem; border: 2px solid #fff; 
             z-index: 3;
-            /* Efekt ognia / neonu */
-            box-shadow: 
-                0 0 10px #ff0000, 
-                0 0 20px #ff0000, 
-                0 0 40px #ffaa00, 
-                0 0 60px #ff0000;
+            box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ffaa00, 0 0 60px #ff0000;
             animation: pulseVS 0.8s infinite alternate;
         }
         @keyframes pulseVS { 
@@ -283,7 +278,7 @@
             height: 100%; background: linear-gradient(90deg, #3b82f6, #ef4444); border-radius: 5px; transition: width 1s ease;
         }
 
-        /* 2. Wykres Barowy (Pod tabelą) */
+        /* 2. PIERŚCIENIE JAKOŚCI (Nowy Widżet) */
         .chart-container {
             background: rgba(0, 0, 0, 0.2);
             border-radius: 12px;
@@ -298,28 +293,30 @@
             letter-spacing: 1px;
             display: flex; align-items: center; gap: 8px;
         }
-        .chart-bars {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 100px;
-            gap: 5px;
+        .donuts-wrapper {
+            display: flex; justify-content: space-around; padding: 10px 0; align-items: center;
         }
-        .bar-wrapper {
-            display: flex; flex-direction: column; align-items: center; flex: 1;
+        .donut-card {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
         }
-        .bar {
-            width: 40px; max-width: 60%;
-            background: linear-gradient(0deg, var(--primary-color), #60a5fa);
-            border-radius: 4px 4px 0 0;
-            transition: height 1s ease;
-            min-height: 2px;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        .donut {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(var(--c) calc(var(--p)*1%), rgba(255,255,255,0.05) 0);
             position: relative;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
         }
-        .bar:hover { filter: brightness(1.2); }
-        .bar-value { font-size: 0.75rem; color: #fff; margin-bottom: 3px; font-weight: bold; }
-        .bar-label { margin-top: 5px; font-size: 0.7rem; color: #888; text-align: center; }
+        .donut::after {
+            content: attr(data-val);
+            position: absolute; 
+            background: #1e293b; /* Tło środka, dopasowane do ciemnego motywu */
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; font-size: 0.9rem; color: #fff;
+        }
+        .donut-label { font-size: 0.8rem; color: #ccc; text-transform: uppercase; font-weight: 600; }
 
     </style>
 </head>
@@ -450,10 +447,19 @@
             </div>
 
             <div class="chart-container">
-                <div class="chart-title"><i class="fas fa-chart-bar"></i> Wynik wg Stacji (Top 3)</div>
-                <div class="chart-bars" id="station-chart">
-                    <div style="color:#666; font-size:0.8rem; width:100%; text-align:center; padding-top:40px;">
-                        Brak danych
+                <div class="chart-title"><i class="fas fa-chart-pie"></i> Wskaźniki Jakości (Dzień)</div>
+                <div class="donuts-wrapper">
+                    <div class="donut-card">
+                        <div class="donut" id="donut-ok" style="--p:0; --c:var(--ok-bg);" data-val="0%"></div>
+                        <div class="donut-label">OK Rate</div>
+                    </div>
+                    <div class="donut-card">
+                        <div class="donut" id="donut-ndf" style="--p:0; --c:var(--ndf-bg);" data-val="0%"></div>
+                        <div class="donut-label">NDF Rate</div>
+                    </div>
+                    <div class="donut-card">
+                        <div class="donut" id="donut-scrap" style="--p:0; --c:var(--scrap-bg);" data-val="0%"></div>
+                        <div class="donut-label">Scrap Rate</div>
                     </div>
                 </div>
             </div>
@@ -777,8 +783,8 @@
         tableBody.innerHTML = html;
     }
 
-    // --- FUNKCJA RENDEROWANIA BATTLE ARENA I WYKRESU ---
-    function updateExtraCharts(detailsData) {
+    // --- FUNKCJA RENDEROWANIA BATTLE ARENA I PIERŚCIENI JAKOŚCI ---
+    function updateExtraCharts(detailsData, kpi) {
         // 1. Battle Arena (Pojedynek Liderów)
         const counts = {};
         detailsData.forEach(d => {
@@ -806,40 +812,28 @@
             battleContainer.style.display = 'none';
         }
 
-        // 2. Wykres Barowy (Stacje)
-        // Jako że nie mamy pola 'Time' w CSV, pokazujemy rozkład na stacje (Station Performance)
-        const chartContainer = document.getElementById('station-chart');
-        const stationCounts = {};
-        
-        detailsData.forEach(d => {
-             // Zliczamy wszystkie akcje (OK+NDF+SCRAP) lub tylko OK. Tutaj tylko OK.
-             if(d.status === 'OK') {
-                stationCounts[d.station] = (stationCounts[d.station] || 0) + 1;
-             }
-        });
+        // 2. Pierścienie Jakości (Donuts)
+        const donutOk = document.getElementById('donut-ok');
+        const donutNdf = document.getElementById('donut-ndf');
+        const donutScrap = document.getElementById('donut-scrap');
 
-        if (Object.keys(stationCounts).length === 0) {
-             chartContainer.innerHTML = '<div style="color:#666; font-size:0.8rem; width:100%; text-align:center; padding-top:40px;">Brak danych OK</div>';
-             return;
+        const rateOk = Math.round(kpi.successRate);
+        const rateNdf = Math.round(kpi.ndfShare);
+        const rateScrap = Math.round(kpi.scrapShare);
+
+        // Aktualizacja zmiennych CSS i tekstu
+        if(donutOk) {
+            donutOk.style.setProperty('--p', rateOk);
+            donutOk.setAttribute('data-val', rateOk + '%');
         }
-
-        const maxVal = Math.max(...Object.values(stationCounts), 1);
-        let barHtml = '';
-        
-        // Sortujemy stacje po ilości
-        const sortedStations = Object.entries(stationCounts).sort((a,b) => b[1] - a[1]).slice(0,5);
-
-        sortedStations.forEach(([st, val]) => {
-            const h = (val / maxVal) * 80; // max 80% wysokości kontenera
-            barHtml += `
-                <div class="bar-wrapper">
-                    <div class="bar-value">${val}</div>
-                    <div class="bar" style="height: ${h}%;"></div>
-                    <div class="bar-label">${st}</div>
-                </div>
-            `;
-        });
-        chartContainer.innerHTML = barHtml;
+        if(donutNdf) {
+            donutNdf.style.setProperty('--p', rateNdf);
+            donutNdf.setAttribute('data-val', rateNdf + '%');
+        }
+        if(donutScrap) {
+            donutScrap.style.setProperty('--p', rateScrap);
+            donutScrap.setAttribute('data-val', rateScrap + '%');
+        }
     }
 
 
@@ -921,7 +915,7 @@
         updateTicker(latestData);
         updateTargetBar(sumOK);
         updateYesterdaySideBar(data.prevDetails);
-        updateExtraCharts(latestData); 
+        updateExtraCharts(latestData, data.currentKpi); // Dodano data.currentKpi
     }
 
     window.setDate = function(type) {
