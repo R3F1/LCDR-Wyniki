@@ -21,13 +21,13 @@
             --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
             --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
             
-            /* NOWE: Efekt blasku dla sumy dziennej */
+            /* Efekt blasku dla sumy dziennej */
             --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
 
-            /* NOWE: Ogólne zaokrąglenie rogów elementów w kontenerach */
+            /* Ogólne zaokrąglenie rogów */
             --general-radius: 12px;
             
-            /* NOWE: Wysokość paska newsów */
+            /* Wysokość paska newsów */
             --ticker-height: 40px;
         }
 
@@ -42,7 +42,7 @@
             background-size: cover;
             animation: none; 
             transition: background-color .3s, color .3s;
-            /* Dodajemy padding na dole, żeby pasek newsów nie zasłaniał treści */
+            /* Padding na dole, żeby pasek newsów nie zasłaniał treści */
             padding-bottom: var(--ticker-height);
         }
         body.dark-mode { background-color: #0f172a; }
@@ -78,12 +78,12 @@
         }
 
         /* ********************************************** */
-        /* NAPRAWIONY EFEKT ŚNIEGU (PEŁNY EKRAN TV) */
+        /* EFEKT ŚNIEGU (PEŁNY EKRAN TV) */
         /* ********************************************** */
         .snow-container {
             position: fixed;
             top: 0; left: 0; 
-            width: 100%; height: 100%; /* Gwarancja pełnego ekranu */
+            width: 100%; height: 100%; 
             pointer-events: none;
             z-index: 999; 
             overflow: hidden;
@@ -96,14 +96,13 @@
             top: -10px;
             animation: fall linear infinite;
         }
-        /* Zmieniona animacja dla lepszej wydajności na TV */
         @keyframes fall {
             0% { transform: translateY(-10vh) translateX(0); }
             100% { transform: translateY(110vh) translateX(20px); }
         }
 
         /* ********************************************** */
-        /* NOWOŚĆ: PASEK NEWSÓW (TICKER) */
+        /* PASEK NEWSÓW (TICKER) - ZWOLNIONY */
         /* ********************************************** */
         .news-ticker-container {
             position: fixed;
@@ -139,7 +138,8 @@
             display: inline-block;
             white-space: nowrap;
             padding-left: 100%;
-            animation: ticker 35s linear infinite; /* Prędkość paska */
+            /* ZMIANA: Zwiększono czas do 60s (wolniej) */
+            animation: ticker 60s linear infinite; 
         }
         .ticker-item {
             display: inline-block;
@@ -364,7 +364,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* CHATBOT - POPRAWIONA POZYCJA ABY NIE ZASŁANIAŁ GO PASEK */
+        /* CHATBOT */
         #chatbot-container {
             position: fixed; 
             bottom: 60px; /* Podniesiony wyżej nad pasek newsów */
@@ -695,17 +695,17 @@
             successRateEl.style.color = successRate >= 70 ? '#fff' : 'var(--scrap-bg)';
         }
 
-        // *** NOWOŚĆ: WYSTRZAŁ KONFETTI JEŚLI WYNIK > 90% ***
+        // KONFETTI JEŚLI WYNIK > 90%
         if (successRate > 90 && total > 5) {
              fireConfetti();
         }
     }
 
-    // --- FUNKCJA KONFETTI ---
+    // --- KONFETTI ---
     let lastConfettiTime = 0;
     function fireConfetti() {
         const now = Date.now();
-        if (now - lastConfettiTime < 60000) return; // Tylko raz na minutę, żeby nie spamować
+        if (now - lastConfettiTime < 60000) return; // Tylko raz na minutę
         lastConfettiTime = now;
         
         if (typeof confetti === 'function') {
@@ -718,7 +718,7 @@
         }
     }
 
-    // --- NOWOŚĆ: FUNKCJA NEWS TICKER ---
+    // --- PASEK NEWS TICKER ---
     function updateTicker(data) {
         const ticker = document.getElementById('ticker-content');
         if (!data || data.length === 0) {
@@ -738,7 +738,7 @@
                      </div>`;
         });
         
-        // Duplikujemy treść, aby pasek przesuwał się płynnie
+        // Duplikacja dla płynności
         ticker.innerHTML = html + html; 
     }
 
@@ -799,8 +799,6 @@
 
         updateBotPhrase(sumOK, sumNDF, sumSCR);
         updateKPIs(data.currentKpi, data.prevKpi);
-        
-        // Wywołanie aktualizacji paska newsów
         updateTicker(latestData);
     }
 
@@ -908,7 +906,7 @@
         }
     }
 
-    // --- CHATBOT ROBOCIK LOGIC ---
+    // --- CHATBOT ---
     const botExtraReplies = [
         "🧠 Pracuję nad nowym algorytmem!",
         "🧰 Mam wszystkie narzędzia gotowe!",
@@ -956,7 +954,7 @@
     });
 
     // **********************************************
-    // NOWA NAPRAWIONA FUNKCJA ŚNIEGU (RESPONSYWNA NA TV)
+    // ŚNIEG (RESPONSYWNY)
     // **********************************************
     function createSnowflake() {
         const snowContainer = document.getElementById('snow-container');
@@ -965,20 +963,17 @@
         const snowflake = document.createElement('div');
         snowflake.classList.add('snow');
         
-        // Rozmiar i czas trwania
-        const size = Math.random() * 6 + 4; // 4px do 10px
-        const duration = Math.random() * 15 + 10; // 10s do 25s
+        const size = Math.random() * 6 + 4; 
+        const duration = Math.random() * 15 + 10;
         
         snowflake.style.width = `${size}px`;
         snowflake.style.height = `${size}px`;
-        // KLUCZOWE: Używamy % szerokości a nie pixeli, działa przy skalowaniu
         snowflake.style.left = `${Math.random() * 100}%`; 
         snowflake.style.animationDuration = `${duration}s`;
         snowflake.style.animationDelay = `-${Math.random() * duration}s`;
         
         snowContainer.appendChild(snowflake);
         
-        // Pętla odnawiania po zakończeniu animacji
         snowflake.addEventListener('animationend', () => {
             snowflake.remove();
             createSnowflake(); 
@@ -987,10 +982,8 @@
 
     function initSnow() {
         const container = document.getElementById('snow-container');
-        container.innerHTML = ''; // Reset przy zmianie rozmiaru
+        container.innerHTML = '';
         
-        // Obliczamy ilość śniegu na podstawie szerokości ekranu
-        // Dla Full HD (1920) = ok 60, dla 4K (3840) = ok 120
         const width = window.innerWidth;
         const flakeCount = Math.floor(width / 30); 
         
@@ -999,7 +992,7 @@
         }
     }
     
-    // --- Efekt Wesołych Świąt JavaScript ---
+    // --- Logika Świąteczna (Napisy) ---
     const HOLIDAY_PHRASES = ["Wesołych Świąt!", "Ho Ho Ho!", "Merry Xmas!"];
     const NEON_COLORS = [
         '0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0',
@@ -1131,9 +1124,7 @@
             }
         }
 
-        // START NOWEGO ŚNIEGU
         initSnow();
-        // Przeliczanie śniegu przy zmianie rozmiaru okna (obracanie tabletu, zoom)
         window.addEventListener('resize', () => {
             clearTimeout(window.resizeTimer);
             window.resizeTimer = setTimeout(initSnow, 500);
