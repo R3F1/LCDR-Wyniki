@@ -715,7 +715,7 @@
         else textPercent.style.color = "#fff";
     }
 
-    // --- FUNKCJA RENDEROWANIA SIDEBARA TOP WCZORAJ ---
+    // --- FUNKCJA RENDEROWANIA SIDEBARA TOP WCZORAJ (Z LOGIKĄ EX AEQUO) ---
     function updateYesterdaySideBar(prevDetails) {
         const tableBody = document.querySelector('#yesterday-top-table tbody');
         if (!prevDetails || prevDetails.length === 0) {
@@ -730,22 +730,45 @@
             }
         });
 
-        const sorted = Object.entries(counts)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 3); 
-
+        // Sortowanie malejąco
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        
         if (sorted.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Brak napraw OK</td></tr>';
             return;
         }
 
-        let html = '';
-        const medals = ['🥇', '🥈', '🥉'];
+        // Bierzemy top 3 do wyświetlenia
+        const top3 = sorted.slice(0, 3);
         
-        sorted.forEach((item, index) => {
+        let html = '';
+        const medalIcons = ['🥇', '🥈', '🥉'];
+        let currentMedalIndex = 0;
+
+        top3.forEach((item, index) => {
             const name = item[0];
             const count = item[1];
-            const medal = medals[index] || (index + 1) + '.';
+            let medal = '';
+
+            if (index === 0) {
+                // Pierwszy zawsze ma złoto
+                medal = medalIcons[0];
+                currentMedalIndex = 0;
+            } else {
+                const prevCount = top3[index - 1][1];
+                if (count === prevCount) {
+                    // REMIS: ten sam medal co poprzednik
+                    medal = medalIcons[currentMedalIndex];
+                } else {
+                    // BRAK REMISU: kolejny medal z listy
+                    currentMedalIndex++;
+                    if (currentMedalIndex < medalIcons.length) {
+                        medal = medalIcons[currentMedalIndex];
+                    } else {
+                        medal = (index + 1) + '.';
+                    }
+                }
+            }
             
             html += `
                 <tr>
@@ -758,7 +781,7 @@
         tableBody.innerHTML = html;
     }
 
-    // --- FUNKCJA RENDEROWANIA BATTLE ARENA (Wywalono wykresy) ---
+    // --- FUNKCJA RENDEROWANIA BATTLE ARENA ---
     function updateExtraCharts(detailsData) {
         // 1. Battle Arena (Pojedynek Liderów)
         const counts = {};
