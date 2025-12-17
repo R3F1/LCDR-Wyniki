@@ -15,15 +15,18 @@
             --ndf-bg: #facc15; 
             --scrap-bg: #f87171; 
             --gold-leader: #ffd700; 
-            --txt-dark: #1F2937;
-            --general-radius: 12px;
-            --ticker-height: 40px;
+            --silver-rank: #e0e0e0; /* Jasny srebrny dla lepszej widoczności */
+            --bronze-rank: #cd7f32;
             
+            --txt-dark: #1F2937;
+            --card-bg-dark: rgba(15, 23, 42, 0.9);
             --neon-glow-ok: 0 0 5px #4ade80, 0 0 10px #4ade80;
             --neon-glow-ndf: 0 0 5px #facc15, 0 0 10px #facc15;
             --neon-glow-scrap: 0 0 5px #f87171, 0 0 10px #f87171;
             
             --extended-glow: 0 0 20px rgba(59, 130, 246, 0.7);
+            --general-radius: 12px;
+            --ticker-height: 40px;
         }
 
         /* TŁO I PODSTAWY */
@@ -82,27 +85,31 @@
         }
 
         /* ********************************************** */
-        /* STYLE DLA LIDERA (TYLKO ZŁOTO) */
+        /* STYLE DLA KORON TOP 3 */
         /* ********************************************** */
         .crown-icon {
-            font-size: 1.2em;
+            font-size: 1.3em;
             margin-left: 8px;
             display: inline-block;
             animation: bounceCrown 2s infinite ease-in-out;
-            color: var(--gold-leader); 
-            filter: drop-shadow(0 0 5px var(--gold-leader));
+            vertical-align: middle;
         }
+        
+        .crown-gold { color: var(--gold-leader); filter: drop-shadow(0 0 8px var(--gold-leader)); }
+        .crown-silver { color: var(--silver-rank); filter: drop-shadow(0 0 5px rgba(255,255,255,0.6)); }
+        .crown-bronze { color: var(--bronze-rank); filter: drop-shadow(0 0 5px rgba(205,127,50,0.6)); }
+
         @keyframes bounceCrown {
             0%, 100% { transform: translateY(0) scale(1); }
             50% { transform: translateY(-3px) scale(1.2); }
         }
 
-        /* Wiersz lidera - złote podświetlenie */
+        /* Tylko lider (Top 1) dostaje specjalne tło wiersza */
         tr.leader-row td {
             background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05)) !important;
             border-top: 1px solid rgba(255, 215, 0, 0.5);
             border-bottom: 1px solid rgba(255, 215, 0, 0.5);
-            color: #fff !important; /* Wymuszamy biały tekst dla lidera, żeby był czytelny na złocie */
+            color: #fff !important; 
             text-shadow: 0 0 5px #000;
         }
         tr.leader-row td:first-child { border-left: 3px solid var(--gold-leader); }
@@ -159,7 +166,7 @@
         
         .summary-table td { padding: 10px; text-align: center; font-weight: bold; border-right: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: #fff; }
         
-        /* STANDARDOWE KOLORY KOMÓREK (DLA WSZYSTKICH POZA LIDEREM) */
+        /* STANDARDOWE KOLORY KOMÓREK (DLA WSZYSTKICH) */
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
@@ -577,7 +584,7 @@
         document.getElementById('data-table').tBodies[0]?.remove();
         document.getElementById('data-table').appendChild(dtb);
 
-        // 2. Summary Table z LIDEREM (TYLKO ZŁOTO)
+        // 2. Summary Table z KORONAMI
         const okC={}, ndfC={}, scrC={}, names=new Set();
         latestData.forEach(it=>{
             names.add(it.name);
@@ -586,29 +593,35 @@
             scrC[it.name] = (scrC[it.name]||0)+it.scrap;
         });
 
-        // Znajdź unikalne wyniki OK, żeby wyłonić Top 1
+        // Znajdź unikalne wyniki OK, żeby wyłonić Top 1, 2, 3
         const scores = [];
         names.forEach(n => {
             scores.push({ name: n, count: okC[n] || 0 });
         });
-        // Sortowanie
+        // Sortowanie i unikalne
         const uniqueScores = [...new Set(scores.map(s => s.count).filter(s => s > 0))].sort((a, b) => b - a);
-        const goldScore = uniqueScores[0]; // Najlepszy wynik
+        const goldScore = uniqueScores[0]; 
+        const silverScore = uniqueScores[1];
+        const bronzeScore = uniqueScores[2];
 
         const stb = document.createElement('tbody');
         Array.from(names).sort().forEach(n=>{
             const tr = document.createElement('tr');
             const score = okC[n] || 0;
             
-            // Logika lidera: Tylko jeśli wynik > 0 i jest równy najlepszemu wynikowi
-            const isLeader = (score > 0 && score === goldScore);
-
-            if (isLeader) {
-                tr.classList.add('leader-row');
+            let iconHtml = '';
+            
+            if (score > 0) {
+                if (score === goldScore) {
+                    tr.classList.add('leader-row'); // TYLKO LIDER ma tło
+                    iconHtml = '<i class="fas fa-crown crown-icon crown-gold"></i>';
+                } else if (score === silverScore) {
+                    iconHtml = '<i class="fas fa-crown crown-icon crown-silver"></i>';
+                } else if (score === bronzeScore) {
+                    iconHtml = '<i class="fas fa-crown crown-icon crown-bronze"></i>';
+                }
             }
 
-            // Ikona tylko dla lidera
-            const iconHtml = isLeader ? '<i class="fas fa-crown crown-icon"></i>' : '';
             const nameHtml = `${n} ${iconHtml}`;
 
             tr.innerHTML = `
