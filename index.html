@@ -6,6 +6,8 @@
     <title>LCDR HYBRID WOW Dashboard</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
@@ -24,21 +26,24 @@
 
             /* NOWE: Ogólne zaokrąglenie rogów elementów w kontenerach */
             --general-radius: 12px;
+            
+            /* NOWE: Wysokość paska newsów */
+            --ticker-height: 40px;
         }
 
         /* TŁO I ANIMACJE */
-        html, body { margin:0; padding:0; min-height:100vh; }
+        html, body { margin:0; padding:0; min-height:100vh; overflow-x: hidden; }
         body {
             font-family: 'Segoe UI', sans-serif;
             color: #fff;
-            /* ZMNIEJSZONA INTENSYWNOŚĆ TŁA */
             background: 
                 linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                 url('background.jpg') center/cover no-repeat fixed;
             background-size: cover;
             animation: none; 
             transition: background-color .3s, color .3s;
-            overflow-x: hidden;
+            /* Dodajemy padding na dole, żeby pasek newsów nie zasłaniał treści */
+            padding-bottom: var(--ticker-height);
         }
         body.dark-mode { background-color: #0f172a; }
 
@@ -60,14 +65,9 @@
             white-space: nowrap;
             opacity: 0;
             user-select: none;
-            
-            /* Losowy kolor Neon */
             color: #fff;
-            text-shadow: 
-                0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; 
-            
-            animation: 
-                holidayFade 10s ease-out forwards; 
+            text-shadow: 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; 
+            animation: holidayFade 10s ease-out forwards; 
         }
         
         @keyframes holidayFade {
@@ -77,23 +77,83 @@
             100% { opacity: 0; transform: scale(1.5); }
         }
 
-
-        /* Efekt Śniegu */
+        /* ********************************************** */
+        /* NAPRAWIONY EFEKT ŚNIEGU (PEŁNY EKRAN TV) */
+        /* ********************************************** */
         .snow-container {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0; left: 0; 
+            width: 100%; height: 100%; /* Gwarancja pełnego ekranu */
             pointer-events: none;
-            z-index: 999; /* Nad tekstem, ale pod tabelami */
+            z-index: 999; 
+            overflow: hidden;
         }
         .snow {
             position: absolute;
             background: #fff;
             border-radius: 50%;
             opacity: 0.8;
+            top: -10px;
             animation: fall linear infinite;
         }
+        /* Zmieniona animacja dla lepszej wydajności na TV */
         @keyframes fall {
-            to { transform: translateY(100vh); }
+            0% { transform: translateY(-10vh) translateX(0); }
+            100% { transform: translateY(110vh) translateX(20px); }
+        }
+
+        /* ********************************************** */
+        /* NOWOŚĆ: PASEK NEWSÓW (TICKER) */
+        /* ********************************************** */
+        .news-ticker-container {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: var(--ticker-height);
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid var(--primary-color);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+        }
+        .ticker-label {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 0 15px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            z-index: 2;
+            box-shadow: 5px 0 10px rgba(0,0,0,0.5);
+        }
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .ticker-move {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: ticker 35s linear infinite; /* Prędkość paska */
+        }
+        .ticker-item {
+            display: inline-block;
+            padding: 0 2rem;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .ticker-item strong { color: var(--ok-bg); }
+        .ticker-item .bad { color: var(--scrap-bg); font-weight: bold; }
+        
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
         }
 
         /* LOGO */
@@ -107,21 +167,19 @@
         @keyframes fadeIn { to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 
-        /* KARTY (Glassmorphism) - ZMIANA PADDINGÓW */
+        /* KARTY */
         .summary-box, .data-section {
             background: rgba(255, 255, 255, 0.08); 
             border-radius: var(--general-radius); 
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             margin: 0 auto 30px; 
-            padding: 15px; /* Zmniejszony padding wewnętrzny karty */
+            padding: 15px;
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1); 
             color: #fff;
             transition: transform 0.3s;
             overflow: hidden; 
-            
-            /* ZMIANA Z-INDEX: Zapewnia, że te elementy są NAD napisem "Wesołych Świąt" */
             position: relative; 
             z-index: 1000; 
         }
@@ -130,33 +188,26 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
         
-        /* PRZERWA POMIĘDZY TABELAMI */
-        .container.data-section {
-             margin-top: 40px; 
-        }
+        .container.data-section { margin-top: 40px; }
 
-        /* NOWY: Układ dla sekcji podsumowania (summary-box) */
         .summary-content-wrapper {
             display: flex;
-            gap: 30px; /* Odstęp między nowymi elementami */
+            gap: 30px; 
             align-items: flex-start; 
         }
 
-        /* NOWY: Panel z kluczowymi wskaźnikami (KPI) */
+        /* KPI PANEL */
         .kpi-panel {
-            flex-basis: 30%; /* Zajmie około 30% szerokości */
+            flex-basis: 30%; 
             min-width: 250px;
             padding: 20px;
             border-radius: var(--general-radius);
-            background: rgba(59, 130, 246, 0.15); /* Półprzezroczyste tło akcentujące */
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); /* Silny neonowy blask */
+            background: rgba(59, 130, 246, 0.15); 
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); 
             border: 1px solid var(--primary-color);
-            
-            /* ZMIANA: Ustawienie sticky i fit-content dla wyrównania */
             position: sticky; 
             top: 30px; 
             height: fit-content; 
-            
             display: flex;
             flex-direction: column;
             align-items: center; 
@@ -172,13 +223,8 @@
             width: 100%; 
         }
         
-        /* DODANO: Wyrównanie dolnego tekstu KPI */
-        .kpi-panel p {
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
+        .kpi-panel p { margin-bottom: 0; padding-bottom: 0; }
         
-        /* WSKAŹNIKI TRENDU */
         .kpi-trend {
             display: block;
             font-size: 0.9rem;
@@ -188,7 +234,6 @@
         .trend-up { color: var(--ok-bg); }
         .trend-down { color: var(--scrap-bg); }
         .trend-neutral { color: #aaa; }
-
 
         .kpi-item h3 {
             margin: 0 0 8px 0;
@@ -202,30 +247,20 @@
             font-weight: 900;
             text-align: center;
             color: #fff;
-            /* Ten blask jest dynamicznie zmieniany przez JS */
             text-shadow: 0 0 15px var(--ok-bg), 0 0 25px var(--ok-bg); 
             animation: kpiPulse 2s infinite alternate;
         }
         
-        /* Specjalne kolory dla NDF i SCRAP KPI */
-        #kpi-ndf-share {
-            text-shadow: 0 0 15px var(--ndf-bg), 0 0 25px var(--ndf-bg);
-        }
-        #kpi-scrap-share {
-            text-shadow: 0 0 15px var(--scrap-bg), 0 0 25px var(--scrap-bg);
-        }
+        #kpi-ndf-share { text-shadow: 0 0 15px var(--ndf-bg), 0 0 25px var(--ndf-bg); }
+        #kpi-scrap-share { text-shadow: 0 0 15px var(--scrap-bg), 0 0 25px var(--scrap-bg); }
 
         @keyframes kpiPulse {
             from { transform: scale(1); opacity: 0.9; }
             to { transform: scale(1.02); opacity: 1; }
         }
 
-        /* KONTROLKI I PRZYCISKI */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; 
-             /* ZMIANA Z-INDEX: Zabezpieczenie logo i kontrolek NAD wszystkimi efektami */
-             position: relative; 
-             z-index: 1001; 
-        }
+        /* KONTROLKI */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1001; }
         .header-controls {
             display: flex; flex-wrap: wrap; gap: 10px;
             justify-content: center; align-items: center; margin: 30px 0;
@@ -245,15 +280,11 @@
             color: #fff;
             background: rgba(59, 130, 246, 0.4);
         }
-        
-        /* WIZUALNE POTWIERDZENIE AKTYWNEGO PRZYCISKU */
         .filter-btn.active {
             background: var(--primary-color);
             box-shadow: 0 0 10px var(--primary-color), inset 0 0 5px #fff;
             transform: scale(1.05);
         }
-        
-        /* POPRAWA STYLU INPUTÓW */
         #date-picker-input, #serial-filter {
             width: 180px;
             background: rgba(255, 255, 255, 0.1);
@@ -264,192 +295,100 @@
         
         /* TABELA */
         .summary-table { 
-            width: 100%; 
-            border-collapse: separate; 
-            border-spacing: 0;
-            border-radius: var(--general-radius); 
-            flex-basis: 70%; 
-            margin-top: 0;
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            border-radius: var(--general-radius); flex-basis: 70%; margin-top: 0;
         }
-        
-        /* NAGŁÓWKI TABEL - WOW EFFECT & ZAOKRĄGLENIE */
         .summary-table th { 
-            padding: 12px; 
-            color: #fff; 
-            font-weight: 700;
+            padding: 12px; color: #fff; font-weight: 700;
             background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
-            border: none;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.1); text-align: center;
         }
         .summary-table th:last-child { border-right: none; }
         .summary-table thead tr:first-child th:first-child { border-top-left-radius: var(--general-radius); }
         .summary-table thead tr:first-child th:last-child { border-top-right-radius: var(--general-radius); }
         
-        /* KOMÓRKI W TABELI */
         .summary-table td { 
             padding: 10px; text-align: center; font-weight: bold;
             border-right: 1px solid rgba(255, 255, 255, 0.1); 
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05); 
-            color: #fff; 
+            background: rgba(255, 255, 255, 0.05); color: #fff; 
         }
         .summary-table td:last-child { border-right: none; }
-
-        /* Neonowe Wyróżnienie Statusów */
         .summary-table td:first-child { text-align: center; font-weight: bold; } 
         .summary-table td.ok { background: var(--ok-bg); box-shadow: var(--neon-glow-ok); color: var(--txt-dark); }
         .summary-table td.ndf { background: var(--ndf-bg); box-shadow: var(--neon-glow-ndf); color: var(--txt-dark); }
         .summary-table td.scrap-ttl { background: var(--scrap-bg); box-shadow: var(--neon-glow-scrap); color: var(--txt-dark); }
         
-        /* Wiersz SUMARYCZNY */
         .summary-table tr.total-row td {
             font-size: 1.2em;
             background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
             color: #e5e7eb;
             text-shadow: 0 0 8px #fff;
             box-shadow: 0 0 15px #fff, 0 8px 30px var(--primary-color), var(--extended-glow); 
-            border: none; 
-            padding: 15px 10px;
-            /* Usunięcie górnego zaokrąglenia, aby ładnie łączyło się z poprzednim wierszem */
-            border-top-left-radius: 0 !important;
-            border-top-right-radius: 0 !important;
+            border: none; padding: 15px 10px;
+            border-top-left-radius: 0 !important; border-top-right-radius: 0 !important;
+        }
+        .summary-table tr.total-row td:first-child { border-bottom-left-radius: var(--general-radius); text-align: center; padding-left: 20px; }
+        .summary-table tr.total-row td:last-child { border-bottom-right-radius: var(--general-radius); }
+
+        .container.summary-box h2, .container.data-section h2 {
+            margin: 0; padding: 0; background: none; border-radius: 0; box-shadow: none;
+            border-left: none !important; padding-left: 0 !important; 
+            color: #fff; font-size: 1.8rem; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
         }
         
-        /* ZAOKRĄGLENIE WŁAŚCIWE dla Sumy (dolne rogi) */
-        .summary-table tr.total-row td:first-child {
-            border-bottom-left-radius: var(--general-radius);
-            text-align: center;
-            padding-left: 20px;
-        }
-        .summary-table tr.total-row td:last-child {
-            border-bottom-right-radius: var(--general-radius);
-        }
+        .data-table tbody tr:last-child td:first-child { border-bottom-left-radius: var(--general-radius); border-bottom: none; }
+        .data-table tbody tr:last-child td:last-child { border-bottom-right-radius: var(--general-radius); border-bottom: none; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
 
-        /* Ujednolicony styl nagłówków H2 w sekcjach summary-box i data-section */
-        .container.summary-box h2,
-        .container.data-section h2 {
-            margin: 0; /* Zapewnia kontrolę nad odstępami */
-            padding: 0; 
-            background: none; 
-            border-radius: 0;
-            box-shadow: none;
-            
-            /* Usuwamy wszelkie paski i wcięcia */
-            border-left: none !important;
-            padding-left: 0 !important; 
-            
-            /* Ujednolicona estetyka */
-            color: #fff;
-            font-size: 1.8rem;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Subtelny blask */
-        }
-        
-        /* TABELA DETALI - Zapewnienie, że wiersze detali też mają zaokrąglenia na dole */
-        .data-table tbody tr:last-child td:first-child {
-             border-bottom-left-radius: var(--general-radius);
-             border-bottom: none; /* Usuwamy dolną krawędź ostatniego wiersza */
-        }
-        .data-table tbody tr:last-child td:last-child {
-             border-bottom-right-radius: var(--general-radius);
-             border-bottom: none;
-        }
-        .data-table tbody tr:last-child td {
-             border-bottom: none; /* Usuwamy dolną krawędź ostatniego wiersza */
-        }
-
-
-        /* ZEGAR - ULEPSZENIA WIZUALNE */
+        /* ZEGAR */
         #clock-inline {
-            font-size: 2.2rem; /* Większa czcionka */
-            font-weight: 800 !important;
+            font-size: 2.2rem; font-weight: 800 !important;
             text-shadow: 0 0 15px #fff, 0 0 30px var(--primary-color);
-            color: #fff;
-            animation: pulseClock 3s infinite ease-in-out;
-            margin: 0; /* Usuń auto margin z poprzedniej wersji */
-            flex-grow: 1; /* Pozwala mu się rozciągnąć i być wyśrodkowanym w header-controls */
-            text-align: center; /* Wyśrodkowanie tekstu zegara */
+            color: #fff; animation: pulseClock 3s infinite ease-in-out;
+            margin: 0; flex-grow: 1; text-align: center;
         }
-        @keyframes pulseClock {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
+        @keyframes pulseClock { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
 
-        /* ********************************************** */
-        /* WSKAŹNIK ŁADOWANIA (LOADER) */
-        /* ********************************************** */
+        /* LOADER */
         .loader-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85); /* Ciemne, blokujące tło */
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            font-size: 1.5rem;
-            backdrop-filter: blur(5px);
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85); color: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10000; font-size: 1.5rem; backdrop-filter: blur(5px);
         }
-
         .loader {
-            border: 8px solid rgba(255, 255, 255, 0.3);
-            border-top: 8px solid var(--primary-color);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1.5s linear infinite;
+            border: 8px solid rgba(255, 255, 255, 0.3); border-top: 8px solid var(--primary-color);
+            border-radius: 50%; width: 60px; height: 60px; animation: spin 1.5s linear infinite;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-
-        /* CHATBOT ROBOCIK */
+        /* CHATBOT - POPRAWIONA POZYCJA ABY NIE ZASŁANIAŁ GO PASEK */
         #chatbot-container {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1003;
+            position: fixed; 
+            bottom: 60px; /* Podniesiony wyżej nad pasek newsów */
+            right: 20px; z-index: 1003;
             display: flex; align-items: flex-end; gap: 8px;
             animation: robotTalk 3s ease-in-out infinite;
         }
         @keyframes robotTalk { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        #chatbot-img { 
-            width: 192px; height: auto; 
-            filter: drop-shadow(0 0 8px var(--primary-color));
-        }
+        #chatbot-img { width: 192px; height: auto; filter: drop-shadow(0 0 8px var(--primary-color)); }
         #chatbot-bubble {
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(50, 50, 50, 0.9));
             color: white; padding: 12px 16px; border-radius: 16px 16px 0 16px;
             max-width: 240px; font-size: 14px; line-height: 1.4em;
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            cursor: pointer; user-select: none;
-            order: -1;
+            cursor: pointer; user-select: none; order: -1;
         }
         
         /* Media Queries */
         @media(max-width: 992px) {
-            .summary-content-wrapper {
-                flex-direction: column;
-            }
-            .kpi-panel {
-                flex-basis: auto;
-                min-width: unset;
-                width: 100%; /* Rozciągamy na całą szerokość */
-                position: static; /* Usuwamy sticky, gdy jest w trybie kolumnowym */
-                margin-bottom: 20px;
-            }
-            .summary-table {
-                flex-basis: auto;
-            }
-            .holiday-text {
-                font-size: 4vw; /* Skalowalny rozmiar na mniejsze ekrany (proporcjonalnie do 1.75vw) */
-            }
-            #clock-inline {
-                font-size: 1.8rem;
-                text-align: left; /* W trybie kolumnowym lepiej w lewo */
-            }
+            .summary-content-wrapper { flex-direction: column; }
+            .kpi-panel { flex-basis: auto; min-width: unset; width: 100%; position: static; margin-bottom: 20px; }
+            .summary-table { flex-basis: auto; }
+            .holiday-text { font-size: 4vw; }
+            #clock-inline { font-size: 1.8rem; text-align: left; }
         }
         @media(max-width:768px) {
             .header-controls { flex-direction: column; align-items: stretch; }
@@ -463,8 +402,16 @@
 <audio id="lunchAlarm" src="lunch_alarm.mp3" preload="auto"></audio>
 
 <div id="holiday-container"></div>
-
 <div class="snow-container" id="snow-container"></div>
+
+<div class="news-ticker-container">
+    <div class="ticker-label">LIVE DATA</div>
+    <div class="ticker-wrap">
+        <div class="ticker-move" id="ticker-content">
+            <div class="ticker-item">Oczekiwanie na dane...</div>
+        </div>
+    </div>
+</div>
 
 <div class="theme-switch-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
     <button id="themeToggle" onclick="toggleTheme()" style="padding: 8px 12px; border-radius: 8px; background: #1f2937; color: #fff; border: none; cursor: pointer;">
@@ -493,17 +440,8 @@
         <div class="header-controls">
             <button class="filter-btn" data-type="today" onclick="setDate('today')">Dzisiaj</button>
             <button class="filter-btn" data-type="yesterday" onclick="setDate('yesterday')">Wczoraj</button>
-            
             <input type="date" id="date-picker-input" onchange="setDate('custom')" title="Wybierz datę">
-
-            <input
-                type="text"
-                id="serial-filter"
-                placeholder="🔎 Szukaj SN lub Nazwy..."
-                oninput="filterData(this.value)"
-                title="Wyszukaj po numerze seryjnym lub nazwisku"
-            />
-
+            <input type="text" id="serial-filter" placeholder="🔎 Szukaj SN lub Nazwy..." oninput="filterData(this.value)" title="Wyszukaj po numerze seryjnym lub nazwisku"/>
             <a class="filter-btn" href="https://r3f1.github.io/OLED-REPAIR/" target="_blank" style="background: #7c3aed;"><i class="fas fa-tv"></i> OLED LIVE DATA</a>
             <button class="filter-btn" onclick="manualLoad()"><i class="fas fa-sync-alt"></i> ŁADUJ DANE </button>
             <button class="export-btn" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Excel</button>
@@ -568,7 +506,7 @@
 
 <script>
     // **********************************************
-    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS
+    // LOGIKA POBIERANIA DANYCH Z GOOGLE SHEETS (BEZ ZMIAN)
     // **********************************************
     const urls = [
         'https://docs.google.com/spreadsheets/d/10W03bvKlVFlIUcxsHkzP_v_13gtnYRBmnrrO0ujB1bU/export?format=csv&gid=0',
@@ -580,8 +518,8 @@
     let currentDate = new Date();
     const datePicker = document.getElementById('date-picker-input');
     const loader = document.getElementById('loader');
-    const lunchAlarm = document.getElementById('lunchAlarm'); // Dźwięk alarmu
-    let lunchAlarmTriggered = false; // Flaga zapobiegająca wielokrotnemu odtwarzaniu
+    const lunchAlarm = document.getElementById('lunchAlarm'); 
+    let lunchAlarmTriggered = false; 
 
     function parseCSV(text) {
         return text.trim().split('\n').map(row =>
@@ -604,7 +542,6 @@
         return date.toISOString().split('T')[0];
     }
     
-    // NOWA FUNKCJA: Pobieranie i agregowanie danych
     async function fetchAndAggregateData(targetDate) {
         const all = [];
         const stationNames = ["KOVALCHYK", "ULANOVYCH", "OLED REPAIR"];
@@ -647,7 +584,6 @@
             }
         }
         
-        // Agregacja KPI
         const ok = all.filter(d => d.status === 'OK').length;
         const ndf = all.filter(d => d.status === 'NDF').length;
         const scrap = all.filter(d => d.status === 'SCRAP_TTL').length;
@@ -664,7 +600,6 @@
         };
     }
     
-    // ZMODYFIKOWANA FUNKCJA loadData - teraz pobiera dane dla bieżącego i poprzedniego dnia
     async function loadData() {
         const yesterday = new Date(currentDate);
         yesterday.setDate(yesterday.getDate() - 1);
@@ -678,9 +613,6 @@
             prevKpi: prevDayData.kpi
         };
     }
-    // **********************************************
-    // KONIEC LOGIKI GOOGLE SHEETS
-    // **********************************************
 
     function setDatePickerValue(date) {
         if (datePicker) {
@@ -688,7 +620,6 @@
         }
     }
 
-    // WIZUALNE POTWIERDZENIE AKTYWNEGO PRZYCISKU
     function highlightActive(type) {
         document.querySelectorAll('.filter-btn').forEach(btn => {
             if (btn.dataset.type) {
@@ -699,7 +630,6 @@
         if (type === 'today' || type === 'yesterday') {
             document.querySelector(`.filter-btn[data-type="${type}"]`)?.classList.add('active');
         } else if (type === 'custom' && datePicker.value) {
-            // Używamy `custom` do oznaczenia, że to data z kalendarza, choć nie ma dedykowanego przycisku
         }
     }
 
@@ -719,7 +649,6 @@
             return;
         }
 
-        // FUNKCJA OBLICZAJĄCA TREND I ZWRACAJĄCA HTML
         function getTrendHTML(currentValue, prevValue, betterIsHigher) {
             if (prevKpi.total === 0) {
                 return '<span class="kpi-trend trend-neutral">(Brak danych wczoraj)</span>';
@@ -754,22 +683,64 @@
         
         // Udział NDF (No Defect Found)
         const ndfShare = currentKpi.ndfShare;
-        ndfShareEl.innerHTML = `${ndfShare.toFixed(1)}% ${getTrendHTML(ndfShare, prevKpi.ndfShare, false)}`; // Niższy jest lepszy
+        ndfShareEl.innerHTML = `${ndfShare.toFixed(1)}% ${getTrendHTML(ndfShare, prevKpi.ndfShare, false)}`;
         
         // Udział SCRAP (Złom)
         const scrapShare = currentKpi.scrapShare;
-        scrapShareEl.innerHTML = `${scrapShare.toFixed(1)}% ${getTrendHTML(scrapShare, prevKpi.scrapShare, false)}`; // Niższy jest lepszy
+        scrapShareEl.innerHTML = `${scrapShare.toFixed(1)}% ${getTrendHTML(scrapShare, prevKpi.scrapShare, false)}`;
         
-        // **********************************************
-        // LOGIKA BLASKU DLA WSKAŹNIKA SUKCESU (OK) - ZAWSZE ZIELONY
-        // **********************************************
         if (successRateEl) {
             const glowColor = 'var(--ok-bg)'; 
             successRateEl.style.textShadow = `0 0 15px ${glowColor}, 0 0 25px ${glowColor}`;
             successRateEl.style.color = successRate >= 70 ? '#fff' : 'var(--scrap-bg)';
         }
+
+        // *** NOWOŚĆ: WYSTRZAŁ KONFETTI JEŚLI WYNIK > 90% ***
+        if (successRate > 90 && total > 5) {
+             fireConfetti();
+        }
     }
 
+    // --- FUNKCJA KONFETTI ---
+    let lastConfettiTime = 0;
+    function fireConfetti() {
+        const now = Date.now();
+        if (now - lastConfettiTime < 60000) return; // Tylko raz na minutę, żeby nie spamować
+        lastConfettiTime = now;
+        
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#3b82f6', '#4ade80', '#ffffff']
+            });
+        }
+    }
+
+    // --- NOWOŚĆ: FUNKCJA NEWS TICKER ---
+    function updateTicker(data) {
+        const ticker = document.getElementById('ticker-content');
+        if (!data || data.length === 0) {
+            ticker.innerHTML = '<div class="ticker-item">Oczekiwanie na nowe naprawy...</div>';
+            return;
+        }
+
+        // Weź 8 ostatnich napraw
+        const recent = data.slice(-8).reverse(); 
+
+        let html = '';
+        recent.forEach(item => {
+            const icon = item.status === 'OK' ? '✅' : (item.status === 'NDF' ? '⚠️' : '❌');
+            const styleClass = item.status === 'SCRAP_TTL' ? 'bad' : '';
+            html += `<div class="ticker-item ${styleClass}">
+                        ${icon} <strong>${item.station}</strong>: ${item.serial} (${item.name}) - ${item.status}
+                     </div>`;
+        });
+        
+        // Duplikujemy treść, aby pasek przesuwał się płynnie
+        ticker.innerHTML = html + html; 
+    }
 
     function render(data) {
         latestData = data.current.sort((a,b)=>a.name.localeCompare(b.name));
@@ -826,11 +797,11 @@
         document.getElementById('summary-table').tBodies[0]?.remove();
         document.getElementById('summary-table').appendChild(stb);
 
-        // Aktualizacja Chatbota
         updateBotPhrase(sumOK, sumNDF, sumSCR);
-        
-        // NOWE: Aktualizacja KPI (z trendem)
         updateKPIs(data.currentKpi, data.prevKpi);
+        
+        // Wywołanie aktualizacji paska newsów
+        updateTicker(latestData);
     }
 
     window.setDate = function(type) {
@@ -867,6 +838,15 @@
     window.manualLoad = function() {
         setDate('custom'); 
     }
+    
+    window.filterData = function(val) {
+        const filter = val.toLowerCase();
+        const rows = document.querySelectorAll('#data-table tbody tr');
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            row.style.display = txt.includes(filter) ? '' : 'none';
+        });
+    }
 
     window.exportToExcel = function() {
         const ws = XLSX.utils.json_to_sheet(
@@ -884,7 +864,7 @@
     }
 
     // --- ZEGAR I MOTYW ---
-    let lastCheckedHour = -1; // Używane do alarmu obiadowego
+    let lastCheckedHour = -1; 
 
     window.updateClockInline = function() {
         const clk = document.getElementById('clock-inline');
@@ -896,15 +876,12 @@
             
             clk.innerHTML = `🕒 ${h.toString().padStart(2,'0')}:${m}:${s}`;
             
-            // Logika Alarmu Obiadowego
             if (h === 12 && m === '00' && s === '00' && !lunchAlarmTriggered) {
                  if(lunchAlarm) {
                     lunchAlarm.play().catch(e => console.error("Błąd odtwarzania alarmu obiadowego:", e));
-                    lunchAlarmTriggered = true; // Ustaw flagę
+                    lunchAlarmTriggered = true; 
                  }
             }
-            
-            // Reset flagi po 12:00 (np. po 13:00)
             if (h > 12) {
                  lunchAlarmTriggered = false;
             }
@@ -950,13 +927,11 @@
         ];
         const msg = phrases[Math.floor(Math.random() * phrases.length)];
 
-        // Pobieranie statystyk z render() lub z atrybutów danych
         const el = document.getElementById('chatbot-bubble');
         const ok = okCount !== undefined ? okCount : (el.dataset.ok || '–');
         const ndf = ndfCount !== undefined ? ndfCount : (el.dataset.ndf || '–');
         const scrap = scrapCount !== undefined ? scrapCount : (el.dataset.scrap || '–');
 
-        // Zapisanie danych w dymku
         el.dataset.ok = ok;
         el.dataset.ndf = ndf;
         el.dataset.scrap = scrap;
@@ -980,7 +955,9 @@
         }
     });
 
-    // --- Efekt Śniegu JavaScript ---
+    // **********************************************
+    // NOWA NAPRAWIONA FUNKCJA ŚNIEGU (RESPONSYWNA NA TV)
+    // **********************************************
     function createSnowflake() {
         const snowContainer = document.getElementById('snow-container');
         if (!snowContainer) return;
@@ -988,27 +965,36 @@
         const snowflake = document.createElement('div');
         snowflake.classList.add('snow');
         
-        // ZMODYFIKOWANE ZAKRESY: większe i bardziej losowe
-        const size = Math.random() * 7 + 3; // 3px do 10px
-        const duration = Math.random() * 22 + 8; // 8s do 30s
+        // Rozmiar i czas trwania
+        const size = Math.random() * 6 + 4; // 4px do 10px
+        const duration = Math.random() * 15 + 10; // 10s do 25s
         
         snowflake.style.width = `${size}px`;
         snowflake.style.height = `${size}px`;
-        snowflake.style.left = `${Math.random() * 100}vw`;
+        // KLUCZOWE: Używamy % szerokości a nie pixeli, działa przy skalowaniu
+        snowflake.style.left = `${Math.random() * 100}%`; 
         snowflake.style.animationDuration = `${duration}s`;
         snowflake.style.animationDelay = `-${Math.random() * duration}s`;
         
         snowContainer.appendChild(snowflake);
         
-        // Usunięcie płatków śniegu po zakończeniu animacji, aby nie obciążały DOM
+        // Pętla odnawiania po zakończeniu animacji
         snowflake.addEventListener('animationend', () => {
             snowflake.remove();
-            createSnowflake(); // Tworzenie nowego płatka
+            createSnowflake(); 
         });
     }
 
-    function generateSnow(count) {
-        for (let i = 0; i < count; i++) {
+    function initSnow() {
+        const container = document.getElementById('snow-container');
+        container.innerHTML = ''; // Reset przy zmianie rozmiaru
+        
+        // Obliczamy ilość śniegu na podstawie szerokości ekranu
+        // Dla Full HD (1920) = ok 60, dla 4K (3840) = ok 120
+        const width = window.innerWidth;
+        const flakeCount = Math.floor(width / 30); 
+        
+        for (let i = 0; i < flakeCount; i++) {
             createSnowflake();
         }
     }
@@ -1022,20 +1008,16 @@
     ];
     
     const HOLIDAY_LIMIT = 4; 
-    const MIN_DISTANCE_VW = 20; // Minimalna odległość między napisami (vw)
-    const MARGIN_PX = 40;       // Margines bezpieczeństwa wokół kontenerów danych (px)
+    const MIN_DISTANCE_VW = 20; 
+    const MARGIN_PX = 40;       
 
-    // Funkcja obliczająca odległość Euklidesową (w przybliżeniu)
     function checkCollision(currentPos, existingElements) {
         for (let i = 0; i < existingElements.length; i++) {
             const el = existingElements[i];
-            
             const existingLeft = parseFloat(el.style.left);
             const existingTop = parseFloat(el.style.top);
-            
             const distanceX = currentPos.left - existingLeft;
             const distanceY = currentPos.top - existingTop;
-            
             const distanceSq = distanceX * distanceX + distanceY * distanceY;
             
             if (distanceSq < MIN_DISTANCE_VW * MIN_DISTANCE_VW) {
@@ -1045,19 +1027,14 @@
         return false; 
     }
     
-    // NOWA FUNKCJA: Oblicza zakazane strefy na podstawie elementów DOM (w jednostkach VW/VH)
     function getExclusionZones() {
         const zones = [];
-        // Celujemy w główne kontenery danych i kontrolki
         const targets = document.querySelectorAll('.summary-box, .data-section, .container'); 
-        
         const vw = window.innerWidth;
         const vh = window.innerHeight;
 
         targets.forEach(el => {
             const rect = el.getBoundingClientRect();
-            
-            // Konwersja pixel na vw/vh
             const leftVW = (rect.left - MARGIN_PX) / vw * 100;
             const topVH = (rect.top - MARGIN_PX) / vh * 100;
             const widthVW = (rect.width + 2 * MARGIN_PX) / vw * 100;
@@ -1073,13 +1050,11 @@
         return zones;
     }
     
-    // NOWA FUNKCJA: Sprawdza, czy pozycja koliduje z którąkolwiek zakazaną strefą
     function checkZoneCollision(pos, zones) {
-        const textWidthVW = 10; // Przybliżona szerokość napisu Wesołych Świąt
-        const textHeightVH = 5; // Przybliżona wysokość napisu Wesołych Świąt
+        const textWidthVW = 10; 
+        const textHeightVH = 5; 
 
         for (const zone of zones) {
-            // Sprawdzenie, czy nowy napis (pos) zachodzi na zakazaną strefę (zone)
             if (pos.left < zone.right &&
                 pos.left + textWidthVW > zone.left &&
                 pos.top < zone.bottom &&
@@ -1097,45 +1072,34 @@
         const existingElements = Array.from(container.children);
         const exclusionZones = getExclusionZones();
         
-        // SPRAWDZENIE LIMITU LICZBY ELEMENTÓW
         if (existingElements.length >= HOLIDAY_LIMIT) {
              return; 
         }
 
         let newPos = {};
         let attempts = 0;
-        const maxAttempts = 20; // Zwiększona liczba prób
+        const maxAttempts = 20;
 
         let isColliding = true;
 
-        // Pętla do szukania wolnej pozycji
         while (isColliding && attempts < maxAttempts) {
-            // Generowanie losowej pozycji (środek tekstu)
             newPos.left = Math.random() * 85;
             newPos.top = Math.random() * 85;
-            
-            // 1. Sprawdzenie kolizji z innymi napisami
             isColliding = checkCollision(newPos, existingElements);
-            
-            // 2. Sprawdzenie kolizji z zakazanymi strefami (tabelami/logo)
             if (!isColliding) {
                 isColliding = checkZoneCollision(newPos, exclusionZones);
             }
-            
             attempts++;
         }
         
-        // Jeśli nie znaleziono wolnej pozycji po max próbach
         if (isColliding) return; 
-
 
         const textEl = document.createElement('div');
         textEl.classList.add('holiday-text');
         
-        // Reszta logiki stylizowania
         const phrase = HOLIDAY_PHRASES[Math.floor(Math.random() * HOLIDAY_PHRASES.length)];
         textEl.textContent = phrase;
-        const rotation = Math.random() * 40 - 20; // od -20 deg do 20 deg
+        const rotation = Math.random() * 40 - 20; 
         const randomNeon = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
         
         textEl.style.left = `${newPos.left}vw`;
@@ -1144,22 +1108,18 @@
         textEl.style.textShadow = randomNeon;
         
         container.appendChild(textEl);
-
-        // Używamy eventu animationend do usunięcia elementu po zakończeniu animacji
         textEl.addEventListener('animationend', () => {
             textEl.remove();
         });
     }
 
     function startHolidayEffect() {
-        // Generowanie nowego tekstu co 4 sekundy
         setInterval(createHolidayText, 4000); 
     }
 
     // --- Inicjalizacja ---
     
     function init() {
-        // Ustawienie motywu na podstawie localStorage
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
             const icon = document.querySelector('#themeToggle i');
@@ -1171,24 +1131,22 @@
             }
         }
 
-        // Generowanie 50 płatków śniegu
-        generateSnow(50);
+        // START NOWEGO ŚNIEGU
+        initSnow();
+        // Przeliczanie śniegu przy zmianie rozmiaru okna (obracanie tabletu, zoom)
+        window.addEventListener('resize', () => {
+            clearTimeout(window.resizeTimer);
+            window.resizeTimer = setTimeout(initSnow, 500);
+        });
         
-        // Rozpoczęcie efektu świątecznego
         startHolidayEffect();
-
-        // Ustawienie daty na "Dzisiaj" i ładowanie danych
         setDate('today');
-        
-        // Zegar
         setInterval(updateClockInline, 1000);
         updateClockInline();
 
-        // Bot
         updateBotPhrase();
         setInterval(() => updateBotPhrase(), 10000);
 
-        // Sprawdzenie zmiany dnia (co 5 minut)
         let lastCheckedDate = new Date().toDateString();
         setInterval(() => {
             const now = new Date().toDateString();
@@ -1198,7 +1156,6 @@
             }
         }, 300000); 
         
-        // Automatyczne odświeżanie danych co 30 sekund
         (function loop(){
             setTimeout(()=>loadData().then(render).finally(loop),30000);
         })();
