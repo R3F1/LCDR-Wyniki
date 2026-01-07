@@ -42,24 +42,20 @@
         body.dark-mode { background-color: #0f172a; }
 
         /* ********************************************** */
-        /* KONTENERY I RESPONSYWNOŚĆ (POPRAWKA TV)        */
-        /* ********************************************** */
+        /* --- TV FIX: SZERSZY KONTENER GŁÓWNY --- */
         .container { 
-            width: 95%; /* Zamiast sztywnego px */
-            max-width: 1400px; /* Szerszy na dużych TV */
+            width: 98%; 
+            max-width: 1800px; /* Pozwalamy na szerokość TV */
             margin: 0 auto; 
             padding: 0 10px; 
             position: relative; 
             z-index: 1001; 
         }
 
-        /* ********************************************** */
         /* PASEK CELU (TARGET BAR) */
-        /* ********************************************** */
         .target-wrapper {
-            width: 95%; max-width: 1400px; margin: 20px auto 10px; padding: 0 10px;
+            width: 98%; max-width: 1800px; margin: 20px auto 10px; padding: 0 10px;
             position: relative; z-index: 1001;
-            box-sizing: border-box;
         }
         .target-container {
             background: rgba(255, 255, 255, 0.1);
@@ -74,7 +70,6 @@
             display: flex; justify-content: space-between; margin-bottom: 5px;
             font-weight: 800; text-transform: uppercase; font-size: 0.9rem;
             padding: 0 10px; text-shadow: 0 0 5px rgba(0,0,0,0.8);
-            flex-wrap: wrap; /* Zabezpieczenie przed ucięciem tekstu */
         }
         .progress-bg {
             height: 25px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; position: relative;
@@ -100,9 +95,7 @@
             font-weight: bold; text-shadow: 0 0 4px #000; z-index: 2; pointer-events: none;
         }
 
-        /* ********************************************** */
         /* LIDERA (KORONA) */
-        /* ********************************************** */
         .leader-crown {
             color: var(--gold-leader);
             font-size: 1.2em;
@@ -142,23 +135,29 @@
         .summary-box, .data-section { background: rgba(255, 255, 255, 0.08); border-radius: var(--general-radius); box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin: 0 auto 30px; padding: 15px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; transition: transform 0.3s; overflow: hidden; position: relative; z-index: 1000; }
         .summary-box:hover, .data-section:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0,0,0,0.8); }
         
-        /* GŁÓWNY UKŁAD - POPRAWIONY */
+        /* ********************************************** */
+        /* --- TV FIX START: UKŁAD SPAWANY --- */
+        /* ********************************************** */
         .summary-content-wrapper { 
             display: flex; 
             gap: 30px; 
             align-items: flex-start;
-            flex-wrap: wrap; /* Kluczowe dla skalowania - pozwala elementom spadać niżej */
+            /* To blokuje spadanie kolumn na dół */
+            flex-wrap: nowrap; 
         }
-        
+
         .kpi-panel { 
-            flex: 1 1 300px; /* Base 300px, ale może rosnąć i maleć */
-            min-width: 250px;
+            /* Ustawiamy na sztywno: nie kurcz się (0), nie rośnij (0), baza 350px */
+            flex: 0 0 350px;
+            width: 350px; 
+            
             padding: 20px; 
             border-radius: var(--general-radius); 
             background: rgba(59, 130, 246, 0.15); 
             box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); 
             border: 1px solid var(--primary-color); 
-            /* Sticky tylko gdy jest miejsce w pionie */
+            
+            /* Sticky działa lepiej jak kolumna nie spada */
             position: sticky; 
             top: 30px; 
             height: fit-content; 
@@ -168,10 +167,30 @@
             text-align: center; 
         }
 
-        /* Wyłącz sticky gdy ekran jest niski (np. przez zoom) */
-        @media (max-height: 800px) {
-            .kpi-panel { position: static; }
+        .widgets-wrapper {
+            /* Prawa strona zajmuje resztę miejsca i pozwala się kurczyć */
+            flex: 1 1 auto;
+            min-width: 0; /* Kluczowe dla flexboxa, żeby tabela nie rozpychała */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
+
+        /* --- TABLE RESPONSIVE WRAPPER (Dla scrollowania tabeli) --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto; /* Pasek przewijania poziomego tylko tu */
+            border-radius: var(--general-radius);
+        }
+
+        /* Tylko dla pionowych telefonów zmieniamy na kolumnę */
+        @media(max-width: 700px) {
+            .summary-content-wrapper { flex-direction: column; }
+            .kpi-panel { width: 100%; flex: none; position: static; }
+        }
+        /* ********************************************** */
+        /* --- TV FIX END --- */
+        /* ********************************************** */
 
         .kpi-item { margin-bottom: 20px; padding: 15px; border-radius: 8px; background: rgba(0, 0, 0, 0.4); box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); width: 100%; box-sizing: border-box; }
         .kpi-trend { display: block; font-size: 0.9rem; font-weight: 500; margin-top: 5px; }
@@ -182,22 +201,13 @@
         #kpi-scrap-share { text-shadow: 0 0 15px var(--scrap-bg), 0 0 25px var(--scrap-bg); }
         @keyframes kpiPulse { from { transform: scale(1); opacity: 0.9; } to { transform: scale(1.02); opacity: 1; } }
 
-        .header-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 30px 0; padding: 15px 20px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7); border-radius: 20px; background: rgba(255, 255, 255, 0.1); }
-        .filter-btn, .export-btn, #date-picker-input, #serial-filter { padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.5); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; color: #fff; background: rgba(59, 130, 246, 0.4); flex-grow: 1; text-align: center; min-width: 120px; max-width: 250px; box-sizing: border-box; }
+        .header-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin: 30px 0; padding: 15px 40px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7); border-radius: 20px; background: rgba(255, 255, 255, 0.1); }
+        .filter-btn, .export-btn, #date-picker-input, #serial-filter { padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.5); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s ease; color: #fff; background: rgba(59, 130, 246, 0.4); }
         .filter-btn.active { background: var(--primary-color); box-shadow: 0 0 10px var(--primary-color), inset 0 0 5px #fff; transform: scale(1.05); }
-        #date-picker-input, #serial-filter { width: auto; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--primary-color); box-shadow: 0 0 5px var(--primary-color); }
+        #date-picker-input, #serial-filter { width: 180px; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid var(--primary-color); box-shadow: 0 0 5px var(--primary-color); }
         
-        /* WRAPPER DLA TABEL - SCROLLOWANIE WEWNĄTRZ */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: var(--general-radius);
-            margin-bottom: 20px;
-        }
-
-        .summary-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 600px; /* Minimalna szerokość żeby się nie zgniotło */ }
-        .summary-table th { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border: none; border-right: 1px solid rgba(255, 255, 255, 0.1); text-align: center; white-space: nowrap; }
+        .summary-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: var(--general-radius); margin-top: 0; min-width: 600px; /* Minimalna szerokość tabeli */ }
+        .summary-table th { padding: 12px; color: #fff; font-weight: 700; background: linear-gradient(180deg, rgba(59, 130, 246, 0.8), #1e3a8a); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border: none; border-right: 1px solid rgba(255, 255, 255, 0.1); text-align: center; }
         .summary-table th:first-child { border-top-left-radius: var(--general-radius); }
         .summary-table th:last-child { border-top-right-radius: var(--general-radius); border-right: none; }
         .summary-table td { padding: 10px; text-align: center; font-weight: bold; border-right: 1px solid rgba(255, 255, 255, 0.1); border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: #fff; }
@@ -209,7 +219,7 @@
         .summary-table tr.total-row td:last-child { border-bottom-right-radius: var(--general-radius); }
         .container.summary-box h2, .container.data-section h2 { margin: 0; padding: 0; background: none; border-radius: 0; box-shadow: none; border-left: none !important; padding-left: 0 !important; color: #fff; font-size: 1.8rem; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
         
-        #clock-inline { font-size: 2.2rem; font-weight: 800 !important; text-shadow: 0 0 15px #fff, 0 0 30px var(--primary-color); color: #fff; animation: pulseClock 3s infinite ease-in-out; margin: 10px auto; text-align: center; display: block; width: 100%; }
+        #clock-inline { font-size: 2.2rem; font-weight: 800 !important; text-shadow: 0 0 15px #fff, 0 0 30px var(--primary-color); color: #fff; animation: pulseClock 3s infinite ease-in-out; margin: 0; flex-grow: 1; text-align: center; }
         @keyframes pulseClock { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
 
         .loader-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; font-size: 1.5rem; backdrop-filter: blur(5px); }
@@ -221,21 +231,9 @@
         #chatbot-img { width: 192px; height: auto; filter: drop-shadow(0 0 8px var(--primary-color)); }
         #chatbot-bubble { background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(50, 50, 50, 0.9)); color: white; padding: 12px 16px; border-radius: 16px 16px 0 16px; max-width: 240px; font-size: 14px; line-height: 1.4em; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); cursor: pointer; user-select: none; order: -1; }
         
-        /* RESPONSIVE MEDIA QUERIES */
-        @media(max-width: 1100px) { 
-            .summary-content-wrapper { flex-direction: column; } 
-            .kpi-panel { width: 100%; position: static; margin-bottom: 20px; flex: none; } 
-            .widgets-wrapper { width: 100%; flex: none; }
-        }
-        @media(max-width:768px) { 
-            .header-controls { flex-direction: column; align-items: stretch; } 
-            #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; max-width: unset; margin-bottom: 5px; } 
-            #chatbot-img { width: 120px; } 
-            #clock-inline { font-size: 1.5rem; } 
-            h2 { font-size: 1.4rem !important; }
-        }
+        @media(max-width:768px) { .header-controls { flex-direction: column; align-items: stretch; } #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; box-sizing: border-box; } #chatbot-img { width: 120px; } #clock-inline { font-size: 1.5rem; } }
 
-        /* --- SIDEBAR WCZORAJ --- */
+        /* --- NOWY STYL DLA TOP WCZORAJ (SIDEBAR) --- */
         .yesterday-box {
             margin-top: 25px;
             width: 100%;
@@ -270,16 +268,9 @@
         .mini-table .rank-idx { width: 20px; color: #555; font-size: 0.7rem; }
         .mini-table .val-ok { text-align: right; color: var(--ok-bg); font-weight: bold; }
 
-        /* --- WIDŻETY --- */
-        .widgets-wrapper {
-            flex: 2 1 600px; /* Base 600px, rośnie x2 */
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            min-width: 0; /* Zapobiega wypychaniu flexa */
-        }
+        /* --- STYLE DLA NOWYCH WIDŻETÓW (POD TABELĄ) --- */
         
-        /* 1. Battle Arena */
+        /* 1. Battle Arena (Pojedynek) */
         .battle-container {
             background: linear-gradient(90deg, rgba(20, 30, 60, 0.8), rgba(40, 20, 60, 0.8));
             border-radius: 12px;
@@ -294,18 +285,18 @@
         }
         .battle-arena {
             display: flex; align-items: center; justify-content: space-between; position: relative;
-            padding-top: 10px;
-            flex-wrap: wrap; /* Zabezpieczenie dla bardzo małych przestrzeni */
+            padding-top: 10px; /* Dodatkowy odstęp od góry */
+            flex-wrap: wrap;
         }
         .fighter {
-            text-align: center; width: 40%; position: relative; z-index: 2; /* Zwiększone z 30% na 40% */
+            text-align: center; width: 35%; position: relative; z-index: 2;
         }
         .fighter-name {
             font-weight: 800; 
             font-size: 1.1rem; 
-            margin-bottom: 30px; 
+            margin-bottom: 30px; /* PUSH W GÓRĘ, z dala od paska */
             position: relative;
-            top: -10px; 
+            top: -10px; /* Dodatkowe uniesienie */
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis;
@@ -322,7 +313,6 @@
             z-index: 3;
             box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 40px #ffaa00, 0 0 60px #ff0000;
             animation: pulseVS 0.8s infinite alternate;
-            margin: 0 auto; /* Centrowanie przy wrapie */
         }
         @keyframes pulseVS { 
             0% { transform: scale(1); box-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; } 
@@ -336,7 +326,7 @@
             height: 100%; background: linear-gradient(90deg, #3b82f6, #ef4444); border-radius: 5px; transition: width 1s ease;
         }
 
-        /* 2. BREAK TIMER */
+        /* 2. BREAK TIMER (Nowy Widżet) */
         .break-container {
             background: linear-gradient(90deg, #0f172a, #1e293b);
             border: 1px solid #3b82f6;
@@ -360,7 +350,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 5px;
-            display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+            display: flex; align-items: center; gap: 10px;
         }
         .break-label i { font-size: 1.2rem; color: #facc15; }
 
@@ -429,7 +419,7 @@
 </div>
 
 <div class="container summary-box">
-    <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+    <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h2>PODSUMOWANIE</h2>
         <div class="date-summary" id="summary-date"></div>
     </div>
