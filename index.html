@@ -110,15 +110,7 @@
         tr.leader-row td:first-child { border-left: 3px solid var(--gold-leader); }
         tr.leader-row td:last-child { border-right: 3px solid var(--gold-leader); }
 
-        /* EFEKTY POGODOWE I INNE */
-        #holiday-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 998; }
-        .holiday-text { position: absolute; font-size: 1.75vw; font-weight: 900; text-transform: uppercase; white-space: nowrap; opacity: 0; user-select: none; color: #fff; text-shadow: 0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0; animation: holidayFade 10s ease-out forwards; }
-        @keyframes holidayFade { 0% { opacity: 0; transform: scale(0.5); } 10% { opacity: 1; transform: scale(1); } 90% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
-
-        .snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; overflow: hidden; }
-        .snow { position: absolute; background: #fff; border-radius: 50%; opacity: 0.8; top: -10px; animation: fall linear infinite; }
-        @keyframes fall { 0% { transform: translateY(-10vh) translateX(0); } 100% { transform: translateY(110vh) translateX(20px); } }
-
+        /* NEWS TICKER */
         .news-ticker-container { position: fixed; bottom: 0; left: 0; width: 100%; height: var(--ticker-height); background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--primary-color); z-index: 10000; display: flex; align-items: center; overflow: hidden; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); }
         .ticker-label { background: var(--primary-color); color: #fff; padding: 0 15px; height: 100%; display: flex; align-items: center; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; z-index: 2; box-shadow: 5px 0 10px rgba(0,0,0,0.5); }
         .ticker-wrap { width: 100%; overflow: hidden; white-space: nowrap; }
@@ -178,7 +170,7 @@
         #chatbot-img { width: 192px; height: auto; filter: drop-shadow(0 0 8px var(--primary-color)); }
         #chatbot-bubble { background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(50, 50, 50, 0.9)); color: white; padding: 12px 16px; border-radius: 16px 16px 0 16px; max-width: 240px; font-size: 14px; line-height: 1.4em; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); cursor: pointer; user-select: none; order: -1; }
         
-        @media(max-width: 992px) { .summary-content-wrapper { flex-direction: column; } .kpi-panel { flex-basis: auto; min-width: unset; width: 100%; position: static; margin-bottom: 20px; } .summary-table { flex-basis: auto; } .holiday-text { font-size: 4vw; } #clock-inline { font-size: 1.8rem; text-align: left; } }
+        @media(max-width: 992px) { .summary-content-wrapper { flex-direction: column; } .kpi-panel { flex-basis: auto; min-width: unset; width: 100%; position: static; margin-bottom: 20px; } .summary-table { flex-basis: auto; } #clock-inline { font-size: 1.8rem; text-align: left; } }
         @media(max-width:768px) { .header-controls { flex-direction: column; align-items: stretch; } #serial-filter, #date-picker-input, .filter-btn, .export-btn { width: 100%; box-sizing: border-box; } #chatbot-img { width: 120px; } #clock-inline { font-size: 1.5rem; } }
 
         /* --- NOWY STYL DLA TOP WCZORAJ (SIDEBAR) --- */
@@ -310,9 +302,6 @@
 </head>
 <body>
 <audio id="lunchAlarm" src="lunch_alarm.mp3" preload="auto"></audio>
-
-<div id="holiday-container"></div>
-<div class="snow-container" id="snow-container"></div>
 
 <div class="news-ticker-container">
     <div class="ticker-label">LIVE DATA</div>
@@ -1104,159 +1093,6 @@
         }
     });
 
-    function createSnowflake() {
-        const snowContainer = document.getElementById('snow-container');
-        if (!snowContainer) return;
-        
-        const snowflake = document.createElement('div');
-        snowflake.classList.add('snow');
-        
-        const size = Math.random() * 6 + 4; 
-        const duration = Math.random() * 15 + 10;
-        
-        snowflake.style.width = `${size}px`;
-        snowflake.style.height = `${size}px`;
-        snowflake.style.left = `${Math.random() * 100}%`; 
-        snowflake.style.animationDuration = `${duration}s`;
-        snowflake.style.animationDelay = `-${Math.random() * duration}s`;
-        
-        snowContainer.appendChild(snowflake);
-        
-        snowflake.addEventListener('animationend', () => {
-            snowflake.remove();
-            createSnowflake(); 
-        });
-    }
-
-    function initSnow() {
-        const container = document.getElementById('snow-container');
-        container.innerHTML = '';
-        
-        const width = window.innerWidth;
-        const flakeCount = Math.floor(width / 30); 
-        
-        for (let i = 0; i < flakeCount; i++) {
-            createSnowflake();
-        }
-    }
-    
-    const HOLIDAY_PHRASES = ["Wesołych Świąt!", "Ho Ho Ho!", "Merry Xmas!"];
-    const NEON_COLORS = [
-        '0 0 5px #f0f, 0 0 10px #0ff, 0 0 15px #ff0',
-        '0 0 8px #fff, 0 0 12px #4ade80',
-        '0 0 10px #f87171, 0 0 20px #ff00ff'
-    ];
-    
-    const HOLIDAY_LIMIT = 4; 
-    const MIN_DISTANCE_VW = 20; 
-    const MARGIN_PX = 40;       
-
-    function checkCollision(currentPos, existingElements) {
-        for (let i = 0; i < existingElements.length; i++) {
-            const el = existingElements[i];
-            const existingLeft = parseFloat(el.style.left);
-            const existingTop = parseFloat(el.style.top);
-            const distanceX = currentPos.left - existingLeft;
-            const distanceY = currentPos.top - existingTop;
-            const distanceSq = distanceX * distanceX + distanceY * distanceY;
-            
-            if (distanceSq < MIN_DISTANCE_VW * MIN_DISTANCE_VW) {
-                return true; 
-            }
-        }
-        return false; 
-    }
-    
-    function getExclusionZones() {
-        const zones = [];
-        const targets = document.querySelectorAll('.summary-box, .data-section, .container'); 
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-
-        targets.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const leftVW = (rect.left - MARGIN_PX) / vw * 100;
-            const topVH = (rect.top - MARGIN_PX) / vh * 100;
-            const widthVW = (rect.width + 2 * MARGIN_PX) / vw * 100;
-            const heightVH = (rect.height + 2 * MARGIN_PX) / vh * 100;
-
-            zones.push({
-                left: leftVW,
-                top: topVH,
-                right: leftVW + widthVW,
-                bottom: topVH + heightVH
-            });
-        });
-        return zones;
-    }
-    
-    function checkZoneCollision(pos, zones) {
-        const textWidthVW = 10; 
-        const textHeightVH = 5; 
-
-        for (const zone of zones) {
-            if (pos.left < zone.right &&
-                pos.left + textWidthVW > zone.left &&
-                pos.top < zone.bottom &&
-                pos.top + textHeightVH > zone.top) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function createHolidayText() {
-        const container = document.getElementById('holiday-container');
-        if (!container) return;
-        
-        const existingElements = Array.from(container.children);
-        const exclusionZones = getExclusionZones();
-        
-        if (existingElements.length >= HOLIDAY_LIMIT) {
-             return; 
-        }
-
-        let newPos = {};
-        let attempts = 0;
-        const maxAttempts = 20;
-
-        let isColliding = true;
-
-        while (isColliding && attempts < maxAttempts) {
-            newPos.left = Math.random() * 85;
-            newPos.top = Math.random() * 85;
-            isColliding = checkCollision(newPos, existingElements);
-            if (!isColliding) {
-                isColliding = checkZoneCollision(newPos, exclusionZones);
-            }
-            attempts++;
-        }
-        
-        if (isColliding) return; 
-
-        const textEl = document.createElement('div');
-        textEl.classList.add('holiday-text');
-        
-        const phrase = HOLIDAY_PHRASES[Math.floor(Math.random() * HOLIDAY_PHRASES.length)];
-        textEl.textContent = phrase;
-        const rotation = Math.random() * 40 - 20; 
-        const randomNeon = NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)];
-        
-        textEl.style.left = `${newPos.left}vw`;
-        textEl.style.top = `${newPos.top}vh`;
-        textEl.style.transform = `rotate(${rotation}deg)`;
-        textEl.style.textShadow = randomNeon;
-        
-        container.appendChild(textEl);
-        textEl.addEventListener('animationend', () => {
-            textEl.remove();
-        });
-    }
-
-    function startHolidayEffect() {
-        setInterval(createHolidayText, 4000); 
-    }
-
     function init() {
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
@@ -1269,13 +1105,6 @@
             }
         }
 
-        initSnow();
-        window.addEventListener('resize', () => {
-            clearTimeout(window.resizeTimer);
-            window.resizeTimer = setTimeout(initSnow, 500);
-        });
-        
-        startHolidayEffect();
         setDate('today');
         setInterval(updateClockInline, 1000);
         updateClockInline();
