@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>OLED REPAIR v2.7 (ROLE TITLE FIX)</title>
+  <title>OLED REPAIR v3.1 (FULL SYSTEM)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -322,7 +322,7 @@
 <div id="loginScreen">
   <div class="login-box">
     <h2 style="color:#fff;">OLED REPAIR SYSTEM</h2>
-    <div style="font-size:12px; color:#666; font-family: var(--font-tech);">v2.7 (ROLE TITLE FIX)</div>
+    <div style="font-size:12px; color:#666; font-family: var(--font-tech);">v3.1 (FULL SYSTEM)</div>
     <div id="syncStatus" class="sync-status">Ładowanie użytkowników...</div>
     
     <label class="input-label" style="text-align:left; margin-left:5px; margin-top:20px;">UŻYTKOWNIK</label>
@@ -456,7 +456,7 @@
     <div class="admin-container">
         <div class="admin-status-bar">
             <div class="status-item"><div class="status-dot ok"></div> SYSTEM: ONLINE</div>
-            <div class="status-item">VER: 2.7</div>
+            <div class="status-item">VER: 3.1</div>
             <div class="status-item">CPU: <span id="simCpu">12%</span></div>
             <div class="status-item">MEM: <span id="simMem">2.4GB</span></div>
         </div>
@@ -489,7 +489,7 @@
                 <div class="admin-panel-box">
                     <div class="admin-h" style="margin-bottom:5px;">TERMINAL SYSTEMOWY</div>
                     <div class="admin-terminal" id="sysLog">
-                        <div class="log-line"><span class="log-time">System:</span> Inicjalizacja v2.7...</div>
+                        <div class="log-line"><span class="log-time">System:</span> Inicjalizacja v3.1...</div>
                         <div class="log-line"><span class="log-time">System:</span> Gotowy do pracy.</div>
                     </div>
                 </div>
@@ -807,7 +807,7 @@
       statusEl.innerText = "Synchronizacja...";
       
       try {
-          const res = await fetch(CONFIG.sheetUrl);
+          const res = await fetch(CONFIG.sheetUrl, { method: "GET" });
           if(!res.ok) throw new Error("Network response was not ok");
           const txt = await res.text();
           
@@ -1291,22 +1291,52 @@
       if(['OK','RMA'].includes(dec) && !currentOC) return alert("BRAK OC!");
       
       document.getElementById('saveStatus').innerText = "ZAPISYWANIE...";
+      document.getElementById('saveStatus').style.color = "orange";
+
       const txt = `RAPORT\nSN: ${currentSN}\nOC: ${currentOC}\nOP: ${currentUser.login}\nDEC: ${dec}`;
       
+      // 1. Zapis lokalny (txt)
       if(dirHandle) {
           try {
               const d = await dirHandle.getDirectoryHandle(currentSN, {create:true});
               const h = await d.getFileHandle(`RAPORT_${currentSN}.txt`, {create:true});
               const w = await h.createWritable(); await w.write(txt); await w.close();
-              finishSave(dec);
-          } catch(e) { alert("BŁĄD ZAPISU"); }
-      } else {
-          finishSave(dec);
+          } catch(e) { console.log("Błąd zapisu lokalnego"); }
       }
+
+      // 2. Zapis do Google Sheets (Cloud)
+      try {
+          const payload = {
+              sn: currentSN,
+              oc: currentOC || "---",
+              op: currentUser.login,
+              dec: dec,
+              com: document.getElementById('commentInput').value
+          };
+
+          const res = await fetch(CONFIG.sheetUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+          });
+
+          if(res.ok) {
+              logSystem("Dane wysłane do Google Sheets");
+          } else {
+              alert("Błąd wysyłania do Google Sheets!");
+          }
+      } catch(e) {
+          console.error("Cloud save error:", e);
+          alert("Błąd połączenia z bazą online (Zapisano tylko lokalnie)");
+      }
+
+      finishSave(dec);
   }
 
   function finishSave(dec) {
-      clearRecovery(); document.getElementById('saveStatus').innerText = "ZAPISANO";
+      clearRecovery(); 
+      document.getElementById('saveStatus').innerText = "ZAPISANO";
+      document.getElementById('saveStatus').style.color = "var(--neon-green)";
       
       recentScans.unshift({sn: currentSN, dec: dec});
       if(recentScans.length > 5) recentScans.pop();
